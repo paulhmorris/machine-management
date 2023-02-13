@@ -1,0 +1,173 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String  @id @default(cuid())
+  email     String  @unique
+  firstName String?
+  lastName  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  password     Password?
+  vendorId     String?
+  vendor       Vendor?       @relation(fields: [vendorId], references: [id])
+  tickets      Ticket[]
+  ticketEvents TicketEvent[] @relation("createdByUser")
+  ticketevents TicketEvent[] @relation("assignedToUser")
+}
+
+model Password {
+  hash   String
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Vendor {
+  id           String   @id @default(cuid())
+  name         String
+  employees    User[]
+  tripCharge   Float
+  hourlyCharge Float
+  campuses     Campus[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  invoices  Invoice[]
+  charges   Charge[]
+  campusId  String?
+}
+
+model Invoice {
+  id                   String    @id @default(cuid())
+  vendor               Vendor    @relation(fields: [vendorId], references: [id])
+  invoicedOn           DateTime?
+  submittedOn          DateTime?
+  paidOn               DateTime?
+  total                Float?
+  billedToUniversityOn DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  vendorId  String
+  charges   Charge[]
+}
+
+model Campus {
+  id        String     @id @default(cuid())
+  name      String
+  locations Location[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Vendor    Vendor[]
+}
+
+model Location {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  campusId    String
+  campus      Campus    @relation(fields: [campusId], references: [id])
+  machines    Machine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Machine {
+  id             String      @id @default(cuid())
+  friendlyNumber String?     @unique
+  floor          Int?
+  serialNumber   String?
+  description    String?
+  type           MachineType @relation(fields: [machineTypeId], references: [id])
+  machineTypeId  Int
+  locationId     String
+  location       Location    @relation(fields: [locationId], references: [id])
+  tickets        Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MachineType {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  machines Machine[]
+}
+
+model MachineErrorType {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  tickets Ticket[]
+}
+
+model Ticket {
+  id            String           @id @default(cuid())
+  machine       Machine          @relation(fields: [machineId], references: [id])
+  machineId     String
+  errorCode     String?
+  notes         String?
+  reporterEmail String?
+  status        TicketStatus     @relation(fields: [ticketStatusId], references: [id])
+  assignedTo    User?            @relation(fields: [userId], references: [id])
+  repairCost    Float?
+  errorType     MachineErrorType @relation(fields: [machineErrorTypeId], references: [id])
+
+  reported           DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  ticketStatusId     Int
+  userId             String
+  events             TicketEvent[]
+  charges            Charge[]
+  machineErrorTypeId Int
+}
+
+model TicketStatus {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  tickets Ticket[]
+}
+
+model TicketEvent {
+  id               Int      @id @default(autoincrement())
+  ticket           Ticket   @relation(fields: [ticketId], references: [id])
+  ticketId         String
+  assignedTo       User     @relation("assignedToUser", fields: [assignedToUserId], references: [id])
+  assignedToUserId String
+  createdBy        User     @relation("createdByUser", fields: [createdByUserId], references: [id])
+  createdByUserId  String
+  timestamp        DateTime @default(now())
+}
+
+model Charge {
+  id              Int        @id @default(autoincrement())
+  ticket          Ticket     @relation(fields: [ticketId], references: [id])
+  ticketId        String
+  type            ChargeType @relation(fields: [typeId], references: [id])
+  typeId          Int
+  actualCost      Float
+  warrantyCovered Boolean    @default(false)
+  description     String?
+  vendor          Vendor     @relation(fields: [vendorId], references: [id])
+  vendorId        String
+  invoice         Invoice    @relation(fields: [invoiceId], references: [id])
+  invoiceId       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChargeType {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  charges Charge[]
+}
