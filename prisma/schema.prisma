@@ -8,10 +8,11 @@ generator client {
 }
 
 model User {
-  id        String  @id @default(cuid())
-  email     String  @unique
+  id        String   @id @default(cuid())
+  email     String   @unique
   firstName String?
   lastName  String?
+  role      UserRole
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -22,6 +23,12 @@ model User {
   tickets      Ticket[]
   ticketEvents TicketEvent[] @relation("createdByUser")
   ticketevents TicketEvent[] @relation("assignedToUser")
+}
+
+enum UserRole {
+  ATTENDANT
+  VENDOR
+  ADMIN
 }
 
 model Password {
@@ -71,31 +78,39 @@ model Campus {
 }
 
 model Location {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
   campusId    String
-  campus      Campus    @relation(fields: [campusId], references: [id])
-  machines    Machine[]
+  campus      Campus   @relation(fields: [campusId], references: [id])
+  pockets     Pocket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Pocket {
+  id          String    @id @default(cuid())
+  floor       String?   @default("1")
+  position    Int?      @default(1)
+  description String?
+  machines    Machine[]
+  location    Location  @relation(fields: [locationId], references: [id])
+  locationId  String
+}
+
 model Machine {
-  id             String      @id @default(cuid())
-  friendlyNumber String?     @unique
-  floor          Int?
-  serialNumber   String?
-  description    String?
-  type           MachineType @relation(fields: [machineTypeId], references: [id])
-  machineTypeId  Int
-  locationId     String
-  location       Location    @relation(fields: [locationId], references: [id])
-  tickets        Ticket[]
+  id            String      @id @default(cuid())
+  serialNumber  String?
+  description   String?
+  type          MachineType @relation(fields: [machineTypeId], references: [id])
+  machineTypeId Int
+  pocket        Pocket      @relation(fields: [pocketId], references: [id])
+  tickets       Ticket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  pocketId  String
 }
 
 model MachineType {
@@ -111,47 +126,50 @@ model MachineErrorType {
 }
 
 model Ticket {
-  id            String           @id @default(cuid())
+  id            Int              @id @default(autoincrement())
   machine       Machine          @relation(fields: [machineId], references: [id])
+  assignedTo    User             @relation(fields: [assignedToUserId], references: [id])
   machineId     String
   errorCode     String?
   notes         String?
   reporterEmail String?
   status        TicketStatus     @relation(fields: [ticketStatusId], references: [id])
-  assignedTo    User?            @relation(fields: [userId], references: [id])
   repairCost    Float?
   errorType     MachineErrorType @relation(fields: [machineErrorTypeId], references: [id])
 
   reported           DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   ticketStatusId     Int
-  userId             String
+  assignedToUserId   String
   events             TicketEvent[]
   charges            Charge[]
   machineErrorTypeId Int
 }
 
 model TicketStatus {
-  id      Int      @id @default(autoincrement())
-  name    String   @unique
-  tickets Ticket[]
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  tickets     Ticket[]
+  TicketEvent TicketEvent[]
 }
 
 model TicketEvent {
-  id               Int      @id @default(autoincrement())
-  ticket           Ticket   @relation(fields: [ticketId], references: [id])
-  ticketId         String
-  assignedTo       User     @relation("assignedToUser", fields: [assignedToUserId], references: [id])
+  id               Int          @id @default(autoincrement())
+  ticket           Ticket       @relation(fields: [ticketId], references: [id])
+  ticketId         Int
+  status           TicketStatus @relation(fields: [ticketStatusId], references: [id])
+  assignedTo       User         @relation("assignedToUser", fields: [assignedToUserId], references: [id])
   assignedToUserId String
-  createdBy        User     @relation("createdByUser", fields: [createdByUserId], references: [id])
+  createdBy        User         @relation("createdByUser", fields: [createdByUserId], references: [id])
   createdByUserId  String
-  timestamp        DateTime @default(now())
+  timestamp        DateTime     @default(now())
+  ticketStatusId   Int
 }
 
 model Charge {
   id              Int        @id @default(autoincrement())
   ticket          Ticket     @relation(fields: [ticketId], references: [id])
-  ticketId        String
+  ticketId        Int
   type            ChargeType @relation(fields: [typeId], references: [id])
   typeId          Int
   actualCost      Float

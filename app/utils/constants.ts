@@ -7,7 +7,8 @@ export const errorTypes = [
   "Blank display",
   "CA Room Check-in",
   "Cycle Count",
-];
+] as const;
+export type TErrorType = (typeof errorTypes)[number];
 
 export const ticketStatuses = [
   "New",
@@ -20,7 +21,8 @@ export const ticketStatuses = [
   "Resolved by Tech",
   "Reopened",
   "Inspected, Needs Service",
-];
+] as const;
+export type TTicketStatus = (typeof ticketStatuses)[number];
 
 export const chargeTypes = [
   "Labor",
@@ -28,6 +30,7 @@ export const chargeTypes = [
   "Part",
   "Shipping",
   "Reimbursement",
-];
+] as const;
 
-export const machineTypes = ["Washer", "Dryer"];
+export const machineTypes = ["Washer", "Dryer"] as const;
+export type TMachineType = (typeof machineTypes)[number];

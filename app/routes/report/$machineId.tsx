@@ -3,7 +3,7 @@ import { json, Response } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import invariant from "tiny-invariant";
-import { prisma } from "~/db.server";
+import { prisma } from "~/utils/db.server";
 
 export async function loader({ params }: LoaderArgs) {
   const { machineId } = params;
@@ -12,9 +12,13 @@ export async function loader({ params }: LoaderArgs) {
   const machine = await prisma.machine.findUnique({
     where: { id: machineId },
     include: {
-      location: {
+      pocket: {
         include: {
-          campus: true,
+          location: {
+            include: {
+              campus: true,
+            },
+          },
         },
       },
       type: true,
@@ -32,7 +36,7 @@ export default function MachineReport() {
   return (
     <div>
       <h1>{machine.friendlyNumber}</h1>
-      <p>Location: {machine.location.name}</p>
+      <p>Location: {machine.pocket.location.name}</p>
     </div>
   );
 }

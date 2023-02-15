@@ -10,4 +10,13 @@
   h1 {
     @apply text-3xl font-extrabold;
   }
+
+  label,
+  button {
+    @apply select-none;
+  }
+
+  a {
+    @apply decoration-cyan-800 decoration-2 underline-offset-2 transition duration-75;
+  }
 }

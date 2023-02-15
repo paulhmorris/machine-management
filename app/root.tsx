@@ -9,13 +9,26 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import { Toaster } from "react-hot-toast";
-import { Header } from "~/components/Header";
 
-import { getUser } from "./session.server";
-import tailwindStylesheetUrl from "./styles/tailwind.css";
+import styles from "./styles/tailwind.css";
+import { getUser } from "./utils/session.server";
 
+// @ts-expect-error this doesn't like third object here, the type is not correct
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+  return [
+    { rel: "stylesheet", href: styles, as: "style" },
+    { rel: "preconnect", href: "https://fonts.googleapis.com", as: "font" },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+      crossOrigin: "true",
+      as: "font",
+    },
+    {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap",
+    },
+  ];
 };
 
 export const meta: MetaFunction = () => ({
@@ -32,14 +45,13 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function App() {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full font-dm">
       <head>
         <Meta />
         <Links />
       </head>
       <body className="h-full">
         <Toaster position="top-right" />
-        <Header />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
