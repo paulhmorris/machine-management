@@ -175,6 +175,21 @@ async function seed() {
       },
     });
   }
+  const tickets = await prisma.ticket.findMany();
+  for (let i = 0; i < 500; i++) {
+    const randomTicket = faker.helpers.arrayElement(tickets);
+    await prisma.ticketEvent.create({
+      data: {
+        comments: faker.random.words(
+          faker.datatype.number({ min: 10, max: 40 })
+        ),
+        ticketId: randomTicket.id,
+        ticketStatusId: faker.helpers.arrayElement(statuses).id,
+        assignedToUserId: user.id,
+        createdByUserId: user.id,
+      },
+    });
+  }
 
   console.log(`Database has been seeded. 🌱`);
 }

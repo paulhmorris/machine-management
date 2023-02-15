@@ -19,7 +19,7 @@ export function TicketNav() {
                 to={tab.href}
                 className={({ isActive }) =>
                   classNames(
-                    "whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium",
+                    "whitespace-nowrap border-b-2 px-1 pb-4 font-medium",
                     isActive
                       ? "border-cyan-700 text-cyan-700"
                       : "border-transparent hover:border-gray-300"

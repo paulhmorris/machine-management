@@ -23,10 +23,10 @@ export async function loader({ request, params }: LoaderArgs) {
 export default function TicketLayout() {
   const { ticket } = useLoaderData<typeof loader>();
   return (
-    <main>
+    <main className="h-full">
       <TicketDetails ticket={ticket} />
       <TicketNav />
-      <div className="mt-4">
+      <div className="mt-4 pb-24">
         <Outlet />
       </div>
     </main>

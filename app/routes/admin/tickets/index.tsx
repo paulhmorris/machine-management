@@ -60,7 +60,7 @@ export default function TicketIndex() {
   );
 
   return (
-    <main className="flex h-full flex-col overflow-hidden">
+    <main className="flex flex-col overflow-hidden">
       <TableHeader
         title="Tickets"
         description="All tickets in the system with their current status and location."

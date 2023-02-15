@@ -157,6 +157,7 @@ model TicketEvent {
   id               Int          @id @default(autoincrement())
   ticket           Ticket       @relation(fields: [ticketId], references: [id])
   ticketId         Int
+  comments         String?
   status           TicketStatus @relation(fields: [ticketStatusId], references: [id])
   assignedTo       User         @relation("assignedToUser", fields: [assignedToUserId], references: [id])
   assignedToUserId String

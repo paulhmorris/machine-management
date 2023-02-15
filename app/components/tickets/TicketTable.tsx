@@ -12,6 +12,7 @@ import {
   formatDateWithTime,
   getTicketStatusBadgeColor,
 } from "~/utils/formatters";
+import { classNames } from "~/utils/utils";
 
 const columns: TableColumn[] = [
   { title: "WO #", key: "id", sortable: true },
@@ -50,7 +51,7 @@ export function TicketTable({ items, sortConfig, requestSort }: Props) {
         {items.map((ticket, index) => (
           <tr
             key={ticket.id}
-            className={index % 2 === 0 ? undefined : "bg-gray-50"}
+            className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}
           >
             <TableCell>{ticket.id}</TableCell>
             <TableCell>{ticket.campus}</TableCell>

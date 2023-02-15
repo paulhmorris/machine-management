@@ -1,9 +1,20 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import dayjs from "dayjs";
 import invariant from "tiny-invariant";
+import { Badge } from "~/components/shared/Badge";
+import type { TableColumn } from "~/components/tables";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableWrapper,
+} from "~/components/tables";
+import { useSortableData } from "~/hooks/useSortableData";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { getTicketStatusBadgeColor } from "~/utils/formatters";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -13,6 +24,7 @@ export async function loader({ request, params }: LoaderArgs) {
   const ticketEvents = await prisma.ticketEvent.findMany({
     where: { ticketId: Number(ticketId) },
     include: {
+      status: true,
       createdBy: true,
       assignedTo: true,
     },
@@ -21,78 +33,53 @@ export async function loader({ request, params }: LoaderArgs) {
   return json({ ticketEvents });
 }
 
+const columns: TableColumn[] = [
+  { key: "timestamp", title: "Timestamp", sortable: false },
+  { key: "createdBy", title: "Created By", sortable: false },
+  { key: "assignedTo", title: "Assigned To", sortable: false },
+  { key: "status", title: "Status", sortable: false },
+  { key: "comments", title: "Comments", sortable: false },
+];
+
 export default function TicketEvents() {
   const { ticketEvents } = useLoaderData<typeof loader>();
+  const { items, sortConfig, requestSort } = useSortableData(ticketEvents, {
+    key: "timestamp",
+    direction: "desc",
+  });
   return (
-    <div className="px-6 lg:px-8">
-      <div className="mt-8 flow-root">
-        <div className="-my-2 -mx-6 overflow-x-auto lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead>
-                <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Title
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Email
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Role
-                  </th>
-                  <th scope="col" className="relative py-3.5 pl-3 pr-6 sm:pr-3">
-                    <span className="sr-only">Edit</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                {ticketEvents.map((event, index) => (
-                  <tr
-                    key={person.email}
-                    className={index % 2 === 0 ? undefined : "bg-gray-50"}
-                  >
-                    <td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-gray-900 sm:pl-3">
-                      {person.name}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {person.title}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {person.email}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {person.role}
-                    </td>
-                    <td className="relative whitespace-nowrap py-4 pl-3 pr-6 text-right text-sm font-medium sm:pr-3">
-                      <a
-                        href="#"
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Edit<span className="sr-only">, {person.name}</span>
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+    <TableWrapper>
+      <TableHead
+        columns={columns}
+        sortConfig={sortConfig}
+        sortFn={requestSort}
+      />
+      <TableBody>
+        {items.map((event, index) => (
+          <tr
+            key={event.id}
+            className={index % 2 === 0 ? undefined : "bg-gray-50"}
+          >
+            <TableCell>
+              {dayjs(event.timestamp).format("M/D/YYYY h:mm A")}
+            </TableCell>
+            <TableCell>
+              {event.createdBy.firstName} {event.createdBy.lastName}{" "}
+            </TableCell>
+            <TableCell>
+              {event.assignedTo?.firstName} {event.assignedTo.lastName}
+            </TableCell>
+            <TableCell>
+              <Badge
+                text={event.status.name}
+                size="small"
+                color={getTicketStatusBadgeColor(event.status.name)}
+              />
+            </TableCell>
+            <TableCell allowWrap>{event.comments}</TableCell>
+          </tr>
+        ))}
+      </TableBody>
+    </TableWrapper>
   );
 }

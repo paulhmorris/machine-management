@@ -1,6 +1,18 @@
+import { classNames } from "~/utils/utils";
+
 type Props = {
   children: React.ReactNode;
+  allowWrap?: boolean;
 };
-export function TableCell({ children }: Props) {
-  return <td className="whitespace-nowrap px-4 py-2.5 text-sm">{children}</td>;
+export function TableCell({ children, allowWrap = false }: Props) {
+  return (
+    <td
+      className={classNames(
+        "px-4 py-2.5 text-sm",
+        allowWrap ? "break-words" : "whitespace-nowrap"
+      )}
+    >
+      {children}
+    </td>
+  );
 }
