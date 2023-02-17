@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { ButtonLink } from "~/components/shared/ButtonLink";
 
 type Props = {
   title: string;
@@ -25,13 +25,10 @@ export function TableHeader({
       </div>
       {noAction ? null : (
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Link
-            to={href ?? "#"}
-            className="inline-flex items-center justify-center space-x-2 rounded-md border border-transparent bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 sm:w-auto"
-          >
+          <ButtonLink to={href ?? "#"}>
             <span>{actionText}</span>
             {actionIcon}
-          </Link>
+          </ButtonLink>
         </div>
       )}
     </div>

@@ -180,6 +180,8 @@ model Charge {
   vendorId        String
   invoice         Invoice    @relation(fields: [invoiceId], references: [id])
   invoiceId       String
+  part            Part?      @relation(fields: [partId], references: [id])
+  partId          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -189,4 +191,15 @@ model ChargeType {
   id      Int      @id @default(autoincrement())
   name    String   @unique
   charges Charge[]
+}
+
+model Part {
+  id           String @id @default(cuid())
+  name         String
+  partNumber   String
+  standardCost Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Charge    Charge[]
 }

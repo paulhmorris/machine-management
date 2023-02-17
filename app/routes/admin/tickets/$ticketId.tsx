@@ -1,6 +1,6 @@
 import type { LoaderArgs } from "@remix-run/node";
-import { Outlet, useLoaderData } from "@remix-run/react";
-import { typedjson } from "remix-typedjson";
+import { Outlet } from "@remix-run/react";
+import { typedjson, useTypedLoaderData } from "remix-typedjson";
 import invariant from "tiny-invariant";
 import { TicketDetails } from "~/components/tickets/TicketDetails";
 import { TicketNav } from "~/components/tickets/TicketNav";
@@ -21,7 +21,8 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export default function TicketLayout() {
-  const { ticket } = useLoaderData<typeof loader>();
+  const { ticket } = useTypedLoaderData<typeof loader>();
+
   return (
     <main className="h-full">
       <TicketDetails ticket={ticket} />

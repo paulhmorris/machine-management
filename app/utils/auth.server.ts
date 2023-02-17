@@ -9,6 +9,7 @@ export async function requireUserId(
   const userId = await getUserId(request);
   if (!userId) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw redirect(`/login?${searchParams}`);
   }
   return userId;

@@ -1,8 +1,10 @@
-import { Link } from "@remix-run/react";
 import { IconChevronRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { Badge } from "~/components/shared/Badge";
+import { Button } from "~/components/shared/Button";
+import { CustomLink } from "~/components/shared/CustomLink";
+import { AddTicketNoteModal } from "~/components/tickets/AddTicketNoteModal";
 import { CloseTicketModal } from "~/components/tickets/CloseTicketModal";
 import type { getTicketById } from "~/models/ticket.server";
 import type { TTicketStatus } from "~/utils/constants";
@@ -13,7 +15,8 @@ type Props = {
 };
 
 export function TicketDetails({ ticket }: Props) {
-  const [open, setOpen] = useState(false);
+  const [openCloseTicket, setOpenCloseTicket] = useState(false);
+  const [openAddNote, setOpenAddNote] = useState(false);
 
   if (!ticket) return null;
   const campus = ticket.machine.pocket.location.campus;
@@ -22,8 +25,17 @@ export function TicketDetails({ ticket }: Props) {
 
   return (
     <>
-      <CloseTicketModal ticketId={ticket.id} open={open} setOpen={setOpen} />
-      <div className="overflow-hidden sm:rounded-lg">
+      <CloseTicketModal
+        ticketId={ticket.id}
+        open={openCloseTicket}
+        setOpen={setOpenCloseTicket}
+      />
+      <AddTicketNoteModal
+        ticketId={ticket.id}
+        open={openAddNote}
+        setOpen={setOpenAddNote}
+      />
+      <div className="sm:rounded-lg">
         <div className="flex items-center justify-between">
           <div className="py-5">
             <h1>
@@ -34,35 +46,29 @@ export function TicketDetails({ ticket }: Props) {
             </p>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => setOpen(true)}
-              className="inline-flex w-full items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium shadow-sm transition duration-75 hover:bg-gray-50 focus:border-cyan-700 focus:outline-none focus:ring focus:ring-cyan-600 focus:ring-opacity-25"
+            <Button
+              variant="secondary"
+              onClick={() => setOpenCloseTicket(true)}
             >
               Close
-            </button>
-            <button className="inline-flex w-full items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium shadow-sm transition duration-75 hover:bg-gray-50 focus:border-cyan-700 focus:outline-none focus:ring focus:ring-cyan-600 focus:ring-opacity-25">
+            </Button>
+            <Button variant="secondary" onClick={() => setOpenAddNote(true)}>
               Add Note
-            </button>
+            </Button>
           </div>
         </div>
         <div className="border-t border-gray-200 py-5 sm:p-0">
           <dl className="sm:divide-y sm:divide-gray-200">
-            <div className="py-4 sm:grid sm:grid-cols-5 sm:gap-4 sm:py-5">
+            <div className="py-3 sm:grid sm:grid-cols-5 sm:gap-4">
               <dt className="text-sm font-medium text-gray-500">Machine</dt>
               <dd className="mt-1 flex items-center gap-2 text-sm sm:col-span-2 sm:mt-0">
-                <Link
-                  to={`/admin/campuses/${campus.id}`}
-                  className="-m-1 p-1 font-medium text-cyan-700 hover:text-cyan-800 hover:underline"
-                >
+                <CustomLink to={`/admin/campuses/${campus.id}`}>
                   {campus.name}
-                </Link>
+                </CustomLink>
                 <IconChevronRight size={12} />
-                <Link
-                  to={`/admin/locations/${location.id}`}
-                  className="-m-1 p-1 font-medium text-cyan-700 hover:text-cyan-800 hover:underline"
-                >
+                <CustomLink to={`/admin/locations/${location.id}`}>
                   {location.name}
-                </Link>
+                </CustomLink>
                 <IconChevronRight size={12} />
                 {floor && (
                   <>
@@ -70,27 +76,24 @@ export function TicketDetails({ ticket }: Props) {
                     <IconChevronRight size={12} />
                   </>
                 )}
-                <Link
-                  to={`/admin/machines/${ticket.machine.id}`}
-                  className="-m-1 p-1 font-medium text-cyan-700 hover:text-cyan-800 hover:underline"
-                >
+                <CustomLink to={`/admin/machines/${ticket.machine.id}`}>
                   {ticket.machine.id}
-                </Link>
+                </CustomLink>
               </dd>
             </div>
-            <div className="py-4 sm:grid sm:grid-cols-5 sm:gap-4 sm:py-5">
+            <div className="py-3 sm:grid sm:grid-cols-5 sm:gap-4">
               <dt className="text-sm font-medium text-gray-500">Reported On</dt>
               <dd className="mt-1 text-sm sm:col-span-2 sm:mt-0">
                 {dayjs(ticket.reported).format("M/D/YYYY h:mm A")}
               </dd>
             </div>
-            <div className="py-4 sm:grid sm:grid-cols-5 sm:gap-4 sm:py-5">
+            <div className="py-3 sm:grid sm:grid-cols-5 sm:gap-4">
               <dt className="text-sm font-medium text-gray-500">Reported By</dt>
               <dd className="mt-1 text-sm sm:col-span-2 sm:mt-0">
                 {ticket.reporterEmail}
               </dd>
             </div>
-            <div className="py-4 sm:grid sm:grid-cols-5 sm:gap-4 sm:py-5">
+            <div className="py-3 sm:grid sm:grid-cols-5 sm:gap-4">
               <dt className="text-sm font-medium text-gray-500">Status</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                 <Badge

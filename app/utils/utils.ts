@@ -41,10 +41,12 @@ export function useMatchesData(
     () => matchingRoutes.find((route) => route.id === id),
     [matchingRoutes, id]
   );
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return route?.data;
 }
 
 function isUser(user: any): user is User {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   return user && typeof user === "object" && typeof user.email === "string";
 }
 
@@ -72,4 +74,8 @@ export function validateEmail(email: unknown): email is string {
 
 export function classNames(...classes: unknown[]): string {
   return classes.filter(Boolean).join(" ");
+}
+
+export function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

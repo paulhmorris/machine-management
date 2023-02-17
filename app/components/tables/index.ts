@@ -4,9 +4,9 @@ export { TableHead } from "./TableHead";
 export { TableHeader } from "./TableHeader";
 export { TableWrapper } from "./TableWrapper";
 
-export type TableColumn = {
+export type TableColumn<T extends any[] = []> = {
+  key: string | keyof T;
   title: string;
-  key: string;
   sortable: boolean;
 };
 

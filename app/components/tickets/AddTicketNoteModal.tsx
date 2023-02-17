@@ -1,6 +1,5 @@
 import { Dialog } from "@headlessui/react";
 import { useFetcher } from "@remix-run/react";
-import { IconAlertTriangle } from "@tabler/icons-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useRef } from "react";
 import { Button } from "~/components/shared/Button";
@@ -13,37 +12,30 @@ type Props = {
   ticketId: number;
 };
 
-export function CloseTicketModal({ ticketId, open, setOpen }: Props) {
+export function AddTicketNoteModal({ ticketId, open, setOpen }: Props) {
   const cancelButtonRef = useRef(null);
   const fetcher = useFetcher();
 
   return (
     <Modal open={open} setOpen={setOpen}>
       <fetcher.Form
-        action="/admin/resources/close-ticket"
+        action="/admin/resources/add-ticket-note"
         method="post"
         reloadDocument
       >
         <input type="hidden" name="ticketId" value={ticketId} />
         <div className="sm:flex sm:items-start">
-          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-            <IconAlertTriangle
-              size={24}
-              className="text-red-500"
-              aria-hidden="true"
-            />
-          </div>
           <div className="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
             <Dialog.Title
               as="h3"
               className="text-xl font-medium leading-6 text-gray-900"
             >
-              Close ticket {ticketId}
+              Add note to ticket {ticketId}
             </Dialog.Title>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
-                Are you sure you want to close this ticket? Please provide any
-                related comments.
+                This note will be visible to other users. The status of the
+                ticket will not change.
               </p>
             </div>
             <div className="mt-4">
@@ -63,7 +55,7 @@ export function CloseTicketModal({ ticketId, open, setOpen }: Props) {
             type="submit"
             onClick={() => setOpen(false)}
           >
-            Close Ticket
+            Add note
           </Button>
           <Button
             type="button"

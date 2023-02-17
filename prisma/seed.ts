@@ -25,11 +25,29 @@ async function seed() {
       name: "TCU",
     },
   });
+  const vendor = await prisma.vendor.create({
+    data: {
+      name: "TCU",
+      tripCharge: 100,
+      hourlyCharge: 50,
+      campuses: {
+        connect: {
+          id: campus.id,
+        },
+      },
+    },
+  });
   for (let i = 0; i < 50; i++) {
     await prisma.location.create({
       data: {
         name: faker.word.noun(),
         campusId: campus.id,
+      },
+    });
+    await prisma.invoice.create({
+      data: {
+        total: faker.datatype.float({ min: 0, max: 1000 }),
+        vendorId: vendor.id,
       },
     });
   }
@@ -88,18 +106,6 @@ async function seed() {
         locationId: faker.helpers.arrayElement(locations).id,
       },
     ],
-  });
-  const vendor = await prisma.vendor.create({
-    data: {
-      name: "TCU",
-      tripCharge: 100,
-      hourlyCharge: 50,
-      campuses: {
-        connect: {
-          id: campus.id,
-        },
-      },
-    },
   });
 
   // Create types
@@ -176,6 +182,7 @@ async function seed() {
     });
   }
   const tickets = await prisma.ticket.findMany();
+  const invoices = await prisma.invoice.findMany();
   for (let i = 0; i < 500; i++) {
     const randomTicket = faker.helpers.arrayElement(tickets);
     await prisma.ticketEvent.create({
@@ -187,6 +194,17 @@ async function seed() {
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
         assignedToUserId: user.id,
         createdByUserId: user.id,
+      },
+    });
+    const randomInvoice = faker.helpers.arrayElement(invoices);
+    await prisma.charge.create({
+      data: {
+        actualCost: faker.datatype.number({ min: 10, max: 100 }),
+        typeId: faker.datatype.number({ min: 1, max: 3 }),
+        ticketId: randomTicket.id,
+        createdAt: faker.date.past(),
+        vendorId: vendor.id,
+        invoiceId: randomInvoice.id,
       },
     });
   }

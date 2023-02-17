@@ -4,6 +4,7 @@ import invariant from "tiny-invariant";
 let prisma: PrismaClient;
 
 declare global {
+  // eslint-disable-next-line no-var
   var __db__: PrismaClient;
 }
 
@@ -34,6 +35,7 @@ function getClient() {
   const isReadReplicaRegion = !PRIMARY_REGION || PRIMARY_REGION === FLY_REGION;
 
   if (!isLocalHost) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     databaseUrl.host = `${FLY_REGION}.${databaseUrl.host}`;
     if (!isReadReplicaRegion) {
       // 5433 is the read-replica port
@@ -54,7 +56,7 @@ function getClient() {
     },
   });
   // connect eagerly
-  client.$connect();
+  void client.$connect();
 
   return client;
 }

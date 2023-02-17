@@ -10,7 +10,7 @@ export function FormMenu({ title, icon, children }: Props) {
   return (
     <Menu as="div" className="relative inline-block w-min">
       <Menu.Button className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium shadow-sm transition duration-75 hover:bg-gray-50 focus:border-cyan-700 focus:outline-none focus:ring focus:ring-cyan-600 focus:ring-opacity-25">
-        {icon && icon}
+        {icon}
         <span className="ml-2 mr-3 whitespace-nowrap">{title}</span>
       </Menu.Button>
 

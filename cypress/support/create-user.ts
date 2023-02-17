@@ -8,7 +8,7 @@ import { installGlobals } from "@remix-run/node";
 import { parse } from "cookie";
 
 import { createUser } from "~/models/user.server";
-import { createUserSession } from "~/session.server";
+import { createUserSession } from "~/utils/session.server";
 
 installGlobals();
 
@@ -45,4 +45,4 @@ async function createAndLogin(email: string) {
   );
 }
 
-createAndLogin(process.argv[2]);
+createAndLogin(process.argv[2]).catch((error) => console.error(error));

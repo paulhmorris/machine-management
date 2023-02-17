@@ -7,6 +7,7 @@ export async function loader({ request }: LoaderArgs) {
     request.headers.get("X-Forwarded-Host") ?? request.headers.get("host");
 
   try {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const url = new URL("/", `http://${host}`);
     // if we can connect to the database and make a simple query
     // and make a HEAD request to ourselves, then we're good.

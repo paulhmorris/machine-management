@@ -47,6 +47,7 @@ export default function TicketEvents() {
     key: "timestamp",
     direction: "desc",
   });
+
   return (
     <TableWrapper>
       <TableHead

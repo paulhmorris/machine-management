@@ -8,7 +8,7 @@ export function useSortableData<T extends any[]>(
   const [sortConfig, setSortConfig] = useState<SortConfig<T>>(config);
 
   const sortedItems = useMemo(() => {
-    let sortableItems = [...items];
+    const sortableItems = [...items];
     sortableItems.sort((a, b) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
         return sortConfig.direction === "asc" ? -1 : 1;

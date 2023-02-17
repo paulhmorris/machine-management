@@ -3,6 +3,7 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
+import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
 
 export async function action({ request }: ActionArgs) {
@@ -49,12 +50,9 @@ export default function Index() {
           required
           placeholder="XYZ"
         />
-        <button
-          type="submit"
-          className="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-cyan-700 px-4 py-2.5 text-base font-medium text-white shadow-sm hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2"
-        >
+        <Button type="submit" variant="primary" className="w-full">
           Make a report
-        </button>
+        </Button>
       </Form>
     </>
   );

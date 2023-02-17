@@ -9,10 +9,10 @@ import {
   IconUsers,
   IconWashMachine,
 } from "@tabler/icons-react";
-import { useOptionalUser } from "~/utils/utils";
+import { useUser } from "~/utils/utils";
 
 export function AdminNav() {
-  const user = useOptionalUser();
+  const user = useUser();
   return (
     <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6">
       <nav>

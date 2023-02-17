@@ -1,10 +1,11 @@
 import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Form, useActionData, useSearchParams } from "@remix-run/react";
 import * as React from "react";
 
 import { createUserSession, getUserId } from "~/utils/session.server";
 
+import { CustomLink } from "~/components/shared/CustomLink";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { safeRedirect, validateEmail } from "~/utils/utils";
 
@@ -153,15 +154,14 @@ export default function Join() {
           <div className="flex items-center justify-center">
             <div className="text-center text-sm text-gray-500">
               Already have an account?{" "}
-              <Link
-                className="text-blue-500 underline"
+              <CustomLink
                 to={{
                   pathname: "/login",
                   search: searchParams.toString(),
                 }}
               >
                 Log in
-              </Link>
+              </CustomLink>
             </div>
           </div>
         </Form>

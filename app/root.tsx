@@ -7,11 +7,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
-import { Toaster } from "react-hot-toast";
+import { Notifications } from "~/components/shared/Notifications";
+import { getGlobalToast } from "~/utils/toast.server";
 
 import styles from "./styles/tailwind.css";
-import { getUser } from "./utils/session.server";
+import { getSession, getUser, sessionStorage } from "./utils/session.server";
 
 // @ts-expect-error this doesn't like third object here, the type is not correct
 export const links: LinksFunction = () => {
@@ -38,12 +40,21 @@ export const meta: MetaFunction = () => ({
 });
 
 export async function loader({ request }: LoaderArgs) {
-  return json({
-    user: await getUser(request),
-  });
+  const session = await getSession(request);
+  const toast = getGlobalToast(session);
+  return json(
+    { user: await getUser(request), toast },
+    {
+      headers: {
+        "Set-Cookie": await sessionStorage.commitSession(session),
+      },
+    }
+  );
 }
 
 export default function App() {
+  const { toast } = useLoaderData<typeof loader>();
+
   return (
     <html lang="en" className="h-full font-dm">
       <head>
@@ -51,11 +62,30 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        <Toaster position="top-right" />
+        <Notifications serverToast={toast} />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
+      </body>
+    </html>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <div>
+          <h1>Error</h1>
+          <pre>{error.message}</pre>
+        </div>
+        <Scripts />
       </body>
     </html>
   );
