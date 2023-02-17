@@ -11,6 +11,10 @@
     @apply text-3xl font-extrabold;
   }
 
+  h2 {
+    @apply text-lg font-bold;
+  }
+
   label,
   button {
     user-select: none;

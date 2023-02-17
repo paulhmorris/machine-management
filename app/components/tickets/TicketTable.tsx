@@ -35,7 +35,7 @@ type Props = {
     updatedAt: string;
   }>;
   sortConfig: SortConfig;
-  requestSort: (key: string) => void;
+  requestSort: (key: string | number | symbol) => void;
 };
 
 export function TicketTable({ items, sortConfig, requestSort }: Props) {

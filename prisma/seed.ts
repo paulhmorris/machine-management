@@ -27,9 +27,9 @@ async function seed() {
   });
   const vendor = await prisma.vendor.create({
     data: {
-      name: "TCU",
+      name: "AAdvantage Repair",
       tripCharge: 100,
-      hourlyCharge: 50,
+      hourlyRate: 50,
       campuses: {
         connect: {
           id: campus.id,
@@ -48,6 +48,7 @@ async function seed() {
       data: {
         total: faker.datatype.float({ min: 0, max: 1000 }),
         vendorId: vendor.id,
+        campusId: campus.id,
       },
     });
   }
@@ -134,18 +135,46 @@ async function seed() {
   });
   // Machines
   const pockets = await prisma.pocket.findMany();
-  await prisma.machine.createMany({
-    data: [
-      {
+  for (let i = 0; i < 1000; i++) {
+    await prisma.machine.create({
+      data: {
+        publicId: faker.random.alphaNumeric(6).toUpperCase(),
         pocketId: faker.helpers.arrayElement(pockets).id,
-        description: faker.random.words(10),
+        description: faker.random.words(4),
         serialNumber: faker.random.alphaNumeric(16),
         machineTypeId: 1,
       },
-    ],
-  });
+    });
+  }
 
-  const user = await prisma.user.create({
+  for (let i = 0; i < 50; i++) {
+    // create user
+    const user = await prisma.user.create({
+      data: {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        role: faker.helpers.arrayElement(["USER", "VENDOR"]),
+        email: faker.internet.email(),
+        password: {
+          create: {
+            hash: hashedPassword,
+          },
+        },
+      },
+    });
+    await prisma.campusUser.create({
+      data: {
+        userId: user.id,
+        campusId: campus.id,
+        role: faker.helpers.arrayElement([
+          "ATTENDANT",
+          "CAMPUSTECH",
+          "MACHINETECH",
+        ]),
+      },
+    });
+  }
+  const admin = await prisma.user.create({
     data: {
       firstName: "Trae",
       lastName: "Drose",
@@ -176,7 +205,8 @@ async function seed() {
         errorCode: faker.random.alphaNumeric(4),
         machineErrorTypeId: faker.helpers.arrayElement(machineErrorTypes).id,
         reporterEmail: faker.internet.email(),
-        assignedToUserId: user.id,
+        assignedToUserId: admin.id,
+        reportedOn: faker.date.past(),
         updatedAt: faker.date.past(),
       },
     });
@@ -192,8 +222,8 @@ async function seed() {
         ),
         ticketId: randomTicket.id,
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
-        assignedToUserId: user.id,
-        createdByUserId: user.id,
+        assignedToUserId: admin.id,
+        createdByUserId: admin.id,
       },
     });
     const randomInvoice = faker.helpers.arrayElement(invoices);

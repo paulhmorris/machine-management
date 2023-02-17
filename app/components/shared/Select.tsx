@@ -18,7 +18,7 @@ export function Select({ label, name, children, ...props }: Props) {
         id={name}
         name={name}
         className={classNames(
-          "mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-cyan-500 focus:outline-none focus:ring-cyan-500 sm:text-sm",
+          "mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
           props.className
         )}
       >

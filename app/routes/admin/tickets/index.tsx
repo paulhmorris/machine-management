@@ -60,18 +60,20 @@ export default function TicketIndex() {
   );
 
   return (
-    <main className="flex flex-col overflow-hidden">
+    <main className="flex flex-col">
       <TableHeader
         title="Tickets"
         description="All tickets in the system with their current status and location."
         noAction
       />
       <TicketFilterForm ticketStatuses={ticketStatuses} />
-      <TicketTable
-        items={items}
-        requestSort={requestSort}
-        sortConfig={sortConfig}
-      />
+      <div className="mt-4">
+        <TicketTable
+          items={items}
+          requestSort={requestSort}
+          sortConfig={sortConfig}
+        />
+      </div>
     </main>
   );
 }

@@ -13,6 +13,7 @@ import {
 import { useSortableData } from "~/hooks/useSortableData";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { formatCurrency } from "~/utils/formatters";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -25,6 +26,7 @@ export async function loader({ request, params }: LoaderArgs) {
       type: true,
       vendor: true,
       part: true,
+      invoice: true,
     },
   });
 
@@ -32,8 +34,8 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 const columns: TableColumn[] = [
-  { key: "type", title: "Type", sortable: false },
-  { key: "createdAt", title: "Added", sortable: false },
+  { key: "type", title: "Type", sortable: true },
+  { key: "createdAt", title: "Added", sortable: true },
   { key: "part", title: "Part", sortable: false },
   { key: "cost", title: "Cost", sortable: false },
   { key: "vendor", title: "Vendor", sortable: false },
@@ -66,9 +68,12 @@ export default function TicketCharges() {
               {dayjs(charge.createdAt).format("M/D/YYYY h:mm A")}
             </TableCell>
             <TableCell>{charge.part?.name ?? ""}</TableCell>
-            <TableCell>{charge.actualCost}</TableCell>
+            <TableCell>
+              {formatCurrency(charge.actualCost)}{" "}
+              {charge.warrantyCovered && "IW"}
+            </TableCell>
             <TableCell>{charge.vendor.name}</TableCell>
-            <TableCell>{charge.invoiceId}</TableCell>
+            <TableCell>{charge.invoice?.publicId}</TableCell>
             <TableCell allowWrap>{charge.description}</TableCell>
           </tr>
         ))}

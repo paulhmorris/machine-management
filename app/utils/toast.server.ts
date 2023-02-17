@@ -1,5 +1,5 @@
 import type { Session } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { sessionStorage } from "~/utils/session.server";
 
 export type ServerToast = {
@@ -12,7 +12,7 @@ export function setGlobalToast(session: Session, toast: ServerToast) {
 }
 
 export function getGlobalToast(session: Session): ServerToast | null {
-  return session.get("globalMessage") || null;
+  return (session.get("globalMessage") as ServerToast) || null;
 }
 
 export async function redirectWithToast(
@@ -22,6 +22,17 @@ export async function redirectWithToast(
 ) {
   setGlobalToast(session, toast);
   return redirect(url, {
+    headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
+  });
+}
+
+export async function jsonWithToast(
+  data: any,
+  session: Session,
+  toast: ServerToast
+) {
+  setGlobalToast(session, toast);
+  return json(data, {
     headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
   });
 }

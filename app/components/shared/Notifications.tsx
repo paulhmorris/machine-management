@@ -29,6 +29,9 @@ export function Notifications({ serverToast }: Props) {
           paddingInline: "1.125rem",
           border: "1px solid #0000001A",
         },
+        success: {
+          duration: 4000,
+        },
         error: {
           iconTheme: {
             primary: "#dc2626",

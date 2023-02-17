@@ -3,6 +3,7 @@ import { classNames } from "~/utils/utils";
 
 const tabs = [
   { name: "Events", href: "events" },
+  { name: "Actions", href: "actions" },
   { name: "Charges", href: "charges" },
   { name: "Related Tickets", href: "related" },
 ];
@@ -17,6 +18,7 @@ export function TicketNav() {
               <NavLink
                 key={tab.name}
                 to={tab.href}
+                replace={true}
                 className={({ isActive }) =>
                   classNames(
                     "whitespace-nowrap border-b-2 px-1 pb-4 font-medium",

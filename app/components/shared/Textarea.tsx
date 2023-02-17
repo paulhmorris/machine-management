@@ -21,7 +21,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="mt-1">
           <textarea
             {...props}
-            rows={4}
+            rows={props.rows ?? 4}
             name={name}
             id={name}
             className={classNames(

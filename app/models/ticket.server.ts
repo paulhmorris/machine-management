@@ -1,12 +1,10 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Ticket } from "@prisma/client";
 import { prisma } from "~/utils/db.server";
 
 export async function getAllTicketsWithCount({
   where = {},
-  orderBy = { updatedAt: "desc" },
 }: {
   where?: Prisma.TicketWhereInput;
-  orderBy?: Prisma.TicketOrderByWithRelationInput;
 }) {
   return prisma.ticket.findMany({
     where,
@@ -42,6 +40,9 @@ export function getTicketById(id: number) {
     include: {
       errorType: true,
       status: true,
+      assignedTo: {
+        include: { campusUserRoles: true },
+      },
       machine: {
         include: {
           pocket: {
@@ -50,6 +51,26 @@ export function getTicketById(id: number) {
                 include: {
                   campus: true,
                 },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+export function getTicketWithCampusId(ticketId: Ticket["id"]) {
+  return prisma.ticket.findUnique({
+    where: { id: ticketId },
+    select: {
+      status: true,
+      machine: {
+        select: {
+          pocket: {
+            select: {
+              location: {
+                select: { campus: { select: { id: true } } },
               },
             },
           },

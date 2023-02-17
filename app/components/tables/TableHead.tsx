@@ -10,7 +10,7 @@ type HeadProps = {
   columns: TableColumn[];
   sortConfig: SortConfig;
   includeActionCol?: boolean;
-  sortFn?: (key: string) => void;
+  sortFn?: (key: string | number | symbol) => void;
 };
 
 export function TableHead({

@@ -17,18 +17,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password     Password?
-  vendorId     String?
-  vendor       Vendor?       @relation(fields: [vendorId], references: [id])
-  tickets      Ticket[]
-  ticketEvents TicketEvent[] @relation("createdByUser")
-  ticketevents TicketEvent[] @relation("assignedToUser")
+  password             Password?
+  vendorId             String?
+  vendor               Vendor?       @relation(fields: [vendorId], references: [id])
+  campusUserRoles      CampusUser[]
+  tickets              Ticket[]
+  createdTicketEvents  TicketEvent[] @relation("createdByUser")
+  assignedTicketEvents TicketEvent[] @relation("assignedToUser")
 }
 
 enum UserRole {
-  ATTENDANT
-  VENDOR
   ADMIN
+  VENDOR
+  USER
 }
 
 model Password {
@@ -38,12 +39,12 @@ model Password {
 }
 
 model Vendor {
-  id           String   @id @default(cuid())
-  name         String
-  employees    User[]
-  tripCharge   Float
-  hourlyCharge Float
-  campuses     Campus[]
+  id         String   @id @default(cuid())
+  name       String
+  employees  User[]
+  tripCharge Float
+  hourlyRate Float
+  campuses   Campus[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -52,29 +53,36 @@ model Vendor {
   campusId  String?
 }
 
-model Invoice {
-  id                   String    @id @default(cuid())
-  vendor               Vendor    @relation(fields: [vendorId], references: [id])
-  invoicedOn           DateTime?
-  submittedOn          DateTime?
-  paidOn               DateTime?
-  total                Float?
-  billedToUniversityOn DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  vendorId  String
-  charges   Charge[]
-}
-
 model Campus {
   id        String     @id @default(cuid())
   name      String
   locations Location[]
 
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  vendors   Vendor[]
+  invoices  Invoice[]
+  users     CampusUser[]
+}
+
+enum CampusRole {
+  ATTENDANT
+  CAMPUSTECH
+  MACHINETECH
+}
+
+model CampusUser {
+  id       String     @id @default(cuid())
+  campus   Campus     @relation(fields: [campusId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  role     CampusRole
+  campusId String
+  userId   String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Vendor    Vendor[]
+
+  @@unique([campusId, userId])
 }
 
 model Location {
@@ -101,16 +109,17 @@ model Pocket {
 
 model Machine {
   id            String      @id @default(cuid())
+  publicId      String      @unique
   serialNumber  String?
   description   String?
   type          MachineType @relation(fields: [machineTypeId], references: [id])
   machineTypeId Int
   pocket        Pocket      @relation(fields: [pocketId], references: [id])
+  pocketId      String
   tickets       Ticket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  pocketId  String
 }
 
 model MachineType {
@@ -137,7 +146,7 @@ model Ticket {
   repairCost    Float?
   errorType     MachineErrorType @relation(fields: [machineErrorTypeId], references: [id])
 
-  reported           DateTime      @default(now())
+  reportedOn         DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   ticketStatusId     Int
   assignedToUserId   String
@@ -167,6 +176,24 @@ model TicketEvent {
   ticketStatusId   Int
 }
 
+model Invoice {
+  id                   String    @id @default(cuid())
+  publicId             Int       @unique @default(autoincrement())
+  vendor               Vendor    @relation(fields: [vendorId], references: [id])
+  campus               Campus    @relation(fields: [campusId], references: [id])
+  invoicedOn           DateTime?
+  submittedOn          DateTime?
+  paidOn               DateTime?
+  total                Float?
+  billedToUniversityOn DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  vendorId  String
+  charges   Charge[]
+  campusId  String
+}
+
 model Charge {
   id              Int        @id @default(autoincrement())
   ticket          Ticket     @relation(fields: [ticketId], references: [id])
@@ -178,8 +205,8 @@ model Charge {
   description     String?
   vendor          Vendor     @relation(fields: [vendorId], references: [id])
   vendorId        String
-  invoice         Invoice    @relation(fields: [invoiceId], references: [id])
-  invoiceId       String
+  invoice         Invoice?   @relation(fields: [invoiceId], references: [id])
+  invoiceId       String?
   part            Part?      @relation(fields: [partId], references: [id])
   partId          String?
 

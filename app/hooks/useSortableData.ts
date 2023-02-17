@@ -21,7 +21,7 @@ export function useSortableData<T extends any[]>(
     return sortableItems;
   }, [items, sortConfig]);
 
-  function requestSort(key: string) {
+  function requestSort(key: string | number | symbol) {
     let direction: SortConfig<T>["direction"] = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc") {
       direction = "desc";
