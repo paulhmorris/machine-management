@@ -14,13 +14,19 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       <div>
         <label
           htmlFor={name}
-          className="block text-sm font-medium text-gray-700"
+          className="block font-medium text-gray-700 sm:text-sm"
         >
           {label}
+          {props.required ? (
+            "*"
+          ) : (
+            <span className="ml-1 text-sm text-gray-400">(optional)</span>
+          )}
         </label>
         <div className="mt-1">
           <textarea
             {...props}
+            ref={ref ?? null}
             rows={props.rows ?? 4}
             name={name}
             id={name}

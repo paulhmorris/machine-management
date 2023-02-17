@@ -12,6 +12,11 @@ export function Select({ label, name, children, ...props }: Props) {
     <div>
       <label htmlFor={name} className="block text-sm font-medium">
         {label}
+        {props.required ? (
+          "*"
+        ) : (
+          <span className="ml-1 text-sm text-gray-400">(optional)</span>
+        )}
       </label>
       <select
         {...props}

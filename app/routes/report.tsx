@@ -2,9 +2,8 @@ import { Outlet } from "@remix-run/react";
 
 export default function ReportLayout() {
   return (
-    <div>
-      <h1>Report Layout</h1>
+    <main className="h-full min-h-screen py-6 px-2 md:mx-auto md:max-w-sm md:px-0">
       <Outlet />
-    </div>
+    </main>
   );
 }

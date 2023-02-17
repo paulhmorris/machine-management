@@ -16,10 +16,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <label
           htmlFor={name}
           className={
-            hideLabel ? "sr-only" : "block text-sm font-medium text-gray-700"
+            hideLabel ? "sr-only" : "block font-medium text-gray-700 sm:text-sm"
           }
         >
           {label}
+          {props.required ? (
+            "*"
+          ) : (
+            <span className="ml-1 text-sm text-gray-400">(optional)</span>
+          )}
         </label>
         <div className={hideLabel ? "-mt-0.5" : "mt-1"}>
           <input

@@ -139,7 +139,6 @@ model Ticket {
   machine       Machine          @relation(fields: [machineId], references: [id])
   assignedTo    User             @relation(fields: [assignedToUserId], references: [id])
   machineId     String
-  errorCode     String?
   notes         String?
   reporterEmail String?
   status        TicketStatus     @relation(fields: [ticketStatusId], references: [id])
