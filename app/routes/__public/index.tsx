@@ -48,7 +48,7 @@ export default function Index() {
           ref={machineIdRef}
           error={actionData?.errors.machineId}
           required
-          placeholder="XYZ"
+          placeholder="ABCXYZ"
         />
         <Button type="submit" variant="primary" className="w-full">
           Make a report

@@ -40,16 +40,23 @@ export async function action({ request }: ActionArgs) {
   invariant(typeof notes === "string", "Expected notes");
   invariant(typeof reporterEmail === "string", "Expected reporterEmail");
 
-  const system = await prisma.user.findUnique({
-    where: { email: "tmfd@remix.run" },
-  });
-  await prisma.ticket.create({
+  const ticket = await prisma.ticket.create({
     data: {
       notes,
+      reporterEmail,
       machine: { connect: { publicId: machineId } },
       status: { connect: { id: 1 } },
-      assignedTo: { connect: { id: system?.id } },
+      assignedTo: { connect: { email: "tmfd@remix.run" } },
       errorType: { connect: { id: Number(errorId) } },
+    },
+  });
+  await prisma.ticketEvent.create({
+    data: {
+      assignedTo: { connect: { email: "tmfd@remix.run" } },
+      createdBy: { connect: { email: "tmfd@remix.run" } },
+      ticket: { connect: { id: ticket.id } },
+      status: { connect: { id: 1 } },
+      comments: notes,
     },
   });
 

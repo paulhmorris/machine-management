@@ -202,7 +202,6 @@ async function seed() {
         notes: faker.random.words(10),
         machineId: faker.helpers.arrayElement(machines).id,
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
-        errorCode: faker.random.alphaNumeric(4),
         machineErrorTypeId: faker.helpers.arrayElement(machineErrorTypes).id,
         reporterEmail: faker.internet.email(),
         assignedToUserId: admin.id,
@@ -224,6 +223,7 @@ async function seed() {
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
         assignedToUserId: admin.id,
         createdByUserId: admin.id,
+        timestamp: faker.date.past(),
       },
     });
     const randomInvoice = faker.helpers.arrayElement(invoices);
