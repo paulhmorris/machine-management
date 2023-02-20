@@ -1,5 +1,5 @@
-import { Link } from "@remix-run/react";
 import { Badge } from "~/components/shared/Badge";
+import { CustomLink } from "~/components/shared/CustomLink";
 import type { SortConfig, TableColumn } from "~/components/tables";
 import {
   TableBody,
@@ -15,13 +15,13 @@ import {
 import { classNames } from "~/utils/utils";
 
 const columns: TableColumn[] = [
-  { title: "WO #", key: "id", sortable: true },
-  { title: "Campus", key: "campus", sortable: true },
-  { title: "Location", key: "location", sortable: true },
-  { title: "Floor", key: "floor", sortable: false },
-  { title: "Type", key: "type", sortable: false },
-  { title: "Status", key: "status", sortable: true },
-  { title: "Last Updated", key: "updatedAt", sortable: true },
+  { key: "id", title: "WO #", sortable: true },
+  { key: "campus", title: "Campus", sortable: true },
+  { key: "location", title: "Location", sortable: true },
+  { key: "floor", title: "Floor", sortable: false },
+  { key: "type", title: "Type", sortable: false },
+  { key: "status", title: "Status", sortable: true },
+  { key: "updatedAt", title: "Last Updated", sortable: true },
 ];
 
 type Props = {
@@ -69,12 +69,9 @@ export function TicketTable({ items, sortConfig, requestSort }: Props) {
             </TableCell>
             <TableCell>{formatDateWithTime(ticket.updatedAt)}</TableCell>
             <TableCell>
-              <Link
-                to={`/admin/tickets/${ticket.id}/events`}
-                className="text-cyan-600 decoration-2 underline-offset-2 hover:text-cyan-700 hover:underline"
-              >
+              <CustomLink to={`/admin/tickets/${ticket.id}/events`}>
                 View
-              </Link>
+              </CustomLink>
             </TableCell>
           </tr>
         ))}

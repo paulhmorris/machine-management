@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ButtonLink } from "~/components/shared/ButtonLink";
 
 type Props = {
@@ -5,7 +6,7 @@ type Props = {
   noAction?: boolean;
   href?: string;
   actionText?: string;
-  actionIcon?: React.ReactNode;
+  actionIcon?: ReactNode;
   description?: string;
 };
 

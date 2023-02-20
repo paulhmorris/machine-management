@@ -1,4 +1,4 @@
-import type { Machine } from "@prisma/client";
+import type { Machine, Prisma } from "@prisma/client";
 import { prisma } from "~/utils/db.server";
 
 export function getMachineForReport(machineId: Machine["id"]) {
@@ -22,4 +22,26 @@ export function getMachineForReport(machineId: Machine["id"]) {
 export async function getErrorTypesForReport() {
   const errorTypes = await prisma.machineErrorType.findMany();
   return errorTypes.filter((type) => type.id !== 7 && type.id !== 8);
+}
+
+export function getMachinesForTable({
+  where = {},
+}: {
+  where?: Prisma.MachineWhereInput;
+}) {
+  return prisma.machine.findMany({
+    where,
+    include: {
+      type: true,
+      pocket: {
+        include: {
+          location: {
+            include: {
+              campus: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }

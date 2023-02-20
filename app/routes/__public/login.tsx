@@ -92,12 +92,14 @@ export default function LoginPage() {
           label="Username"
           name="email"
           type="email"
+          required
           autoComplete="username"
         />
         <Input
           label="Password"
           name="password"
           type="password"
+          required
           autoComplete="current-password"
         />
         <input type="hidden" name="redirectTo" value={redirectTo} />

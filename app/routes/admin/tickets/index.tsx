@@ -60,7 +60,7 @@ export default function TicketIndex() {
   );
 
   return (
-    <main className="flex flex-col">
+    <>
       <TableHeader
         title="Tickets"
         description="All tickets in the system with their current status and location."
@@ -74,6 +74,6 @@ export default function TicketIndex() {
           sortConfig={sortConfig}
         />
       </div>
-    </main>
+    </>
   );
 }

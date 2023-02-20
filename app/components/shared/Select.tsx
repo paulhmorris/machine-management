@@ -5,12 +5,22 @@ interface Props extends ComponentPropsWithoutRef<"select"> {
   label: string;
   name: string;
   children: ReactNode;
+  hideLabel?: boolean;
 }
 
-export function Select({ label, name, children, ...props }: Props) {
+export function Select({
+  label,
+  name,
+  children,
+  hideLabel = false,
+  ...props
+}: Props) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium">
+      <label
+        htmlFor={name}
+        className={hideLabel ? "sr-only" : "block text-sm font-medium"}
+      >
         {label}
         {props.required ? (
           "*"
