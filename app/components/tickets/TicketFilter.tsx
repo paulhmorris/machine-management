@@ -1,20 +1,20 @@
 import type { TicketStatus } from "@prisma/client";
 import { Form, useSearchParams, useTransition } from "@remix-run/react";
-import { IconFilter, IconRefresh } from "@tabler/icons-react";
+import { IconRefresh } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { Button } from "~/components/shared/Button";
-import { Checkbox } from "~/components/shared/Checkbox";
-import { FormMenu } from "~/components/shared/FormMenu";
 import { Input } from "~/components/shared/Input";
+import type { Filter } from "~/components/shared/TableFilters";
+import { TableFilters } from "~/components/shared/TableFilters";
 
 type Props = {
   ticketStatuses: TicketStatus[];
 };
-export function TicketFilterForm({ ticketStatuses }: Props) {
+export function TicketFilter({ ticketStatuses }: Props) {
   const transition = useTransition();
   const [searchParams] = useSearchParams();
 
-  const urlStatuses = searchParams.getAll("status");
+  const urlStatuses = searchParams.getAll("status[]");
   const defaultStatuses = ticketStatuses
     .filter((s) => s.name !== "Closed")
     .map((s) => s.id.toString());
@@ -22,23 +22,21 @@ export function TicketFilterForm({ ticketStatuses }: Props) {
   const dateFrom = searchParams.get("dateFrom") ?? undefined;
   const dateTo = searchParams.get("dateTo") ?? undefined;
 
+  const filters: Filter[] = [
+    {
+      id: "status",
+      name: "Status",
+      options: ticketStatuses.map((s) => ({
+        value: s.id,
+        label: s.name,
+        defaultSelected: statuses.includes(s.id.toString()),
+      })),
+    },
+  ];
+
   return (
     <Form method="get" className="mt-6 flex flex-col gap-3 text-sm">
-      <FormMenu title="Filters" icon={<IconFilter size={20} />}>
-        <div className="flex flex-col space-y-3 whitespace-nowrap text-sm">
-          {ticketStatuses.map((status) => {
-            return (
-              <Checkbox
-                key={`status-${status.id}`}
-                id={`status-${status.id}`}
-                name="status"
-                label={status.name}
-                defaultChecked={statuses.includes(status.id.toString())}
-              />
-            );
-          })}
-        </div>
-      </FormMenu>
+      <TableFilters filters={filters} direction="right" unmount={false} />
       <div className="flex gap-2">
         <Input
           label="From"

@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
 import { TableHeader } from "~/components/tables";
-import { TicketFilterForm } from "~/components/tickets/TicketFilterForm";
+import { TicketFilter } from "~/components/tickets/TicketFilter";
 import { TicketTable } from "~/components/tickets/TicketTable";
 import { useSortableData } from "~/hooks/useSortableData";
 import {
@@ -66,7 +66,7 @@ export default function TicketIndex() {
         description="All tickets in the system with their current status and location."
         noAction
       />
-      <TicketFilterForm ticketStatuses={ticketStatuses} />
+      <TicketFilter ticketStatuses={ticketStatuses} />
       <div className="mt-4">
         <TicketTable
           items={items}
