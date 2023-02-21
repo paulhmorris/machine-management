@@ -35,7 +35,11 @@ export function TicketFilter({ ticketStatuses }: Props) {
   ];
 
   return (
-    <Form method="get" className="mt-6 flex flex-col gap-3 text-sm">
+    <Form
+      method="get"
+      className="mt-6 flex w-full flex-col gap-4 text-sm"
+      replace={true}
+    >
       <TableFilters filters={filters} direction="right" unmount={false} />
       <div className="flex gap-2">
         <Input
@@ -43,6 +47,7 @@ export function TicketFilter({ ticketStatuses }: Props) {
           name="dateFrom"
           type="date"
           defaultValue={dateFrom}
+          hideHelperText
         />
         <Input
           label="To"
@@ -50,6 +55,7 @@ export function TicketFilter({ ticketStatuses }: Props) {
           type="date"
           max={dayjs().format("YYYY-MM-DD")}
           defaultValue={dateTo}
+          hideHelperText
         />
       </div>
       <div>

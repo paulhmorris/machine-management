@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
+import { classNames } from "~/utils/utils";
 
 interface CheckboxProps extends ComponentPropsWithoutRef<"input"> {
   id: string;
@@ -8,14 +9,17 @@ interface CheckboxProps extends ComponentPropsWithoutRef<"input"> {
 
 export function Checkbox({ id, name, label, ...props }: CheckboxProps) {
   return (
-    <div className="relative flex items-start">
+    <div className="relative flex items-center">
       <div className="flex h-5 items-center">
         <input
           {...props}
           id={id}
           name={name}
           type="checkbox"
-          className="h-4 w-4 cursor-pointer rounded border-gray-300 text-cyan-600 transition duration-75 focus:ring-cyan-600/50"
+          className={classNames(
+            "h-4 w-4 cursor-pointer rounded border-gray-300 text-cyan-600 transition duration-75 focus:ring-cyan-600/50",
+            props.className
+          )}
         />
       </div>
       <div className="ml-3">

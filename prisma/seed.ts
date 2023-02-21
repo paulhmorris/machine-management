@@ -40,7 +40,7 @@ async function seed() {
   for (let i = 0; i < 50; i++) {
     await prisma.location.create({
       data: {
-        name: faker.word.noun(),
+        name: faker.address.city(),
         campusId: campus.id,
       },
     });
@@ -49,6 +49,10 @@ async function seed() {
         total: faker.datatype.float({ min: 0, max: 1000 }),
         vendorId: vendor.id,
         campusId: campus.id,
+        vendorInvoiceNumber: `INV-${faker.random.numeric(6)}`,
+        invoicedOn: faker.date.past(),
+        paidOn: faker.date.past(),
+        submittedOn: faker.date.past(),
       },
     });
   }
@@ -171,6 +175,13 @@ async function seed() {
           "CAMPUSTECH",
           "MACHINETECH",
         ]),
+      },
+    });
+    await prisma.part.create({
+      data: {
+        name: faker.random.words(2),
+        partNumber: faker.random.alphaNumeric(6),
+        standardCost: faker.datatype.float({ min: 0, max: 1000 }),
       },
     });
   }

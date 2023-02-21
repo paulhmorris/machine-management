@@ -24,6 +24,7 @@ model User {
   tickets              Ticket[]
   createdTicketEvents  TicketEvent[] @relation("createdByUser")
   assignedTicketEvents TicketEvent[] @relation("assignedToUser")
+  submittedInvoices    Invoice[]
 }
 
 enum UserRole {
@@ -45,6 +46,7 @@ model Vendor {
   tripCharge Float
   hourlyRate Float
   campuses   Campus[]
+  isActive   Boolean  @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -152,6 +154,8 @@ model Ticket {
   events             TicketEvent[]
   charges            Charge[]
   machineErrorTypeId Int
+  invoice            Invoice?      @relation(fields: [invoiceId], references: [id])
+  invoiceId          String?
 }
 
 model TicketStatus {
@@ -176,38 +180,43 @@ model TicketEvent {
 }
 
 model Invoice {
-  id                   String    @id @default(cuid())
-  publicId             Int       @unique @default(autoincrement())
-  vendor               Vendor    @relation(fields: [vendorId], references: [id])
-  campus               Campus    @relation(fields: [campusId], references: [id])
-  invoicedOn           DateTime?
+  id       String @id @default(cuid())
+  campusId String
+  vendorId String
+
   submittedOn          DateTime?
+  submittedBy          User?     @relation(fields: [submittedByUserId], references: [id])
   paidOn               DateTime?
   total                Float?
+  vendorInvoiceNumber  String?   @unique
+  invoicedOn           DateTime?
   billedToUniversityOn DateTime?
+  charges              Charge[]
+  tickets              Ticket[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  vendorId  String
-  charges   Charge[]
-  campusId  String
+  vendor            Vendor   @relation(fields: [vendorId], references: [id])
+  campus            Campus   @relation(fields: [campusId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  submittedByUserId String?
 }
 
 model Charge {
   id              Int        @id @default(autoincrement())
+  vendor          Vendor     @relation(fields: [vendorId], references: [id])
+  vendorId        String
   ticket          Ticket     @relation(fields: [ticketId], references: [id])
   ticketId        Int
+  invoice         Invoice    @relation(fields: [invoiceId], references: [id])
+  invoiceId       String
   type            ChargeType @relation(fields: [typeId], references: [id])
   typeId          Int
   actualCost      Float
   warrantyCovered Boolean    @default(false)
-  description     String?
-  vendor          Vendor     @relation(fields: [vendorId], references: [id])
-  vendorId        String
-  invoice         Invoice?   @relation(fields: [invoiceId], references: [id])
-  invoiceId       String?
-  part            Part?      @relation(fields: [partId], references: [id])
-  partId          String?
+
+  description String?
+  part        Part?   @relation(fields: [partId], references: [id])
+  partId      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -223,9 +232,9 @@ model Part {
   id           String @id @default(cuid())
   name         String
   partNumber   String
-  standardCost Float
+  standardCost Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Charge    Charge[]
+  charges   Charge[]
 }

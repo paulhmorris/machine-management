@@ -5,8 +5,8 @@ import { Fragment } from "react";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { classNames } from "~/utils/utils";
 
-export type Filter = {
-  id: string | number;
+export type Filter<T = string | number> = {
+  id: T;
   name: string;
   options: Array<{
     value: string | number;
@@ -24,7 +24,7 @@ type DropdownProps = {
 
 export function TableFilters({
   filters,
-  direction = "left",
+  direction = "right",
   unmount = true,
 }: DropdownProps) {
   const [searchParams] = useSearchParams();
@@ -64,24 +64,23 @@ export function TableFilters({
                 direction === "left"
                   ? "right-0 origin-top-right"
                   : "left-0 origin-top-left",
-                "space-x- absolute z-20 mt-2 space-y-3 whitespace-nowrap rounded-md bg-white p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                "space-x- absolute z-20 mt-2 space-y-3 whitespace-nowrap rounded-md bg-white p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
               )}
             >
               {section.options.map((option, index) => (
-                <div key={option.value} className="flex items-center">
-                  <Checkbox
-                    id={`filter-${section.id}-${index}`}
-                    label={option.label}
-                    name={`${section.id}[${index}]`}
-                    defaultValue={option.value}
-                    defaultChecked={
-                      option.defaultSelected ||
-                      searchParams
-                        .getAll(`${section.id}[]`)
-                        .includes(String(option.value))
-                    }
-                  />
-                </div>
+                <Checkbox
+                  key={`${section.name}-${option.value}}`}
+                  id={`filter-${section.id}-${index}`}
+                  label={option.label}
+                  name={`${section.id}`}
+                  defaultValue={option.value}
+                  defaultChecked={
+                    option.defaultSelected ||
+                    searchParams
+                      .getAll(`${section.id}`)
+                      .includes(String(option.value))
+                  }
+                />
               ))}
             </Popover.Panel>
           </Transition>

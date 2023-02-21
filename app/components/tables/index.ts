@@ -5,7 +5,7 @@ export { TableHeader } from "./TableHeader";
 export { TableWrapper } from "./TableWrapper";
 
 export type TableColumn<T extends any[] = []> = {
-  key: string | keyof T;
+  key: T extends any[] ? keyof T[number] : string;
   title: string;
   sortable: boolean;
 };

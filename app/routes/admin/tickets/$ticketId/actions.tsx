@@ -193,8 +193,8 @@ export default function TicketActions() {
   );
 }
 
-const iconSize = 14;
-const stroke = 3;
+const iconSize = 18;
+const stroke = 2;
 const actions = [
   {
     name: "close",

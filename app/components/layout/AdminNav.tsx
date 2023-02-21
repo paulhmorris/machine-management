@@ -82,17 +82,17 @@ const nav = [
     end: false,
   },
   {
-    name: "Machines",
-    href: "/machines",
-    icon: <IconWashMachine size={20} className="text-pink-500" />,
-    iconBg: "bg-pink-100",
-    end: false,
-  },
-  {
     name: "Invoices",
     href: "/invoices",
     icon: <IconFileDollar size={20} className="text-emerald-500" />,
     iconBg: "bg-emerald-100",
+    end: false,
+  },
+  {
+    name: "Machines",
+    href: "/machines",
+    icon: <IconWashMachine size={20} className="text-pink-500" />,
+    iconBg: "bg-pink-100",
     end: false,
   },
   {

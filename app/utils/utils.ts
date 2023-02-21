@@ -1,3 +1,4 @@
+import type { Charge, ChargeType } from "@prisma/client";
 import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
@@ -78,4 +79,16 @@ export function classNames(...classes: unknown[]): string {
 
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function calculateTotalByType(
+  charges: Array<Charge & { type: ChargeType }>,
+  typeId: Charge["typeId"]
+) {
+  return charges.reduce((acc, charge) => {
+    if (charge.typeId === typeId) {
+      return acc + charge.actualCost;
+    }
+    return acc;
+  }, 0);
 }

@@ -6,43 +6,57 @@ interface InputProps extends ComponentPropsWithRef<"input"> {
   name: string;
   label: string;
   hideLabel?: boolean;
+  hideHelperText?: boolean;
   error?: string | null | undefined;
+  isCurrency?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ name, label, error, hideLabel, ...props }, ref) => {
+  (
+    { name, label, error, hideLabel, hideHelperText, isCurrency, ...props },
+    ref
+  ) => {
     return (
-      <div className="relative">
+      <div>
         <label
           htmlFor={name}
           className={
-            hideLabel ? "sr-only" : "block font-medium text-gray-700 sm:text-sm"
+            hideLabel
+              ? "sr-only"
+              : "block whitespace-nowrap font-medium text-gray-700 sm:text-sm"
           }
         >
           {label}
-          {props.required ? (
-            "*"
-          ) : (
-            <span className="ml-1 text-sm text-gray-400">(optional)</span>
-          )}
+          {props.required
+            ? "*"
+            : !hideHelperText && (
+                <span className="ml-1 text-sm text-gray-400">(optional)</span>
+              )}
         </label>
-        <div className={hideLabel ? "-mt-0.5" : "mt-1"}>
+        <div className={hideLabel ? "relative -mt-0.5" : "relative mt-1"}>
+          {isCurrency && (
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <span className="text-gray-500 sm:text-sm">$</span>
+            </span>
+          )}
           <input
             {...props}
             ref={ref ?? null}
             id={name}
             name={name}
             type={props.type ?? "text"}
-            aria-invalid={error ? true : undefined}
+            step={isCurrency ? "0.01" : props.step}
+            aria-invalid={error ? true : props["aria-invalid"]}
             aria-describedby={`${name}-error`}
             className={classNames(
+              isCurrency && "pl-7",
               "mt-1 block w-full rounded-md border-gray-300 shadow-sm transition duration-75 placeholder:text-gray-300 focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
               props.className
             )}
           />
           {error && (
             <p
-              className="pt-1 pl-1 text-sm font-medium text-red-700"
+              className="whitespace-nowrap pt-1 pl-1 text-sm font-medium text-red-500"
               id={`${name}-error`}
               role="alert"
             >
