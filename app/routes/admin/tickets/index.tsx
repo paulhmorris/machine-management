@@ -11,15 +11,15 @@ import {
   getTicketStatuses,
 } from "~/models/ticket.server";
 import { requireVendorOrAdmin } from "~/utils/auth.server";
+import { getAllSearchParams, getSearchParam } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   await requireVendorOrAdmin(request);
-  const url = new URL(request.url);
-  const dateFrom = url.searchParams.get("dateFrom") ?? undefined;
-  const dateTo = url.searchParams.get("dateTo") ?? undefined;
+  const dateFrom = getSearchParam("dateFrom", request) ?? undefined;
+  const dateTo = getSearchParam("dateTo", request) ?? undefined;
+  const urlStatuses = getAllSearchParams("status", request);
 
   const ticketStatuses = await getTicketStatuses();
-  const urlStatuses = url.searchParams.getAll("status");
   const defaultStatuses = ticketStatuses
     .filter((s) => s.name !== "Closed")
     .map((s) => s.id.toString());

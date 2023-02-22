@@ -6,6 +6,7 @@ import { TicketDetails } from "~/components/tickets/TicketDetails";
 import { TicketNav } from "~/components/tickets/TicketNav";
 import { getTicketById } from "~/models/ticket.server";
 import { requireAdmin } from "~/utils/auth.server";
+import { badRequest } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -14,7 +15,7 @@ export async function loader({ request, params }: LoaderArgs) {
 
   const ticket = await getTicketById(Number(ticketId));
   if (!ticket) {
-    throw new Response(`Ticket with id ${ticketId} not found`, { status: 404 });
+    throw badRequest(`Ticket with id ${ticketId} not found`);
   }
 
   return typedjson({ ticket });

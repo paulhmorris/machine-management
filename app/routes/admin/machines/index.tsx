@@ -16,16 +16,15 @@ import { useSortableData } from "~/hooks/useSortableData";
 import { getMachinesForTable } from "~/models/machine.server";
 import { requireVendorOrAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
-import { classNames } from "~/utils/utils";
+import { classNames, getAllSearchParams } from "~/utils/utils";
 
 export type MachineQueryParam = "campus" | "loc" | "type";
 
 export async function loader({ request }: LoaderArgs) {
   await requireVendorOrAdmin(request);
-  const url = new URL(request.url);
-  const campusIds = url.searchParams.getAll("campus");
-  const locationIds = url.searchParams.getAll("loc");
-  const machineTypeQuery = url.searchParams.getAll("type") ?? undefined;
+  const campusIds = getAllSearchParams("campus", request);
+  const locationIds = getAllSearchParams("loc", request);
+  const machineTypeQuery = getAllSearchParams("type", request);
 
   const select = { id: true, name: true };
   const machineTypes = await prisma.machineType.findMany({ select });

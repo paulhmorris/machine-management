@@ -81,6 +81,10 @@ export function getSearchParam(param: string, request: Request) {
   const url = new URL(request.url);
   return url.searchParams.get(param);
 }
+export function getAllSearchParams(param: string, request: Request) {
+  const url = new URL(request.url);
+  return url.searchParams.getAll(param);
+}
 
 export function classNames(...classes: unknown[]): string {
   return classes.filter(Boolean).join(" ");

@@ -1,4 +1,4 @@
-import type { Prisma, Ticket } from "@prisma/client";
+import type { Prisma, Ticket, TicketEvent } from "@prisma/client";
 import { prisma } from "~/utils/db.server";
 
 export async function getAllTicketsWithCount({
@@ -83,5 +83,46 @@ export function getTicketWithCampusId(ticketId: Ticket["id"]) {
 export function getTicketStatuses() {
   return prisma.ticketStatus.findMany({
     orderBy: { id: "asc" },
+  });
+}
+
+type UpdateTicketArgs = {
+  ticketId: Ticket["id"];
+  ticketStatusId: Ticket["ticketStatusId"];
+  assignedToUserId: Ticket["assignedToUserId"];
+  createdByUserId: TicketEvent["createdByUserId"];
+  comments?: TicketEvent["comments"];
+};
+export async function reassignTicket(data: UpdateTicketArgs) {
+  await prisma.ticket.update({
+    where: { id: data.ticketId },
+    data: { assignedToUserId: data.assignedToUserId },
+  });
+
+  await prisma.ticketEvent.create({
+    data: {
+      ticketId: data.ticketId,
+      assignedToUserId: data.assignedToUserId,
+      createdByUserId: data.createdByUserId,
+      ticketStatusId: data.ticketStatusId,
+      comments: data.comments,
+    },
+  });
+}
+
+export async function updateTicketStatus(data: UpdateTicketArgs) {
+  await prisma.ticket.update({
+    where: { id: data.ticketId },
+    data: { ticketStatusId: data.ticketStatusId },
+  });
+
+  await prisma.ticketEvent.create({
+    data: {
+      ticketId: data.ticketId,
+      createdByUserId: data.createdByUserId,
+      assignedToUserId: data.assignedToUserId,
+      ticketStatusId: data.ticketStatusId,
+      comments: data.comments,
+    },
   });
 }
