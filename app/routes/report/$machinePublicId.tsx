@@ -4,6 +4,7 @@ import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useRef } from "react";
 
 import invariant from "tiny-invariant";
+import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { ButtonLink } from "~/components/shared/ButtonLink";
 import { Input } from "~/components/shared/Input";
@@ -12,7 +13,9 @@ import {
   getErrorTypesForReport,
   getMachineForReport,
 } from "~/models/machine.server";
+import { reportSchema } from "~/schemas/report";
 import { prisma } from "~/utils/db.server";
+import { getSearchParam } from "~/utils/utils";
 
 export async function loader({ params }: LoaderArgs) {
   const { machinePublicId } = params;
@@ -26,49 +29,47 @@ export async function loader({ params }: LoaderArgs) {
 }
 
 export async function action({ request }: ActionArgs) {
-  const form = await request.formData();
-  const url = new URL(request.url);
-  console.log(url);
-
-  const errorId = url.searchParams.get("error");
-  const machineId = form.get("machineId");
-  const notes = form.get("notes");
-  const reporterEmail = form.get("reporterEmail") ?? null;
-
+  const form = Object.fromEntries(await request.formData());
+  const errorId = getSearchParam("error", request);
   invariant(typeof errorId === "string", "Expected errorId");
-  invariant(typeof machineId === "string", "Expected machineId");
-  invariant(typeof notes === "string", "Expected notes");
-  invariant(typeof reporterEmail === "string", "Expected reporterEmail");
 
-  const ticket = await prisma.ticket.create({
-    data: {
-      notes,
-      reporterEmail,
-      machine: { connect: { publicId: machineId } },
-      status: { connect: { id: 1 } },
-      assignedTo: { connect: { email: "tmfd@remix.run" } },
-      errorType: { connect: { id: Number(errorId) } },
-    },
-  });
-  await prisma.ticketEvent.create({
-    data: {
-      assignedTo: { connect: { email: "tmfd@remix.run" } },
-      createdBy: { connect: { email: "tmfd@remix.run" } },
-      ticket: { connect: { id: ticket.id } },
-      status: { connect: { id: 1 } },
-      comments: notes,
-    },
-  });
+  try {
+    const { notes, reporterEmail, machineId } = reportSchema.parse(form);
+    const ticket = await prisma.ticket.create({
+      data: {
+        notes,
+        reporterEmail,
+        machine: { connect: { publicId: machineId } },
+        status: { connect: { id: 1 } },
+        assignedTo: { connect: { email: "tmfd@remix.run" } },
+        errorType: { connect: { id: Number(errorId) } },
+      },
+    });
+    await prisma.ticketEvent.create({
+      data: {
+        assignedTo: { connect: { email: "tmfd@remix.run" } },
+        createdBy: { connect: { email: "tmfd@remix.run" } },
+        ticket: { connect: { id: ticket.id } },
+        status: { connect: { id: 1 } },
+        comments: notes,
+      },
+    });
 
-  return redirect(
-    `/report/thanks${reporterEmail ? "?providedEmail=true" : ""}`
-  );
+    return redirect(
+      `/report/thanks${reporterEmail ? "?providedEmail=true" : ""}`
+    );
+  } catch (error) {
+    if (error instanceof z.ZodError<typeof reportSchema>) {
+      return json({ error: error.flatten() });
+    }
+  }
 }
 
 export default function MachineReport() {
   const { machine, errorTypes } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
-  const error = Number(searchParams.get("error"));
+  // const actionData = useActionData<typeof action>();
+  const errorParam = Number(searchParams.get("error"));
   const commentsRef = useRef<HTMLTextAreaElement>(null);
 
   return (
@@ -90,7 +91,7 @@ export default function MachineReport() {
                 key={type.id}
                 to={`?error=${type.id}`}
                 replace={true}
-                variant={error === type.id ? "primary" : "secondary"}
+                variant={errorParam === type.id ? "primary" : "secondary"}
                 className="py-5 font-extrabold"
                 onClick={() => commentsRef.current?.focus()}
               >
@@ -113,7 +114,12 @@ export default function MachineReport() {
               autoComplete="email"
             />
           </div>
-          <Button type="submit" variant="primary" className="mt-4">
+          <Button
+            type="submit"
+            variant="primary"
+            className="mt-4"
+            disabled={Boolean(!errorParam)}
+          >
             Submit
           </Button>
         </div>

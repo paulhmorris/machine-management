@@ -1,4 +1,5 @@
 import type { Charge, ChargeType } from "@prisma/client";
+import { json } from "@remix-run/node";
 import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
@@ -69,8 +70,16 @@ export function useUser(): User {
   return maybeUser;
 }
 
-export function validateEmail(email: unknown): email is string {
-  return typeof email === "string" && email.length > 3 && email.includes("@");
+export function badRequest<Data = unknown>(
+  data: Data,
+  init?: Omit<ResponseInit, "status">
+) {
+  return json<Data>(data, { ...init, status: 400 });
+}
+
+export function getSearchParam(param: string, request: Request) {
+  const url = new URL(request.url);
+  return url.searchParams.get(param);
 }
 
 export function classNames(...classes: unknown[]): string {

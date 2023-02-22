@@ -11,7 +11,7 @@ export function formatCurrency(value: string | number) {
     }).format(+value);
     return formattedValue;
   }
-  return false;
+  return value;
 }
 
 export function formatShortDate(date: string | Date) {

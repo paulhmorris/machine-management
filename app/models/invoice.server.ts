@@ -11,3 +11,17 @@ export function getInvoiceById(invoiceId: string) {
     },
   });
 }
+
+export function getInvoicesForIndex() {
+  return prisma.invoice.findMany({
+    include: {
+      vendor: true,
+      campus: true,
+      charges: {
+        include: {
+          ticket: { select: { _count: true } },
+        },
+      },
+    },
+  });
+}

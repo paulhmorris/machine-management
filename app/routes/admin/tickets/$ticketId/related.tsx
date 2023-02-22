@@ -16,6 +16,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import type { TTicketStatus } from "~/utils/constants";
 import { prisma } from "~/utils/db.server";
 import { getTicketStatusBadgeColor } from "~/utils/formatters";
+import { badRequest } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -29,7 +30,7 @@ export async function loader({ request, params }: LoaderArgs) {
     },
   });
   if (!ticket) {
-    throw new Response(`Ticket with id ${ticketId} not found`, { status: 404 });
+    throw badRequest(`Ticket with id ${ticketId} not found`);
   }
 
   const relatedTickets = await prisma.ticket.findMany({

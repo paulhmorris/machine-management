@@ -12,13 +12,13 @@ import {
 import { Notifications } from "~/components/shared/Notifications";
 import { getGlobalToast } from "~/utils/toast.server";
 
-import styles from "./styles/tailwind.css";
+import styles from "~/styles/tailwind.css";
 import { getSession, getUser, sessionStorage } from "./utils/session.server";
 
 // @ts-expect-error this doesn't like third object here, the type is not correct
 export const links: LinksFunction = () => {
   return [
-    { rel: "stylesheet", href: styles, as: "style" },
+    { rel: "stylesheet", href: styles },
     { rel: "preconnect", href: "https://fonts.googleapis.com", as: "font" },
     {
       rel: "preconnect",

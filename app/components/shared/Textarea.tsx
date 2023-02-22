@@ -6,10 +6,11 @@ interface TextareaProps extends ComponentPropsWithRef<"textarea"> {
   name: string;
   label: string;
   resizeable?: boolean;
+  error?: string | null | undefined;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ name, label, resizeable = true, ...props }, ref) => {
+  ({ name, label, resizeable = true, error, ...props }, ref) => {
     return (
       <div>
         <label
@@ -36,6 +37,15 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             )}
             defaultValue={""}
           />
+          {error && (
+            <p
+              className="whitespace-nowrap pt-1 pl-1 text-sm font-medium text-red-500"
+              id={`${name}-error`}
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
         </div>
       </div>
     );

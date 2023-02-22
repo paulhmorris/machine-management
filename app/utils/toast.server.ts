@@ -4,7 +4,7 @@ import { sessionStorage } from "~/utils/session.server";
 
 export type ServerToast = {
   message: string;
-  type: "success" | "error" | "warning" | "info";
+  type: "success" | "error";
 };
 
 export function setGlobalToast(session: Session, toast: ServerToast) {

@@ -5,8 +5,8 @@ import * as React from "react";
 import { Input } from "~/components/shared/Input";
 
 import { verifyLogin } from "~/models/user.server";
+import { loginSchema } from "~/schemas/login";
 import { createUserSession, getUserId } from "~/utils/session.server";
-import { safeRedirect, validateEmail } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const userId = await getUserId(request);
@@ -15,48 +15,28 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export async function action({ request }: ActionArgs) {
-  const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
-  const remember = formData.get("remember");
-
-  if (!validateEmail(email)) {
-    return json(
-      { errors: { email: "Email is invalid", password: null } },
-      { status: 400 }
-    );
-  }
-
-  if (typeof password !== "string" || password.length === 0) {
-    return json(
-      { errors: { password: "Password is required", email: null } },
-      { status: 400 }
-    );
-  }
-
-  if (password.length < 8) {
-    return json(
-      { errors: { password: "Password is too short", email: null } },
-      { status: 400 }
-    );
-  }
-
-  const user = await verifyLogin(email, password);
-
-  if (!user) {
+  const form = Object.fromEntries(await request.formData());
+  try {
+    const { email, password, redirectTo, remember } = loginSchema.parse(form);
+    const user = await verifyLogin(email, password);
+    if (!user) {
+      return json(
+        { errors: { email: "Invalid email or password", password: null } },
+        { status: 400 }
+      );
+    }
+    return createUserSession({
+      request,
+      userId: user.id,
+      remember: remember === "on" ? true : false,
+      redirectTo,
+    });
+  } catch (error) {
     return json(
       { errors: { email: "Invalid email or password", password: null } },
       { status: 400 }
     );
   }
-
-  return createUserSession({
-    request,
-    userId: user.id,
-    remember: remember === "on" ? true : false,
-    redirectTo,
-  });
 }
 
 export const meta: MetaFunction = () => {
@@ -73,6 +53,7 @@ export default function LoginPage() {
   const passwordRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
+    console.log(actionData);
     if (actionData?.errors?.email) {
       emailRef.current?.focus();
     } else if (actionData?.errors?.password) {
@@ -92,6 +73,8 @@ export default function LoginPage() {
           label="Username"
           name="email"
           type="email"
+          ref={emailRef}
+          error={actionData?.errors?.email}
           required
           autoComplete="username"
         />
@@ -99,6 +82,8 @@ export default function LoginPage() {
           label="Password"
           name="password"
           type="password"
+          ref={passwordRef}
+          error={actionData?.errors?.password}
           required
           autoComplete="current-password"
         />
