@@ -2,31 +2,49 @@ import { z } from "zod";
 
 export const addTicketToInvoiceSchema = z.object({
   ticketId: z.coerce.number(),
-  actionType: z.enum([
-    "ticket",
-    "trip",
-    "shipping",
-    "labor",
-    "part",
-    "reimbursement",
-    "deleteCharge",
-    "finishInvoice",
-  ]),
 });
-
-export const addChargeSchema = z.object({
-  chargeAmount: z.coerce.number(),
-  isWarranty: z.string().optional(),
+export const addLaborSchema = z.object({
+  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
+  chargeAmount: z.coerce.number({
+    required_error: "Charge amount is required",
+  }),
+  isWarranty: z.enum(["on"]).optional(),
+  time: z.string(),
 });
-
-export const addLaborSchema = z.object({ time: z.string() });
-export const addTripSchema = z.object({ tripChargeDate: z.coerce.date() });
-export const addPartSchema = z.object({ partId: z.string().cuid() });
-export const addReimbursementSchema = z.object({ reimbursedUser: z.string() });
-export const addShippingSchema = z.object({ shippingDate: z.coerce.date() });
-export const deleteChargeSchema = z.object({ chargeId: z.coerce.number() });
-
+export const addTripSchema = z.object({
+  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
+  tripChargeDate: z.coerce.date({ required_error: "A date is required" }),
+  chargeAmount: z.coerce.number({
+    required_error: "Charge amount is required",
+  }),
+});
+export const addPartSchema = z.object({
+  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
+  partId: z.string({ required_error: "A part is required" }).cuid(),
+  chargeAmount: z.coerce.number({
+    required_error: "Charge amount is required",
+  }),
+  isWarranty: z.enum(["on"]).optional(),
+});
+export const addReimbursementSchema = z.object({
+  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
+  reimbursedUser: z.string({ required_error: "Please specify recipient" }),
+  chargeAmount: z.coerce.number({
+    required_error: "Charge amount is required",
+  }),
+});
+export const addShippingSchema = z.object({
+  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
+  shippingDate: z.coerce.date({ required_error: "A date is required" }),
+  chargeAmount: z.coerce.number({
+    required_error: "Charge amount is required",
+  }),
+});
+export const deleteChargeSchema = z.object({
+  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
+  chargeId: z.coerce.number(),
+});
 export const finishInvoiceSchema = z.object({
   vendorInvoiceNumber: z.string().optional(),
-  vendorInvoiceDate: z.coerce.date().optional(),
+  vendorInvoiceDate: z.string().optional(),
 });

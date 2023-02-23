@@ -1,12 +1,6 @@
 import { Disclosure } from "@headlessui/react";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import {
-  Outlet,
-  useActionData,
-  useFetcher,
-  useTransition,
-} from "@remix-run/react";
+import { Outlet, useFetcher, useTransition } from "@remix-run/react";
 import {
   IconChevronRight,
   IconClock,
@@ -27,21 +21,14 @@ import { InvoiceSummary } from "~/components/invoices/InvoiceSummary";
 import { Button } from "~/components/shared/Button";
 import { ButtonNavLink } from "~/components/shared/ButtonNavLink";
 import { Input } from "~/components/shared/Input";
-import { getInvoiceById } from "~/models/invoice.server";
 import {
-  addChargeSchema,
-  addLaborSchema,
-  addPartSchema,
-  addReimbursementSchema,
-  addShippingSchema,
-  addTicketToInvoiceSchema,
-  addTripSchema,
-  deleteChargeSchema,
-  finishInvoiceSchema,
-} from "~/schemas/invoice";
+  finishInvoice,
+  getInvoiceWithAllRelations,
+} from "~/models/invoice.server";
+import { deleteChargeSchema, finishInvoiceSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
-import { capitalize, formatCurrency } from "~/utils/formatters";
+import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, classNames } from "~/utils/utils";
@@ -50,15 +37,14 @@ export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { invoiceId } = params;
   invariant(typeof invoiceId === "string", "Expected invoiceId");
-  const invoice = await getInvoiceById(invoiceId);
+  const invoice = await getInvoiceWithAllRelations(invoiceId);
   if (!invoice) {
-    throw badRequest(`Invoice ${invoiceId} found`);
+    throw badRequest(`Invoice ${invoiceId} not found`);
   }
-  const parts = await prisma.part.findMany();
-  return typedjson({ invoice, parts });
+  return typedjson({ invoice });
 }
 export type InvoicePayload = NonNullable<
-  Awaited<ReturnType<typeof getInvoiceById>>
+  Awaited<ReturnType<typeof getInvoiceWithAllRelations>>
 >;
 
 export async function action({ request, params }: ActionArgs) {
@@ -67,158 +53,73 @@ export async function action({ request, params }: ActionArgs) {
   const { invoiceId } = params;
   invariant(typeof invoiceId === "string", "Expected invoiceId");
 
-  const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
-  if (!invoice) {
-    throw badRequest(`Invoice ${invoiceId} not found`);
+  const form = Object.fromEntries(await request.formData());
+  const result = z
+    .object({ _action: z.enum(["deleteCharge", "finishInvoice"]) })
+    .safeParse(form);
+  if (!result.success) {
+    return jsonWithToast(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      session,
+      {
+        type: "error",
+        message: `Unknown action type. Error: ${result.error.message}`,
+      }
+    );
+  }
+  const { _action } = result.data;
+
+  // Delete Charge
+  if (_action === "deleteCharge") {
+    const result = deleteChargeSchema.safeParse(form);
+    if (!result.success) {
+      return jsonWithToast(
+        { errors: { ...result.error.flatten().fieldErrors } },
+        session,
+        {
+          type: "error",
+          message: `Error deleting charge`,
+        }
+      );
+    }
+    const charge = await prisma.charge.delete({
+      where: { id: result.data.chargeId },
+    });
+    return jsonWithToast({ charge }, session, {
+      type: "success",
+      message: "Charge deleted",
+    });
   }
 
-  const form = Object.fromEntries(await request.formData());
-
-  try {
-    // Add Ticket
-    const { actionType, ticketId } = addTicketToInvoiceSchema.parse(form);
-    if (actionType === "ticket") {
-      const ticket = await prisma.ticket.findUnique({
-        where: { id: ticketId },
-        select: { id: true },
-      });
-      if (!ticket) {
-        return json(
-          { errors: { ticketId: { _errors: ["Ticket not found"] } } },
-          { status: 400 }
-        );
-      }
-      if (invoice.tickets.some((t) => t.id === ticket.id)) {
-        return json(
-          {
-            errors: {
-              ticketId: { _errors: ["Ticket already added to invoice"] },
-            },
-          },
-          { status: 400 }
-        );
-      }
-      const updatedInvoice = await prisma.invoice.update({
-        where: { id: invoice.id },
-        data: { tickets: { connect: { id: ticket.id } } },
-      });
-      return json({ updatedInvoice });
-    }
-
-    // Add Charge
-    if (
-      actionType === "labor" ||
-      actionType === "trip" ||
-      actionType === "part" ||
-      actionType === "shipping" ||
-      actionType === "reimbursement"
-    ) {
-      const { isWarranty, chargeAmount } = addChargeSchema.parse(form);
-
-      // Set descriptions for each charge type
-      let description: string | undefined = undefined;
-      switch (actionType) {
-        case "labor":
-          const { time } = addLaborSchema.parse(form);
-          description = `${time} minutes`;
-          break;
-        case "trip":
-          const { tripChargeDate } = addTripSchema.parse(form);
-          description = `${dayjs(tripChargeDate).format("M/D/YYYY")}`;
-          break;
-        case "shipping":
-          const { shippingDate } = addShippingSchema.parse(form);
-          description = `${dayjs(shippingDate).format("M/D/YYYY")}`;
-          break;
-        case "reimbursement":
-          const { reimbursedUser } = addReimbursementSchema.parse(form);
-          description = reimbursedUser;
-          break;
-      }
-
-      const newCharge = await prisma.charge.create({
-        data: {
-          ticket: { connect: { id: ticketId } },
-          invoice: { connect: { id: invoice.id } },
-          vendor: { connect: { id: invoice.vendorId } },
-          warrantyCovered: isWarranty ? true : false,
-          actualCost: chargeAmount,
-          description,
-          part:
-            actionType === "part"
-              ? { connect: { id: addPartSchema.parse(form).partId } }
-              : undefined,
-          type: {
-            connect: {
-              id:
-                actionType === "labor"
-                  ? 1
-                  : actionType === "trip"
-                  ? 2
-                  : actionType === "part"
-                  ? 3
-                  : actionType === "shipping"
-                  ? 4
-                  : actionType === "reimbursement"
-                  ? 5
-                  : undefined,
-            },
-          },
-        },
-      });
-      return jsonWithToast({ newCharge }, session, {
-        type: "success",
-        message: `${capitalize(actionType)} charge added!`,
-      });
-    }
-
-    // Delete Charge
-    if (actionType === "deleteCharge") {
-      const { chargeId } = deleteChargeSchema.parse(form);
-      const charge = await prisma.charge.delete({
-        where: { id: chargeId },
-      });
-      return jsonWithToast({ charge }, session, {
-        type: "success",
-        message: "Charge deleted",
-      });
-    }
-
-    // Finish Invoice
-    if (actionType === "finishInvoice") {
-      const { vendorInvoiceNumber, vendorInvoiceDate } =
-        finishInvoiceSchema.parse(form);
-      const total = invoice.charges.reduce(
-        (acc, charge) => acc + (charge.warrantyCovered ? 0 : charge.actualCost),
-        0
+  // Finish Invoice
+  if (_action === "finishInvoice") {
+    const result = finishInvoiceSchema.safeParse(form);
+    if (!result.success) {
+      console.log(result.error.issues);
+      return jsonWithToast(
+        { errors: { ...result.error.flatten().fieldErrors } },
+        session,
+        {
+          type: "error",
+          message: `Error submitting invoice`,
+        }
       );
-      await prisma.invoice.update({
-        where: { id: invoice.id },
-        data: {
-          vendorInvoiceNumber,
-          total,
-          invoicedOn: dayjs(vendorInvoiceDate).toDate(),
-          submittedOn: new Date(),
-          submittedBy: { connect: { id: user.id } },
-        },
-      });
-      return redirectWithToast("/admin/invoices", session, {
-        type: "success",
-        message: "Invoice submitted!",
-      });
     }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error(error.format());
-      return json({ errors: error }, { status: 400 });
-    }
-    console.error(error);
+    await finishInvoice({
+      invoiceId,
+      userId: user.id,
+      vendorInvoiceDate: dayjs(result.data.vendorInvoiceDate).toDate(),
+      vendorInvoiceNumber: result.data.vendorInvoiceNumber,
+    });
+    return redirectWithToast("/admin/invoices", session, {
+      type: "success",
+      message: "Invoice submitted!",
+    });
   }
 }
 
 export default function Invoice() {
-  const { invoice, parts } = useTypedLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
+  const { invoice } = useTypedLoaderData<typeof loader>();
   const transition = useTransition();
   const fetcher = useFetcher();
   const [openAbandon, setOpenAbandon] = useState(false);
@@ -252,9 +153,9 @@ export default function Invoice() {
                 href !== "ticket" && invoice.tickets.length === 0;
               return (
                 <ButtonNavLink
+                  key={href}
                   to={href}
                   replace={true}
-                  key={href}
                   disabled={isDisabled}
                   title={isDisabled ? "Add a ticket first" : undefined}
                 >
@@ -264,47 +165,7 @@ export default function Invoice() {
               );
             })}
           </div>
-          {/* A bit lengthy, but controls form rendering logic */}
           <Outlet />
-          {/* <fetcher.Form
-            className="mt-4 flex max-w-xs flex-col gap-3"
-            method="post"
-          >
-            <>
-              {actionType === "ticket" && (
-                <div className="sm:w-32">
-                  <input type="hidden" name="actionType" value="ticket" />
-                  <Input
-                    label="Ticket Number"
-                    name="ticketId"
-                    placeholder="75226"
-                    // @ts-expect-error Having trouble with typing action
-                    // eslint-disable-next-line
-                    error={actionData?.ticketId?._errors}
-                    disabled={busy}
-                    required
-                  />
-                </div>
-              )}
-              {actionType !== "ticket" && actionType !== null && (
-                <TicketSelect tickets={invoice.tickets} />
-              )}
-              {actionType === "trip" && (
-                <TripForm amount={invoice.vendor.tripCharge} />
-              )}
-              {actionType === "shipping" && <ShippingForm />}
-              {actionType === "labor" && (
-                <LaborForm rate={invoice.vendor.hourlyRate} />
-              )}
-              {actionType === "part" && <PartForm parts={parts} />}
-              {actionType === "reimbursement" && <ReimbursementForm />}
-              {actionType && (
-                <Button type="submit" className="w-min" disabled={busy}>
-                  Add
-                </Button>
-              )}
-            </>
-          </fetcher.Form> */}
         </section>
 
         <section className="mt-4 pb-8">
@@ -378,7 +239,7 @@ export default function Invoice() {
                                   <fetcher.Form method="post">
                                     <input
                                       type="hidden"
-                                      name="actionType"
+                                      name="_action"
                                       value="deleteCharge"
                                     />
                                     <input
@@ -422,13 +283,20 @@ export default function Invoice() {
 
         <fetcher.Form className="space-y-2 pb-24 pt-8" method="post">
           <h2>Finish Invoice</h2>
-          <input type="hidden" name="actionType" value="finishInvoice" />
+          <input type="hidden" name="_action" value="finishInvoice" />
           <div className="flex flex-wrap gap-4">
-            <Input name="vendorInvoiceNumber" label="Vendor Invoice #" />
+            <Input
+              name="vendorInvoiceNumber"
+              label="Vendor Invoice #"
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              errors={fetcher.data?.errors.vendorInvoiceNumber}
+            />
             <Input
               type="date"
               name="vendorInvoiceDate"
               label="Vendor Invoice Date"
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              errors={fetcher.data?.errors.vendorInvoiceDate}
             />
           </div>
           <Button type="submit" disabled={busy}>

@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef } from "react";
 import { forwardRef } from "react";
-import type { z } from "zod";
+import { FieldError } from "~/components/shared/FieldErrors";
 import { classNames } from "~/utils/utils";
 
 interface InputProps extends ComponentPropsWithRef<"input"> {
@@ -8,7 +8,7 @@ interface InputProps extends ComponentPropsWithRef<"input"> {
   label: string;
   hideLabel?: boolean;
   hideHelperText?: boolean;
-  errors?: z.ZodError;
+  errors?: string[] | undefined;
   isCurrency?: boolean;
 }
 
@@ -55,16 +55,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               props.className
             )}
           />
-          {/* <Error errors={errors} /> */}
-          {errors && (
-            <p
-              className="whitespace-nowrap pt-1 pl-1 text-sm font-medium text-red-500"
-              id={`${name}-error`}
-              role="alert"
-            >
-              {errors.message}
-            </p>
-          )}
+          <FieldError name={name} errors={errors} />
         </div>
       </div>
     );

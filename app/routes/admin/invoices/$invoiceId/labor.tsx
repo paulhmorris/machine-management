@@ -1,26 +1,53 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useActionData, useTransition } from "@remix-run/react";
+import { Form, useTransition } from "@remix-run/react";
 import { useState } from "react";
+import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Select } from "~/components/shared/Select";
-import type { getInvoiceById } from "~/models/invoice.server";
+import { createCharge } from "~/models/charge.server";
+import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
+import { addLaborSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
+import { getSession } from "~/utils/session.server";
+import { redirectWithToast } from "~/utils/toast.server";
 import { useMatchesData } from "~/utils/utils";
 
-export async function action({ request }: ActionArgs) {
+export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
-  return json({});
+  const session = await getSession(request);
+  const { invoiceId } = params;
+  invariant(invoiceId, "Expected invoiceId");
+
+  const form = Object.fromEntries(await request.formData());
+  const result = addLaborSchema.safeParse(form);
+  if (!result.success) {
+    return json({ errors: { ...result.error.flatten().fieldErrors } });
+  }
+
+  const { time, ticketId, chargeAmount, isWarranty } = result.data;
+  await createCharge({
+    invoiceId,
+    ticketId,
+    typeId: 1,
+    description: `${time} minutes`,
+    actualCost: chargeAmount,
+    warrantyCovered: Boolean(isWarranty),
+  });
+
+  return redirectWithToast(`/admin/invoices/${invoiceId}/labor`, session, {
+    message: "Labor added to invoice",
+    type: "success",
+  });
 }
 
 export default function AddLabor() {
   const transition = useTransition();
-  const actionData = useActionData<typeof action>();
   const busy = transition.state === "submitting";
   const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
-    invoice: Awaited<ReturnType<typeof getInvoiceById>>;
+    invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
   const rate = data.invoice?.vendor.hourlyRate ?? 0;
 
@@ -28,7 +55,7 @@ export default function AddLabor() {
   const total = ((timeInMin * rate) / 60).toFixed(2);
 
   return (
-    <Form className="mt-4 flex max-w-xs flex-col gap-3" replace>
+    <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
       <div>
         <input type="hidden" name="actionType" value="labor" />
         <input type="hidden" name="chargeAmount" value={total} />

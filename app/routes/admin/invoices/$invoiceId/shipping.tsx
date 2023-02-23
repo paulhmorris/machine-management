@@ -1,14 +1,42 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
+import dayjs from "dayjs";
+import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 
 import { Input } from "~/components/shared/Input";
+import { createCharge } from "~/models/charge.server";
+import { addShippingSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
+import { getSession } from "~/utils/session.server";
+import { redirectWithToast } from "~/utils/toast.server";
 
-export async function action({ request }: ActionArgs) {
+export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
-  return json({});
+  const session = await getSession(request);
+  const { invoiceId } = params;
+  invariant(invoiceId, "Expected invoiceId");
+
+  const form = Object.fromEntries(await request.formData());
+  const result = addShippingSchema.safeParse(form);
+  if (!result.success) {
+    return json({ errors: { ...result.error.flatten().fieldErrors } });
+  }
+
+  const { shippingDate, ticketId, chargeAmount } = result.data;
+  await createCharge({
+    invoiceId,
+    actualCost: chargeAmount,
+    description: `${dayjs(shippingDate).format("M/D/YYYY")}`,
+    typeId: 2,
+    ticketId,
+  });
+
+  return redirectWithToast(`/admin/invoices/${invoiceId}/shipping`, session, {
+    message: "Shipping added to invoice",
+    type: "success",
+  });
 }
 
 export default function AddShipping() {
@@ -17,14 +45,14 @@ export default function AddShipping() {
   const busy = transition.state === "submitting";
 
   return (
-    <Form className="mt-4 flex max-w-xs flex-col gap-3" replace>
-      <input type="hidden" name="actionType" value="shipping" />
+    <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
       <fieldset className="flex gap-2">
         <div className="sm:w-40">
           <Input
             type="date"
             label="Shipping Date"
             name="shippingDate"
+            errors={actionData?.errors.shippingDate}
             required
           />
         </div>
@@ -35,6 +63,7 @@ export default function AddShipping() {
             name="chargeAmount"
             inputMode="decimal"
             placeholder="0.00"
+            errors={actionData?.errors.chargeAmount}
             isCurrency
             required
           />

@@ -244,7 +244,6 @@ async function seed() {
         typeId: faker.datatype.number({ min: 1, max: 3 }),
         ticketId: randomTicket.id,
         createdAt: faker.date.past(),
-        vendorId: vendor.id,
         invoiceId: randomInvoice.id,
       },
     });

@@ -1,4 +1,4 @@
-import type { Ticket } from "@prisma/client";
+import type { Prisma, Ticket } from "@prisma/client";
 import { prisma } from "~/utils/db.server";
 
 export function getChargesByTicketId(ticketId: Ticket["id"]) {
@@ -6,9 +6,12 @@ export function getChargesByTicketId(ticketId: Ticket["id"]) {
     where: { ticketId },
     include: {
       type: true,
-      vendor: true,
       part: true,
       invoice: true,
     },
   });
+}
+
+export async function createCharge(data: Prisma.ChargeCreateArgs["data"]) {
+  return prisma.charge.create({ data });
 }

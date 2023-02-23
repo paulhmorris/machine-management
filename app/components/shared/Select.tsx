@@ -1,16 +1,18 @@
 import type { ComponentPropsWithRef, ReactNode } from "react";
 import { forwardRef } from "react";
+import { FieldError } from "~/components/shared/FieldErrors";
 import { classNames } from "~/utils/utils";
 
 interface Props extends ComponentPropsWithRef<"select"> {
   label: string;
   name: string;
   children: ReactNode;
+  errors?: string[] | undefined;
   hideLabel?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, Props>(
-  ({ label, name, children, hideLabel = false, ...props }, ref) => {
+  ({ label, name, children, errors, hideLabel = false, ...props }, ref) => {
     return (
       <div>
         <label
@@ -36,6 +38,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(
         >
           {children}
         </select>
+        <FieldError errors={errors} name={name} />
       </div>
     );
   }

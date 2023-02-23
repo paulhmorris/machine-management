@@ -7,10 +7,13 @@ import { Input } from "~/components/shared/Input";
 import { addTicketToInvoiceSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { getSession } from "~/utils/session.server";
+import { redirectWithToast } from "~/utils/toast.server";
 import { badRequest } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
+  const session = await getSession(request);
   const { invoiceId } = params;
   invariant(typeof invoiceId === "string", "Expected invoiceId");
   const invoice = await prisma.invoice.findUnique({
@@ -22,16 +25,18 @@ export async function action({ params, request }: ActionArgs) {
   }
 
   const form = Object.fromEntries(await request.formData());
-  // Add Ticket
-  const { ticketId } = addTicketToInvoiceSchema.parse(form);
-
+  const result = addTicketToInvoiceSchema.safeParse(form);
+  if (!result.success) {
+    return json({ errors: { ...result.error.flatten().fieldErrors } });
+  }
+  const { ticketId } = result.data;
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId },
     select: { id: true },
   });
   if (!ticket) {
     return json(
-      { errors: { ticketId: { _errors: ["Ticket not found"] } } },
+      { errors: { ticketId: ["Ticket not found"] } },
       { status: 400 }
     );
   }
@@ -39,7 +44,7 @@ export async function action({ params, request }: ActionArgs) {
     return json(
       {
         errors: {
-          ticketId: { _errors: ["Ticket already added to invoice"] },
+          ticketId: ["Ticket already added to invoice"],
         },
       },
       { status: 400 }
@@ -50,7 +55,14 @@ export async function action({ params, request }: ActionArgs) {
     where: { id: invoice.id },
     data: { tickets: { connect: { id: ticket.id } } },
   });
-  return json({ updatedInvoice });
+  return redirectWithToast(
+    `/admin/invoices/${updatedInvoice.id}/ticket`,
+    session,
+    {
+      message: "Ticket added to invoice",
+      type: "success",
+    }
+  );
 }
 
 export default function AddTicket() {
@@ -59,15 +71,17 @@ export default function AddTicket() {
   const busy = transition.state === "submitting";
 
   return (
-    <Form className="mt-4 flex max-w-xs flex-col gap-3 sm:w-32" replace>
+    <Form
+      className="mt-4 flex max-w-xs flex-col gap-3 sm:w-32"
+      method="post"
+      replace
+    >
       <input type="hidden" name="actionType" value="ticket" />
       <Input
         label="Ticket Number"
         name="ticketId"
         placeholder="75226"
-        // @ts-expect-error Having trouble with typing action
-        // eslint-disable-next-line
-        error={actionData?.ticketId}
+        errors={actionData?.errors.ticketId}
         disabled={busy}
         required
       />

@@ -6,12 +6,17 @@ import {
   useLoaderData,
   useTransition,
 } from "@remix-run/react";
+import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
+import { createCharge } from "~/models/charge.server";
+import { addPartSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { getSession } from "~/utils/session.server";
+import { redirectWithToast } from "~/utils/toast.server";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -20,9 +25,32 @@ export async function loader({ request }: LoaderArgs) {
   });
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
-  return json({});
+  const session = await getSession(request);
+  const { invoiceId } = params;
+  invariant(invoiceId, "Expected invoiceId");
+
+  const form = Object.fromEntries(await request.formData());
+  const result = addPartSchema.safeParse(form);
+  if (!result.success) {
+    return json({ errors: { ...result.error.flatten().fieldErrors } });
+  }
+
+  const { partId, ticketId, chargeAmount, isWarranty } = result.data;
+  await createCharge({
+    invoiceId,
+    ticketId,
+    partId,
+    typeId: 3,
+    actualCost: chargeAmount,
+    warrantyCovered: Boolean(isWarranty),
+  });
+
+  return redirectWithToast(`/admin/invoices/${invoiceId}/part`, session, {
+    message: "Part added to invoice",
+    type: "success",
+  });
 }
 
 export default function AddPart() {
@@ -32,12 +60,23 @@ export default function AddPart() {
   const busy = transition.state === "submitting";
 
   return (
-    <Form className="mt-4 flex max-w-xs flex-col gap-3" replace>
+    <Form
+      className="mt-4 flex max-w-xs flex-col gap-3"
+      method="post"
+      noValidate
+      replace
+    >
       <div>
         <input type="hidden" name="actionType" value="part" />
         <fieldset className="flex gap-2">
           <div className="sm:w-40">
-            <Select name="partId" label="Part" defaultValue="" required>
+            <Select
+              name="partId"
+              label="Part"
+              defaultValue=""
+              errors={actionData?.errors.partId}
+              required
+            >
               <option value="" disabled>
                 Select Part
               </option>
@@ -55,6 +94,7 @@ export default function AddPart() {
               name="chargeAmount"
               inputMode="decimal"
               placeholder="0.00"
+              errors={actionData?.errors.chargeAmount}
               isCurrency
               required
             />

@@ -2,22 +2,35 @@ import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { useEffect, useRef } from "react";
-import invariant from "tiny-invariant";
+import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { prisma } from "~/utils/db.server";
+
+const machineSearchSchema = z.object({
+  machineId: z.string().min(1, "Machine number is required"),
+});
 
 export async function action({ request }: ActionArgs) {
-  const form = await request.formData();
-  const machineId = form.get("machineId");
-  invariant(typeof machineId === "string", "Expected machineId");
-
-  if (typeof machineId !== "string" || machineId.length === 0) {
+  const form = Object.fromEntries(await request.formData());
+  const result = machineSearchSchema.safeParse(form);
+  if (!result.success) {
     return json(
-      { errors: { machineId: "Machine number is required" } },
+      { errors: { ...result.error.flatten().fieldErrors } },
       { status: 400 }
     );
   }
-  return redirect(`/report/${machineId}`);
+
+  const machine = await prisma.machine.findUnique({
+    where: { publicId: result.data.machineId.trim() },
+  });
+  if (!machine) {
+    return json(
+      { errors: { machineId: ["Couldn't find that machine"] } },
+      { status: 404 }
+    );
+  }
+  return redirect(`/report/${machine.publicId}`);
 }
 
 export default function Index() {
@@ -38,17 +51,18 @@ export default function Index() {
         on the machine. You can also enter the machine number below.
       </p>
       <Form
-        action="/?index"
         method="post"
+        action="?index"
         className="mx-auto mt-8 w-full max-w-xs space-y-2"
+        noValidate
       >
         <Input
           label="Machine Number"
           name="machineId"
           ref={machineIdRef}
-          error={actionData?.errors.machineId}
-          required
+          errors={actionData?.errors.machineId}
           placeholder="ABCXYZ"
+          required
         />
         <Button type="submit" variant="primary" className="w-full">
           Make a report

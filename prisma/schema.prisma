@@ -51,7 +51,6 @@ model Vendor {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   invoices  Invoice[]
-  charges   Charge[]
   campusId  String?
 }
 
@@ -203,8 +202,6 @@ model Invoice {
 
 model Charge {
   id              Int        @id @default(autoincrement())
-  vendor          Vendor     @relation(fields: [vendorId], references: [id])
-  vendorId        String
   ticket          Ticket     @relation(fields: [ticketId], references: [id])
   ticketId        Int
   invoice         Invoice    @relation(fields: [invoiceId], references: [id])
