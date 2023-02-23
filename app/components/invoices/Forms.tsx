@@ -34,7 +34,7 @@ export function ShippingForm() {
           <Input
             type="number"
             label="Shipping Cost"
-            name="actualCost"
+            name="chargeAmount"
             inputMode="decimal"
             placeholder="0.00"
             isCurrency
@@ -98,7 +98,7 @@ export function PartForm({ parts }: { parts: Part[] }) {
       <input type="hidden" name="actionType" value="part" />
       <fieldset className="flex gap-2">
         <div className="sm:w-40">
-          <Select name="part" label="Part" defaultValue="" required>
+          <Select name="partId" label="Part" defaultValue="" required>
             <option value="" disabled>
               Select Part
             </option>

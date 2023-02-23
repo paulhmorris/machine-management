@@ -25,7 +25,7 @@ import {
   updateTicketStatus,
 } from "~/models/ticket.server";
 import { ticketAssignmentSchema } from "~/schemas/ticket";
-import { requireAdmin, requireUserId } from "~/utils/auth.server";
+import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { redirectWithToast } from "~/utils/toast.server";
@@ -47,7 +47,7 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export async function action({ request, params }: ActionArgs) {
-  const userId = await requireUserId(request);
+  const user = await requireAdmin(request);
   const session = await getSession(request);
   await requireAdmin(request);
   const { ticketId } = params;
@@ -67,7 +67,7 @@ export async function action({ request, params }: ActionArgs) {
       ticketId: ticket.id,
       assignedToUserId,
       comments,
-      createdByUserId: userId,
+      createdByUserId: user.id,
     };
 
     // Ticket reassignment

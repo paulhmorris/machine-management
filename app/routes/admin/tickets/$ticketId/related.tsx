@@ -12,6 +12,7 @@ import {
   TableWrapper,
 } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
+import { getTicketsByMachineId } from "~/models/ticket.server";
 import { requireAdmin } from "~/utils/auth.server";
 import type { TTicketStatus } from "~/utils/constants";
 import { prisma } from "~/utils/db.server";
@@ -32,16 +33,10 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!ticket) {
     throw badRequest(`Ticket with id ${ticketId} not found`);
   }
-
-  const relatedTickets = await prisma.ticket.findMany({
-    where: { machineId: ticket.machine.id, id: { not: ticket.id } },
-    include: {
-      assignedTo: true,
-      status: true,
-    },
-    orderBy: { reportedOn: "desc" },
-  });
-
+  const relatedTickets = await getTicketsByMachineId(
+    ticket.machineId,
+    ticket.id
+  );
   return json({ relatedTickets });
 }
 

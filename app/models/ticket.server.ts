@@ -1,4 +1,4 @@
-import type { Prisma, Ticket, TicketEvent } from "@prisma/client";
+import type { Machine, Prisma, Ticket, TicketEvent } from "@prisma/client";
 import { prisma } from "~/utils/db.server";
 
 export async function getAllTicketsWithCount({
@@ -124,5 +124,19 @@ export async function updateTicketStatus(data: UpdateTicketArgs) {
       ticketStatusId: data.ticketStatusId,
       comments: data.comments,
     },
+  });
+}
+
+export function getTicketsByMachineId(
+  machineId: Machine["id"],
+  excludedTicketId: Ticket["id"]
+) {
+  return prisma.ticket.findMany({
+    where: { machineId, id: { not: excludedTicketId } },
+    include: {
+      assignedTo: true,
+      status: true,
+    },
+    orderBy: { reportedOn: "desc" },
   });
 }

@@ -12,24 +12,15 @@ import {
   TableWrapper,
 } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
+import { getTicketEventsByTicketId } from "~/models/ticketEvent.server";
 import { requireAdmin } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
 import { getTicketStatusBadgeColor } from "~/utils/formatters";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { ticketId } = params;
   invariant(ticketId, "Ticket ID is required");
-
-  const ticketEvents = await prisma.ticketEvent.findMany({
-    where: { ticketId: Number(ticketId) },
-    include: {
-      status: true,
-      createdBy: true,
-      assignedTo: true,
-    },
-  });
-
+  const ticketEvents = await getTicketEventsByTicketId(Number(ticketId));
   return json({ ticketEvents });
 }
 

@@ -11,25 +11,15 @@ import {
   TableWrapper,
 } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
+import { getChargesByTicketId } from "~/models/charge.server";
 import { requireAdmin } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
 import { formatCurrency } from "~/utils/formatters";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { ticketId } = params;
   invariant(ticketId, "Ticket ID is required");
-
-  const charges = await prisma.charge.findMany({
-    where: { ticketId: Number(ticketId) },
-    include: {
-      type: true,
-      vendor: true,
-      part: true,
-      invoice: true,
-    },
-  });
-
+  const charges = await getChargesByTicketId(Number(ticketId));
   return json({ charges });
 }
 
@@ -73,7 +63,7 @@ export default function TicketCharges() {
               {charge.warrantyCovered && "IW"}
             </TableCell>
             <TableCell>{charge.vendor.name}</TableCell>
-            <TableCell>{charge.invoice?.publicId}</TableCell>
+            <TableCell>{charge.invoice?.vendorInvoiceNumber}</TableCell>
             <TableCell allowWrap>{charge.description}</TableCell>
           </tr>
         ))}

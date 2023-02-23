@@ -1,5 +1,6 @@
 import type { ComponentPropsWithRef } from "react";
 import { forwardRef } from "react";
+import type { z } from "zod";
 import { classNames } from "~/utils/utils";
 
 interface InputProps extends ComponentPropsWithRef<"input"> {
@@ -7,13 +8,13 @@ interface InputProps extends ComponentPropsWithRef<"input"> {
   label: string;
   hideLabel?: boolean;
   hideHelperText?: boolean;
-  error?: string | null | undefined;
+  errors?: z.ZodError;
   isCurrency?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { name, label, error, hideLabel, hideHelperText, isCurrency, ...props },
+    { name, label, errors, hideLabel, hideHelperText, isCurrency, ...props },
     ref
   ) => {
     return (
@@ -46,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             name={name}
             type={props.type ?? "text"}
             step={isCurrency ? "0.01" : props.step}
-            aria-invalid={error ? true : props["aria-invalid"]}
+            aria-invalid={errors ? true : props["aria-invalid"]}
             aria-describedby={`${name}-error`}
             className={classNames(
               isCurrency && "pl-7",
@@ -54,13 +55,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               props.className
             )}
           />
-          {error && (
+          {/* <Error errors={errors} /> */}
+          {errors && (
             <p
               className="whitespace-nowrap pt-1 pl-1 text-sm font-medium text-red-500"
               id={`${name}-error`}
               role="alert"
             >
-              {error}
+              {errors.message}
             </p>
           )}
         </div>

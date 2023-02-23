@@ -6,7 +6,7 @@ export function getInvoiceById(invoiceId: string) {
     include: {
       tickets: true,
       campus: true,
-      charges: { include: { type: true } },
+      charges: { include: { type: true, part: true } },
       vendor: true,
     },
   });

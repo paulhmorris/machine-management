@@ -1,5 +1,5 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json, redirect, Response } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useRef } from "react";
 
@@ -15,14 +15,14 @@ import {
 } from "~/models/machine.server";
 import { reportSchema } from "~/schemas/report";
 import { prisma } from "~/utils/db.server";
-import { getSearchParam } from "~/utils/utils";
+import { badRequest, getSearchParam } from "~/utils/utils";
 
 export async function loader({ params }: LoaderArgs) {
   const { machinePublicId } = params;
   invariant(machinePublicId, "Expected machinePublicId");
   const machine = await getMachineForReport(machinePublicId);
   if (!machine) {
-    throw new Response("Not Found", { status: 404 });
+    throw badRequest(`Machine with id ${machinePublicId} not found`);
   }
   const errorTypes = await getErrorTypesForReport();
   return json({ machine, errorTypes });

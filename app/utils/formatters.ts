@@ -43,3 +43,7 @@ export function getTicketStatusBadgeColor(status: string): BadgeProps["color"] {
       return "bg-gray-100 text-gray-800 border-gray-300";
   }
 }
+
+export function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

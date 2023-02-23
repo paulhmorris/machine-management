@@ -1,10 +1,10 @@
 import { Disclosure } from "@headlessui/react";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json, Response } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
-  Form,
+  Outlet,
   useActionData,
-  useSearchParams,
+  useFetcher,
   useTransition,
 } from "@remix-run/react";
 import {
@@ -21,26 +21,30 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
 import invariant from "tiny-invariant";
+import { z } from "zod";
 import { AbandonInvoiceModal } from "~/components/invoices/AbandonInvoiceModal";
-import {
-  LaborForm,
-  PartForm,
-  ReimbursementForm,
-  ShippingForm,
-  TripForm,
-} from "~/components/invoices/Forms";
 import { InvoiceSummary } from "~/components/invoices/InvoiceSummary";
-import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
-import { ButtonLink } from "~/components/shared/ButtonLink";
+import { ButtonNavLink } from "~/components/shared/ButtonNavLink";
 import { Input } from "~/components/shared/Input";
 import { getInvoiceById } from "~/models/invoice.server";
+import {
+  addChargeSchema,
+  addLaborSchema,
+  addPartSchema,
+  addReimbursementSchema,
+  addShippingSchema,
+  addTicketToInvoiceSchema,
+  addTripSchema,
+  deleteChargeSchema,
+  finishInvoiceSchema,
+} from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
-import { formatCurrency } from "~/utils/formatters";
+import { capitalize, formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { classNames } from "~/utils/utils";
+import { badRequest, classNames } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -48,7 +52,7 @@ export async function loader({ request, params }: LoaderArgs) {
   invariant(typeof invoiceId === "string", "Expected invoiceId");
   const invoice = await getInvoiceById(invoiceId);
   if (!invoice) {
-    throw new Response(`Invoice ${invoiceId} found`, { status: 404 });
+    throw badRequest(`Invoice ${invoiceId} found`);
   }
   const parts = await prisma.part.findMany();
   return typedjson({ invoice, parts });
@@ -62,162 +66,153 @@ export async function action({ request, params }: ActionArgs) {
   const session = await getSession(request);
   const { invoiceId } = params;
   invariant(typeof invoiceId === "string", "Expected invoiceId");
-  const invoice = await getInvoiceById(invoiceId);
+
+  const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
   if (!invoice) {
-    throw new Response(`Invoice ${invoiceId} not found`, { status: 400 });
-  }
-  const form = await request.formData();
-  const actionType = form.get("actionType") as ActionTypes;
-  const ticketId = form.get("ticketId");
-
-  // Add Ticket
-  if (actionType === "ticket") {
-    invariant(typeof ticketId === "string", "Expected ticketId");
-    const ticket = await prisma.ticket.findUnique({
-      where: { id: Number(ticketId) },
-      select: { id: true },
-    });
-    if (!ticket) {
-      return json(
-        { errors: { ticketId: "Ticket not found" } },
-        { status: 400 }
-      );
-    }
-    if (invoice.tickets.some((t) => t.id === ticket.id)) {
-      return json(
-        { errors: { ticketId: "Ticket already added to invoice" } },
-        { status: 400 }
-      );
-    }
-    const updatedInvoice = await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: { tickets: { connect: { id: ticket.id } } },
-    });
-    return json({ updatedInvoice });
+    throw badRequest(`Invoice ${invoiceId} not found`);
   }
 
-  // Charges
-  if (
-    actionType === "trip" ||
-    actionType === "shipping" ||
-    actionType === "labor" ||
-    actionType === "part" ||
-    actionType === "reimbursement"
-  ) {
-    invariant(typeof ticketId === "string", "Expected ticketId");
-    const chargeAmount = form.get("chargeAmount");
-    invariant(typeof chargeAmount === "string", "Expected chargeAmount");
-    const user = form.get("reimbursedUser");
-    const time = form.get("time");
-    const tripChargeDate = form.get("tripChargeDate");
-    const shippingDate = form.get("shippingDate");
-    const isWarranty = form.get("isWarranty");
+  const form = Object.fromEntries(await request.formData());
 
-    // Set descriptions for each charge type
-    let description: string | undefined = undefined;
-    if (actionType === "labor") {
-      invariant(typeof time === "string", "Expected time for this action");
-      description = `${time} minutes`;
-    }
-    if (actionType === "trip") {
-      invariant(
-        typeof tripChargeDate === "string",
-        "Expected cost for this action type"
-      );
-      description = `${dayjs(tripChargeDate).format("M/D/YYYY")}`;
-    }
-    if (actionType === "shipping") {
-      invariant(
-        typeof shippingDate === "string",
-        "Expected shippingDate for this action type"
-      );
-      description = `${dayjs(shippingDate).format("M/D/YYYY")}`;
-    }
-    if (actionType === "reimbursement") {
-      invariant(
-        typeof user === "string",
-        "Expected reimbursemedUser for this action type"
-      );
-      description = user;
+  try {
+    // Add Ticket
+    const { actionType, ticketId } = addTicketToInvoiceSchema.parse(form);
+    if (actionType === "ticket") {
+      const ticket = await prisma.ticket.findUnique({
+        where: { id: ticketId },
+        select: { id: true },
+      });
+      if (!ticket) {
+        return json(
+          { errors: { ticketId: { _errors: ["Ticket not found"] } } },
+          { status: 400 }
+        );
+      }
+      if (invoice.tickets.some((t) => t.id === ticket.id)) {
+        return json(
+          {
+            errors: {
+              ticketId: { _errors: ["Ticket already added to invoice"] },
+            },
+          },
+          { status: 400 }
+        );
+      }
+      const updatedInvoice = await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { tickets: { connect: { id: ticket.id } } },
+      });
+      return json({ updatedInvoice });
     }
 
-    const newCharge = await prisma.charge.create({
-      data: {
-        ticket: { connect: { id: Number(ticketId) } },
-        invoice: { connect: { id: invoice.id } },
-        type: {
-          connect: {
-            id:
-              actionType === "labor"
-                ? 1
-                : actionType === "trip"
-                ? 2
-                : actionType === "part"
-                ? 3
-                : actionType === "shipping"
-                ? 4
-                : actionType === "reimbursement"
-                ? 5
-                : undefined,
+    // Add Charge
+    if (
+      actionType === "labor" ||
+      actionType === "trip" ||
+      actionType === "part" ||
+      actionType === "shipping" ||
+      actionType === "reimbursement"
+    ) {
+      const { isWarranty, chargeAmount } = addChargeSchema.parse(form);
+
+      // Set descriptions for each charge type
+      let description: string | undefined = undefined;
+      switch (actionType) {
+        case "labor":
+          const { time } = addLaborSchema.parse(form);
+          description = `${time} minutes`;
+          break;
+        case "trip":
+          const { tripChargeDate } = addTripSchema.parse(form);
+          description = `${dayjs(tripChargeDate).format("M/D/YYYY")}`;
+          break;
+        case "shipping":
+          const { shippingDate } = addShippingSchema.parse(form);
+          description = `${dayjs(shippingDate).format("M/D/YYYY")}`;
+          break;
+        case "reimbursement":
+          const { reimbursedUser } = addReimbursementSchema.parse(form);
+          description = reimbursedUser;
+          break;
+      }
+
+      const newCharge = await prisma.charge.create({
+        data: {
+          ticket: { connect: { id: ticketId } },
+          invoice: { connect: { id: invoice.id } },
+          vendor: { connect: { id: invoice.vendorId } },
+          warrantyCovered: isWarranty ? true : false,
+          actualCost: chargeAmount,
+          description,
+          part:
+            actionType === "part"
+              ? { connect: { id: addPartSchema.parse(form).partId } }
+              : undefined,
+          type: {
+            connect: {
+              id:
+                actionType === "labor"
+                  ? 1
+                  : actionType === "trip"
+                  ? 2
+                  : actionType === "part"
+                  ? 3
+                  : actionType === "shipping"
+                  ? 4
+                  : actionType === "reimbursement"
+                  ? 5
+                  : undefined,
+            },
           },
         },
-        actualCost: Number(chargeAmount),
-        description,
-        warrantyCovered: isWarranty ? true : false,
-        vendor: { connect: { id: invoice.vendorId } },
-      },
-    });
-    return jsonWithToast({ newCharge }, session, {
-      type: "success",
-      message: `${actionType.charAt(0).toUpperCase()}${actionType.slice(
-        1
-      )} charge added!`,
-    });
-  }
+      });
+      return jsonWithToast({ newCharge }, session, {
+        type: "success",
+        message: `${capitalize(actionType)} charge added!`,
+      });
+    }
 
-  // Delete Charge
-  if (actionType === "deleteCharge") {
-    const chargeId = form.get("chargeId");
-    invariant(typeof chargeId === "string", "Expected chargeId");
-    const charge = await prisma.charge.delete({
-      where: { id: Number(chargeId) },
-    });
-    return jsonWithToast({ charge }, session, {
-      type: "success",
-      message: "Charge deleted",
-    });
-  }
+    // Delete Charge
+    if (actionType === "deleteCharge") {
+      const { chargeId } = deleteChargeSchema.parse(form);
+      const charge = await prisma.charge.delete({
+        where: { id: chargeId },
+      });
+      return jsonWithToast({ charge }, session, {
+        type: "success",
+        message: "Charge deleted",
+      });
+    }
 
-  if (actionType === "finishInvoice") {
-    const vendorInvoiceNumber = form.get("vendorInvoiceNumber");
-    const vendorInvoiceDate = form.get("vendorInvoiceDate");
-    invariant(
-      typeof vendorInvoiceNumber === "string",
-      "Expected vendorInvoiceNumber for this action"
-    );
-    invariant(
-      typeof vendorInvoiceDate === "string",
-      "Expected vendorInvoiceDate for this action"
-    );
-
-    const total = invoice.charges.reduce(
-      (acc, charge) => acc + (charge.warrantyCovered ? 0 : charge.actualCost),
-      0
-    );
-    await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: {
-        vendorInvoiceNumber,
-        total,
-        invoicedOn: dayjs(vendorInvoiceDate).toDate(),
-        submittedOn: new Date(),
-        submittedBy: { connect: { id: user.id } },
-      },
-    });
-    return redirectWithToast("/admin/invoices", session, {
-      type: "success",
-      message: "Invoice submitted!",
-    });
+    // Finish Invoice
+    if (actionType === "finishInvoice") {
+      const { vendorInvoiceNumber, vendorInvoiceDate } =
+        finishInvoiceSchema.parse(form);
+      const total = invoice.charges.reduce(
+        (acc, charge) => acc + (charge.warrantyCovered ? 0 : charge.actualCost),
+        0
+      );
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: {
+          vendorInvoiceNumber,
+          total,
+          invoicedOn: dayjs(vendorInvoiceDate).toDate(),
+          submittedOn: new Date(),
+          submittedBy: { connect: { id: user.id } },
+        },
+      });
+      return redirectWithToast("/admin/invoices", session, {
+        type: "success",
+        message: "Invoice submitted!",
+      });
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error(error.format());
+      return json({ errors: error }, { status: 400 });
+    }
+    console.error(error);
   }
 }
 
@@ -225,10 +220,9 @@ export default function Invoice() {
   const { invoice, parts } = useTypedLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const transition = useTransition();
-  const busy = transition.state === "submitting";
-  const [searchParams] = useSearchParams();
-  const actionType = searchParams.get("actionType") ?? "ticket";
+  const fetcher = useFetcher();
   const [openAbandon, setOpenAbandon] = useState(false);
+  const busy = transition.state === "submitting";
 
   return (
     <>
@@ -253,26 +247,29 @@ export default function Invoice() {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            {actions.map(({ name, icon, title }) => {
+            {actions.map(({ href, icon, title }) => {
               const isDisabled =
-                name !== "ticket" && invoice.tickets.length === 0;
+                href !== "ticket" && invoice.tickets.length === 0;
               return (
-                <ButtonLink
-                  to={`?actionType=${name}`}
+                <ButtonNavLink
+                  to={href}
                   replace={true}
-                  variant={name === actionType ? "primary" : "secondary"}
-                  key={name}
+                  key={href}
                   disabled={isDisabled}
                   title={isDisabled ? "Add a ticket first" : undefined}
                 >
                   {title}
                   {icon}
-                </ButtonLink>
+                </ButtonNavLink>
               );
             })}
           </div>
           {/* A bit lengthy, but controls form rendering logic */}
-          <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post">
+          <Outlet />
+          {/* <fetcher.Form
+            className="mt-4 flex max-w-xs flex-col gap-3"
+            method="post"
+          >
             <>
               {actionType === "ticket" && (
                 <div className="sm:w-32">
@@ -283,7 +280,7 @@ export default function Invoice() {
                     placeholder="75226"
                     // @ts-expect-error Having trouble with typing action
                     // eslint-disable-next-line
-                    error={actionData?.errors?.ticketId}
+                    error={actionData?.ticketId?._errors}
                     disabled={busy}
                     required
                   />
@@ -307,7 +304,7 @@ export default function Invoice() {
                 </Button>
               )}
             </>
-          </Form>
+          </fetcher.Form> */}
         </section>
 
         <section className="mt-4 pb-8">
@@ -365,18 +362,20 @@ export default function Invoice() {
                                   <span>{charge.type.name}</span>
                                 </div>
                                 <div className="text-left">
-                                  <span>{charge.description}</span>
+                                  <span>
+                                    {charge.part?.name ?? charge.description}
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-4 place-self-end">
                                   {charge.warrantyCovered && (
-                                    <span className="font-medium text-cyan-700/75">
-                                      (warrantied)
+                                    <span className="font-bold text-cyan-700/75">
+                                      IW
                                     </span>
                                   )}
                                   <span>
                                     {formatCurrency(charge.actualCost)}
                                   </span>
-                                  <Form method="post">
+                                  <fetcher.Form method="post">
                                     <input
                                       type="hidden"
                                       name="actionType"
@@ -386,6 +385,11 @@ export default function Invoice() {
                                       type="hidden"
                                       name="chargeId"
                                       value={charge.id}
+                                    />
+                                    <input
+                                      type="hidden"
+                                      name="ticketId"
+                                      value={charge.ticketId}
                                     />
                                     <button
                                       type="submit"
@@ -400,7 +404,7 @@ export default function Invoice() {
                                         className="transition-colors duration-75 group-hover:text-red-500"
                                       />
                                     </button>
-                                  </Form>
+                                  </fetcher.Form>
                                 </div>
                               </li>
                             ))}
@@ -416,7 +420,7 @@ export default function Invoice() {
 
         <InvoiceSummary invoice={invoice} />
 
-        <Form className="space-y-2 pb-24 pt-8" method="post">
+        <fetcher.Form className="space-y-2 pb-24 pt-8" method="post">
           <h2>Finish Invoice</h2>
           <input type="hidden" name="actionType" value="finishInvoice" />
           <div className="flex flex-wrap gap-4">
@@ -430,7 +434,7 @@ export default function Invoice() {
           <Button type="submit" disabled={busy}>
             Finish Invoice
           </Button>
-        </Form>
+        </fetcher.Form>
       </main>
     </>
   );
@@ -440,37 +444,33 @@ const iconSize = 18;
 const stroke = 2;
 const actions = [
   {
-    name: "ticket",
+    href: "ticket",
     title: "Ticket",
     icon: <IconTicket size={iconSize} stroke={stroke} />,
   },
   {
-    name: "trip",
+    href: "trip",
     title: "Trip Charge",
     icon: <IconTruckDelivery size={iconSize} stroke={stroke} />,
   },
   {
-    name: "shipping",
+    href: "shipping",
     title: "Shipping",
     icon: <IconPackage size={iconSize} stroke={stroke} />,
   },
   {
-    name: "labor",
+    href: "labor",
     title: "Labor",
     icon: <IconClock size={iconSize} stroke={stroke} />,
   },
   {
-    name: "part",
+    href: "part",
     title: "Part",
     icon: <IconTool size={iconSize} stroke={stroke} />,
   },
   {
-    name: "reimbursement",
+    href: "reimbursement",
     title: "Reimbursement",
     icon: <IconCurrencyDollar size={iconSize} stroke={stroke} />,
   },
-] as const;
-type ActionTypes =
-  | (typeof actions)[number]["name"]
-  | "finishInvoice"
-  | "deleteCharge";
+];
