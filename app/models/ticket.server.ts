@@ -67,6 +67,7 @@ export function getTicketWithCampusId(ticketId: Ticket["id"]) {
       status: true,
       machine: {
         select: {
+          publicId: true,
           pocket: {
             select: {
               location: {
@@ -94,11 +95,6 @@ type UpdateTicketArgs = {
   comments?: TicketEvent["comments"];
 };
 export async function reassignTicket(data: UpdateTicketArgs) {
-  await prisma.ticket.update({
-    where: { id: data.ticketId },
-    data: { assignedToUserId: data.assignedToUserId },
-  });
-
   await prisma.ticketEvent.create({
     data: {
       ticketId: data.ticketId,
@@ -107,6 +103,11 @@ export async function reassignTicket(data: UpdateTicketArgs) {
       ticketStatusId: data.ticketStatusId,
       comments: data.comments,
     },
+  });
+  return await prisma.ticket.update({
+    where: { id: data.ticketId },
+    data: { assignedToUserId: data.assignedToUserId },
+    select: { assignedTo: { select: { email: true } } },
   });
 }
 

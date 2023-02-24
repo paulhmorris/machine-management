@@ -1,6 +1,11 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  useLoaderData,
+  useSearchParams,
+  useTransition,
+} from "@remix-run/react";
 import {
   IconLock,
   IconLockOpen,
@@ -10,6 +15,7 @@ import {
 import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { ButtonLink } from "~/components/shared/ButtonLink";
+import { Spinner } from "~/components/shared/Spinner";
 import {
   AddNoteForm,
   AttendantForm,
@@ -24,11 +30,12 @@ import {
   reassignTicket,
   updateTicketStatus,
 } from "~/models/ticket.server";
-import { ticketAssignmentSchema } from "~/schemas/ticket";
+import { ticketActionSchema, ticketAssignmentSchema } from "~/schemas/ticket";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { sendMachineReportEmail as sendTicketAssignmentEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
-import { redirectWithToast } from "~/utils/toast.server";
+import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
@@ -54,71 +61,116 @@ export async function action({ request, params }: ActionArgs) {
   invariant(ticketId, "Ticket ID is required");
   const ticket = await prisma.ticket.findUnique({
     where: { id: Number(ticketId) },
+    select: {
+      id: true,
+      secretId: true,
+      reportedOn: true,
+      notes: true,
+      ticketStatusId: true,
+      errorType: true,
+      assignedToUserId: true,
+      machine: {
+        select: { publicId: true },
+      },
+    },
   });
   if (!ticket) {
     throw badRequest(`Ticket with id ${ticketId} not found`);
   }
 
   const form = Object.fromEntries(await request.formData());
-  try {
-    const { actionType, assignedToUserId, comments } =
-      ticketAssignmentSchema.parse(form);
-    const data = {
+  const result = ticketActionSchema.safeParse(form);
+  if (!result.success) {
+    return jsonWithToast(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 404 },
+      session,
+      {
+        message: "Unknown action type",
+        type: "error",
+      }
+    );
+  }
+  const { comments, actionType } = result.data;
+  // Ticket reassignment
+  if (actionType === "assignment") {
+    const result = ticketAssignmentSchema.safeParse(form);
+    if (!result.success) {
+      return jsonWithToast(
+        { errors: { ...result.error.flatten().fieldErrors } },
+        { status: 404 },
+        session,
+        {
+          message: "Error updating ticket",
+          type: "error",
+        }
+      );
+    }
+    const { assignedToUserId } = result.data;
+    await reassignTicket({
       ticketId: ticket.id,
       assignedToUserId,
-      comments,
       createdByUserId: user.id,
-    };
+      ticketStatusId: ticket.ticketStatusId,
+    });
+    await sendTicketAssignmentEmail({
+      ticketId: ticket.id,
+      notes: comments,
+    });
+    return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
+      message: "Ticket assigned successfully",
+      type: "success",
+    });
+  }
 
-    // Ticket reassignment
-    if (actionType === "assignment") {
-      await reassignTicket({ ...data, ticketStatusId: ticket.ticketStatusId });
-      return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
-        message: "Ticket assigned successfully",
-        type: "success",
-      });
-    }
-
-    // Ticket resolution or notes
-    if (
-      actionType === "close" ||
-      actionType === "note" ||
-      actionType === "reopen"
-    ) {
-      await updateTicketStatus({
-        ...data,
-        ticketStatusId:
-          actionType === "close"
-            ? 4
-            : actionType === "reopen"
-            ? 1
-            : ticket.ticketStatusId,
-      });
-      return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
-        message:
-          actionType === "close"
-            ? "Ticket closed successfully"
-            : actionType === "reopen"
-            ? "Ticket reopened successfully"
-            : "Note added successfully",
-        type: "success",
-      });
-    }
-  } catch (error) {
-    console.error(error);
+  // Ticket resolution or notes
+  if (
+    actionType === "close" ||
+    actionType === "note" ||
+    actionType === "reopen"
+  ) {
+    await updateTicketStatus({
+      ticketId: ticket.id,
+      assignedToUserId:
+        actionType === "close"
+          ? null
+          : actionType === "reopen"
+          ? user.id
+          : ticket.assignedToUserId,
+      createdByUserId: user.id,
+      comments,
+      ticketStatusId:
+        actionType === "close"
+          ? 4
+          : actionType === "reopen"
+          ? 1
+          : ticket.ticketStatusId,
+    });
+    return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
+      message:
+        actionType === "close"
+          ? "Ticket closed successfully"
+          : actionType === "reopen"
+          ? "Ticket reopened successfully"
+          : "Note added successfully",
+      type: "success",
+    });
   }
 }
 
 export default function TicketActions() {
   const { ticket, campusUsers } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
+  const { state } = useTransition();
+  const busy = state === "submitting" || state === "loading";
   const formName =
     searchParams.get("form") ?? (ticket.status.id === 4 ? "reopen" : "close");
+
   const attendants = campusUsers.filter((user) => user.role === "ATTENDANT");
   const machineTechs = campusUsers.filter(
-    (user) => user.role === "MACHINETECH"
+    (user) => user.role === "MACHINE_TECH"
   );
-  const campusTechs = campusUsers.filter((user) => user.role === "CAMPUSTECH");
+  const campusTechs = campusUsers.filter((user) => user.role === "CAMPUS_TECH");
 
   function actionIsAvailable(actionName: string, statusId: number) {
     const canClose = [1, 2, 3, 5, 6, 7, 8, 9, 10];
@@ -177,7 +229,11 @@ export default function TicketActions() {
         ) : formName === "reopen" ? (
           <ReopenForm />
         ) : null}
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={busy}>
+          {" "}
+          {busy && <Spinner className="mr-2" />}
+          {busy ? "Submitting..." : "Submit"}
+        </Button>
       </Form>
     </div>
   );

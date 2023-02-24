@@ -14,6 +14,8 @@ type Props = {
 };
 export function MachinesFilter({ campuses, locations, machineTypes }: Props) {
   const transition = useTransition();
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   const filters: Array<Filter<MachineQueryParam>> = [
     {
@@ -49,9 +51,9 @@ export function MachinesFilter({ campuses, locations, machineTypes }: Props) {
           </option>
         ))}
       </Select>
-      <Button type="submit" disabled={transition.state === "submitting"}>
-        <span>Refresh</span>
-        <IconRefresh size={18} />
+      <Button type="submit" disabled={busy}>
+        <span>{busy ? "Refreshing..." : "Refresh"}</span>
+        <IconRefresh className={busy ? "animate-spin" : ""} size={18} />
       </Button>
     </Form>
   );

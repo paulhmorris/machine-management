@@ -1,10 +1,16 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useSearchParams,
+  useTransition,
+} from "@remix-run/react";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { verifyLogin } from "~/models/user.server";
 import { prisma } from "~/utils/db.server";
 import { getSearchParam } from "~/utils/utils";
@@ -81,6 +87,9 @@ export async function action({ request }: ActionArgs) {
 
 export default function NewPassword() {
   const [searchParams] = useSearchParams();
+  const transition = useTransition();
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
   const actionData = useActionData<typeof action>();
 
   return (
@@ -119,8 +128,9 @@ export default function NewPassword() {
           minLength={8}
           required
         />
-        <Button type="submit" className="w-full">
-          Reset Password
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy && <Spinner className="mr-2" />}
+          {busy ? "Resetting..." : "Reset Password"}
         </Button>
       </Form>
     </>

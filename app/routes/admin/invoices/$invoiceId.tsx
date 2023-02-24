@@ -39,7 +39,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, classNames, wait } from "~/utils/utils";
+import { badRequest, classNames } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -53,7 +53,6 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export async function action({ request, params }: ActionArgs) {
-  await wait(2500);
   const user = await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;

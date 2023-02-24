@@ -1,10 +1,11 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { prisma } from "~/utils/db.server";
 
 const machineSearchSchema = z.object({
@@ -34,6 +35,9 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function Index() {
+  const transition = useTransition();
+  const busy =
+    transition.state === "loading" || transition.state === "submitting";
   const machineIdRef = useRef<HTMLInputElement>(null);
   const actionData = useActionData<typeof action>();
   useEffect(() => {
@@ -64,8 +68,14 @@ export default function Index() {
           placeholder="ABCXYZ"
           required
         />
-        <Button type="submit" variant="primary" className="w-full">
-          Make a report
+        <Button
+          type="submit"
+          variant="primary"
+          className="w-full"
+          disabled={busy}
+        >
+          {busy && <Spinner className="mr-2" />}
+          {busy ? "Searching..." : "Make a Report"}
         </Button>
       </Form>
     </>

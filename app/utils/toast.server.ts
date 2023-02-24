@@ -18,10 +18,12 @@ export function getGlobalToast(session: Session): ServerToast | null {
 export async function redirectWithToast(
   url: string,
   session: Session,
-  toast: ServerToast
+  toast: ServerToast,
+  init?: ResponseInit
 ) {
   setGlobalToast(session, toast);
   return redirect(url, {
+    ...init,
     headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
   });
 }

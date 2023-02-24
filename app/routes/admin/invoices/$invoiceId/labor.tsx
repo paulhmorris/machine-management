@@ -6,6 +6,7 @@ import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Select } from "~/components/shared/Select";
+import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addLaborSchema } from "~/schemas/invoice";
@@ -53,7 +54,8 @@ export async function action({ params, request }: ActionArgs) {
 
 export default function AddLabor() {
   const transition = useTransition();
-  const busy = transition.state === "submitting";
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
   const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
@@ -95,16 +97,17 @@ export default function AddLabor() {
         </div>
         <div className="mt-2 flex items-center whitespace-nowrap text-sm">
           <span className="block text-gray-500">
-            at {formatCurrency(0)} / hr
+            at {formatCurrency(data.invoice?.vendor.hourlyRate || 0)} / hr
           </span>
           &nbsp;
           <span className="font-medium text-cyan-700">
-            = {formatCurrency(0)}
+            = {formatCurrency(total)}
           </span>
         </div>
       </div>
       <Button type="submit" className="w-min" disabled={busy}>
-        Add
+        {busy && <Spinner className="mr-2" />}
+        {busy ? "Adding..." : "Add"}
       </Button>
     </Form>
   );

@@ -4,6 +4,7 @@ import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addReimbursementSchema } from "~/schemas/invoice";
@@ -57,7 +58,8 @@ export default function AddLabor() {
   };
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
-  const busy = transition.state === "submitting";
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   return (
     <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
@@ -84,7 +86,8 @@ export default function AddLabor() {
         />
       </div>
       <Button type="submit" className="w-min" disabled={busy}>
-        Add
+        {busy && <Spinner className="mr-2" />}
+        {busy ? "Adding..." : "Add"}
       </Button>
     </Form>
   );

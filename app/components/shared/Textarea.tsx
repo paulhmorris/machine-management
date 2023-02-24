@@ -1,16 +1,17 @@
 import type { ComponentPropsWithRef } from "react";
 import { forwardRef } from "react";
+import { FieldError } from "~/components/shared/FieldErrors";
 import { classNames } from "~/utils/utils";
 
 interface TextareaProps extends ComponentPropsWithRef<"textarea"> {
   name: string;
   label: string;
   resizeable?: boolean;
-  error?: string | null | undefined;
+  errors?: string[] | undefined;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ name, label, resizeable = true, error, ...props }, ref) => {
+  ({ name, label, resizeable = true, errors, ...props }, ref) => {
     return (
       <div>
         <label
@@ -37,15 +38,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             )}
             defaultValue={""}
           />
-          {error && (
-            <p
-              className="whitespace-nowrap pt-1 pl-1 text-sm font-medium text-red-500"
-              id={`${name}-error`}
-              role="alert"
-            >
-              {error}
-            </p>
-          )}
+          <FieldError name={name} errors={errors} />
         </div>
       </div>
     );

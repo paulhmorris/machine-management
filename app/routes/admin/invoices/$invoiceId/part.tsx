@@ -12,6 +12,7 @@ import { Button } from "~/components/shared/Button";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
+import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addPartSchema } from "~/schemas/invoice";
@@ -72,7 +73,8 @@ export default function AddPart() {
   };
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
-  const busy = transition.state === "submitting";
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   return (
     <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
@@ -121,7 +123,8 @@ export default function AddPart() {
         </div>
       </div>
       <Button type="submit" className="w-min" disabled={busy}>
-        Add
+        {busy && <Spinner className="mr-2" />}
+        {busy ? "Adding..." : "Add"}
       </Button>
     </Form>
   );

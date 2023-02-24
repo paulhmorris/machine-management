@@ -1,12 +1,18 @@
 import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useSearchParams,
+  useTransition,
+} from "@remix-run/react";
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { Button } from "~/components/shared/Button";
 import { CustomLink } from "~/components/shared/CustomLink";
 
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { verifyLogin } from "~/models/user.server";
 import { loginSchema } from "~/schemas/login";
 import { createUserSession, getUserId } from "~/utils/session.server";
@@ -55,6 +61,9 @@ export default function LoginPage() {
   const redirectTo = searchParams.get("redirectTo") || "/admin";
   const passwordWasReset = searchParams.get("passwordReset");
   const actionData = useActionData<typeof action>();
+  const transition = useTransition();
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   useEffect(() => {
     if (passwordWasReset) {
@@ -86,8 +95,9 @@ export default function LoginPage() {
         <CustomLink to="/reset-password" className="text-right text-sm">
           Forgot password
         </CustomLink>
-        <Button type="submit" className="w-full">
-          Log in
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy && <Spinner className="mr-2" />}
+          {busy ? "Logging In..." : "Log In"}
         </Button>
       </Form>
     </>

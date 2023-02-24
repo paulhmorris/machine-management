@@ -172,8 +172,8 @@ async function seed() {
         campusId: campus.id,
         role: faker.helpers.arrayElement([
           "ATTENDANT",
-          "CAMPUSTECH",
-          "MACHINETECH",
+          "CAMPUS_TECH",
+          "MACHINE_TECH",
         ]),
       },
     });

@@ -1,11 +1,12 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import crypto from "crypto";
 import dayjs from "dayjs";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { getUserByEmail } from "~/models/user.server";
 import { prisma } from "~/utils/db.server";
 
@@ -52,6 +53,9 @@ export async function action({ request }: ActionArgs) {
 
 export default function ResetPassword() {
   const actionData = useActionData<typeof action>();
+  const transition = useTransition();
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   return (
     <>
@@ -65,8 +69,9 @@ export default function ResetPassword() {
           required
           autoComplete="username"
         />
-        <Button type="submit" className="w-full">
-          Get Reset Link
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy && <Spinner className="mr-2" />}
+          {busy ? "Generating Link..." : "Get Reset Link"}
         </Button>
         {actionData?.message && (
           <div className="relative mt-8 text-cyan-700" role="alert">

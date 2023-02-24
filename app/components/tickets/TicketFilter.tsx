@@ -12,6 +12,8 @@ type Props = {
 };
 export function TicketFilter({ ticketStatuses }: Props) {
   const transition = useTransition();
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
   const [searchParams] = useSearchParams();
 
   const urlStatuses = searchParams.getAll("status[]");
@@ -59,9 +61,9 @@ export function TicketFilter({ ticketStatuses }: Props) {
         />
       </div>
       <div>
-        <Button type="submit" disabled={transition.state === "submitting"}>
-          <span>Refresh</span>
-          <IconRefresh size={18} />
+        <Button type="submit" disabled={busy}>
+          <span>{busy ? "Refreshing..." : "Refresh"}</span>
+          <IconRefresh className={busy ? "animate-spin" : ""} size={18} />
         </Button>
       </div>
     </Form>

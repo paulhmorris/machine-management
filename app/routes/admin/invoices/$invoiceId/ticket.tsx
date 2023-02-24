@@ -4,6 +4,7 @@ import { Form, useActionData, useTransition } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { addTicketToInvoiceSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
@@ -76,7 +77,8 @@ export async function action({ params, request }: ActionArgs) {
 export default function AddTicket() {
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
-  const busy = transition.state === "submitting";
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   return (
     <Form
@@ -94,7 +96,8 @@ export default function AddTicket() {
         required
       />
       <Button type="submit" className="w-min" disabled={busy}>
-        Add
+        {busy && <Spinner className="mr-2" />}
+        {busy ? "Adding..." : "Add"}
       </Button>
     </Form>
   );

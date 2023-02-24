@@ -5,7 +5,10 @@ import { Badge } from "~/components/shared/Badge";
 import { CustomLink } from "~/components/shared/CustomLink";
 import type { getTicketById } from "~/models/ticket.server";
 import type { TTicketStatus } from "~/utils/constants";
-import { getTicketStatusBadgeColor } from "~/utils/formatters";
+import {
+  getFormattedEnum,
+  getTicketStatusBadgeColor,
+} from "~/utils/formatters";
 
 type Props = {
   ticket: Awaited<ReturnType<typeof getTicketById>>;
@@ -72,7 +75,7 @@ export function TicketDetails({ ticket }: Props) {
           </TicketDetailRow>
           <TicketDetailRow title="Assigned To">
             {ticket.assignedTo.firstName} {ticket.assignedTo.lastName}{" "}
-            {assignedToRole && `- ${assignedToRole}`}
+            {assignedToRole && `- ${getFormattedEnum(assignedToRole)}`}
           </TicketDetailRow>
         </dl>
       </div>

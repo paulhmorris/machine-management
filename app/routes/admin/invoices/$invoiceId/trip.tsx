@@ -5,6 +5,7 @@ import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addTripSchema } from "~/schemas/invoice";
@@ -56,7 +57,8 @@ export default function AddTrip() {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
-  const busy = transition.state === "submitting";
+  const busy =
+    transition.state === "submitting" || transition.state === "loading";
 
   return (
     <Form
@@ -77,7 +79,8 @@ export default function AddTrip() {
         {formatCurrency(tripCharge)} / trip
       </span>
       <Button type="submit" className="w-min" disabled={busy}>
-        Add
+        {busy && <Spinner className="mr-2" />}
+        {busy ? "Adding..." : "Add"}
       </Button>
     </Form>
   );

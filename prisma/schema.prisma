@@ -81,8 +81,8 @@ model Campus {
 
 enum CampusRole {
   ATTENDANT
-  CAMPUSTECH
-  MACHINETECH
+  CAMPUS_TECH
+  MACHINE_TECH
 }
 
 model CampusUser {
@@ -150,8 +150,9 @@ model MachineErrorType {
 
 model Ticket {
   id            Int              @id @default(autoincrement())
+  secretId      String           @unique @default(cuid())
   machine       Machine          @relation(fields: [machineId], references: [id])
-  assignedTo    User             @relation(fields: [assignedToUserId], references: [id])
+  assignedTo    User?            @relation(fields: [assignedToUserId], references: [id])
   machineId     String
   notes         String?
   reporterEmail String?
@@ -162,7 +163,7 @@ model Ticket {
   reportedOn         DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   ticketStatusId     Int
-  assignedToUserId   String
+  assignedToUserId   String?
   events             TicketEvent[]
   charges            Charge[]
   machineErrorTypeId Int
@@ -183,8 +184,8 @@ model TicketEvent {
   ticketId         Int
   comments         String?
   status           TicketStatus @relation(fields: [ticketStatusId], references: [id])
-  assignedTo       User         @relation("assignedToUser", fields: [assignedToUserId], references: [id])
-  assignedToUserId String
+  assignedTo       User?        @relation("assignedToUser", fields: [assignedToUserId], references: [id])
+  assignedToUserId String?
   createdBy        User         @relation("createdByUser", fields: [createdByUserId], references: [id])
   createdByUserId  String
   timestamp        DateTime     @default(now())

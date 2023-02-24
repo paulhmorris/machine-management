@@ -28,10 +28,12 @@ export async function loader({ params }: LoaderArgs) {
   return json({ machine, errorTypes });
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ params, request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
-  const errorId = getSearchParam("error", request);
-  invariant(typeof errorId === "string", "Expected errorId");
+  const errorType = getSearchParam("error", request);
+  invariant(typeof errorType === "string", "Expected errorId");
+  const { machinePublicId } = params;
+  invariant(machinePublicId, "Expected machinePublicId");
 
   try {
     const { notes, reporterEmail, machineId } = reportSchema.parse(form);
@@ -42,7 +44,7 @@ export async function action({ request }: ActionArgs) {
         machine: { connect: { publicId: machineId } },
         status: { connect: { id: 1 } },
         assignedTo: { connect: { email: "tmfd@remix.run" } },
-        errorType: { connect: { id: Number(errorId) } },
+        errorType: { connect: { id: Number(errorType) } },
       },
     });
     await prisma.ticketEvent.create({
@@ -54,7 +56,6 @@ export async function action({ request }: ActionArgs) {
         comments: notes,
       },
     });
-
     return redirect(
       `/report/thanks${reporterEmail ? "?providedEmail=true" : ""}`
     );
