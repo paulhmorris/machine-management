@@ -1,7 +1,10 @@
 import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useSearchParams } from "@remix-run/react";
+import { useEffect } from "react";
+import { toast } from "react-hot-toast";
 import { Button } from "~/components/shared/Button";
+import { CustomLink } from "~/components/shared/CustomLink";
 
 import { Input } from "~/components/shared/Input";
 import { verifyLogin } from "~/models/user.server";
@@ -50,12 +53,19 @@ export const meta: MetaFunction = () => {
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/admin";
+  const passwordWasReset = searchParams.get("passwordReset");
   const actionData = useActionData<typeof action>();
+
+  useEffect(() => {
+    if (passwordWasReset) {
+      toast.success("Your password was successfully reset 🎉");
+    }
+  }, [passwordWasReset]);
 
   return (
     <>
-      <h1 className="mb-8 text-center">Go ahead, log in.</h1>
-      <Form method="post" className="mx-auto w-full max-w-sm space-y-4">
+      <h1 className="text-center">Go ahead, log in.</h1>
+      <Form method="post" className="mx-auto mt-8 w-full max-w-sm space-y-4">
         <Input
           label="Username"
           name="email"
@@ -73,6 +83,9 @@ export default function LoginPage() {
           autoComplete="current-password"
         />
         <input type="hidden" name="redirectTo" value={redirectTo} />
+        <CustomLink to="/reset-password" className="text-right text-sm">
+          Forgot password
+        </CustomLink>
         <Button type="submit" className="w-full">
           Log in
         </Button>

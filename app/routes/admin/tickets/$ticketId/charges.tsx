@@ -62,8 +62,8 @@ export default function TicketCharges() {
               {formatCurrency(charge.actualCost)}{" "}
               {charge.warrantyCovered && "IW"}
             </TableCell>
-            <TableCell>{charge.vendor.name}</TableCell>
-            <TableCell>{charge.invoice?.vendorInvoiceNumber}</TableCell>
+            <TableCell>{charge.invoice.vendor.name}</TableCell>
+            <TableCell>{charge.invoice.vendorInvoiceNumber}</TableCell>
             <TableCell allowWrap>{charge.description}</TableCell>
           </tr>
         ))}

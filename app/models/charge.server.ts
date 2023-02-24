@@ -7,7 +7,9 @@ export function getChargesByTicketId(ticketId: Ticket["id"]) {
     include: {
       type: true,
       part: true,
-      invoice: true,
+      invoice: {
+        include: { vendor: true },
+      },
     },
   });
 }
