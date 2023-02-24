@@ -4,7 +4,7 @@ databases:
 
 services:
   - type: web
-    name: remix
+    name: machine-management
     env: node
     plan: free
     buildCommand: npm ci --production=false && npm run build && npm prune --production
