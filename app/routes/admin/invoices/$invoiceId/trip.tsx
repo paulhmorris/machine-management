@@ -1,5 +1,4 @@
 import type { ActionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
 import invariant from "tiny-invariant";
@@ -12,7 +11,7 @@ import { addTripSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
-import { redirectWithToast } from "~/utils/toast.server";
+import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
@@ -24,7 +23,15 @@ export async function action({ params, request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = addTripSchema.safeParse(form);
   if (!result.success) {
-    return json({ errors: { ...result.error.flatten().fieldErrors } });
+    return jsonWithToast(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 400 },
+      session,
+      {
+        message: "Error adding trip",
+        type: "error",
+      }
+    );
   }
 
   const { tripChargeDate, ticketId, chargeAmount } = result.data;

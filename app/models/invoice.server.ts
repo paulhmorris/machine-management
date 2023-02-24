@@ -1,4 +1,4 @@
-import type { Invoice, User } from "@prisma/client";
+import type { Invoice, Ticket, User } from "@prisma/client";
 import dayjs from "dayjs";
 import { prisma } from "~/utils/db.server";
 
@@ -51,7 +51,6 @@ export async function finishInvoice(data: FinishInvoiceInput) {
     where: { invoiceId: data.invoiceId, warrantyCovered: false },
     _sum: { actualCost: true },
   });
-  console.info(charges);
 
   return prisma.invoice.update({
     where: { id: data.invoiceId },
@@ -62,4 +61,35 @@ export async function finishInvoice(data: FinishInvoiceInput) {
       submittedBy: { connect: { id: data.userId } },
     },
   });
+}
+
+export async function removeTicketFromInvoice({
+  ticketId,
+  invoiceId,
+}: {
+  ticketId: Ticket["id"];
+  invoiceId: Invoice["id"];
+}) {
+  await prisma.charge.deleteMany({
+    where: { ticketId, invoiceId },
+  });
+  return prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      tickets: {
+        disconnect: { id: ticketId },
+      },
+    },
+  });
+}
+
+export async function abandonInvoice(invoiceId: Invoice["id"]) {
+  await prisma.$transaction([
+    prisma.charge.deleteMany({
+      where: { invoiceId },
+    }),
+    prisma.invoice.delete({
+      where: { id: invoiceId },
+    }),
+  ]);
 }

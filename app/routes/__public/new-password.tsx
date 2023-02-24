@@ -40,7 +40,10 @@ export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = passwordResetSchema.safeParse(form);
   if (!result.success) {
-    return json({ errors: { ...result.error.flatten().fieldErrors } });
+    return json(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 400 }
+    );
   }
   const { oldPassword, newPassword, token } = result.data;
   // Make sure it's not expired again

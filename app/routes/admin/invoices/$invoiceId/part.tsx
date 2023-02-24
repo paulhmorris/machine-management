@@ -7,16 +7,19 @@ import {
   useTransition,
 } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { createCharge } from "~/models/charge.server";
+import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addPartSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
-import { redirectWithToast } from "~/utils/toast.server";
+import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
+import { useMatchesData } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -34,7 +37,16 @@ export async function action({ params, request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = addPartSchema.safeParse(form);
   if (!result.success) {
-    return json({ errors: { ...result.error.flatten().fieldErrors } });
+    console.error(result.error.flatten().fieldErrors);
+    return jsonWithToast(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 400 },
+      session,
+      {
+        message: "Error adding part",
+        type: "error",
+      }
+    );
   }
 
   const { partId, ticketId, chargeAmount, isWarranty } = result.data;
@@ -55,19 +67,18 @@ export async function action({ params, request }: ActionArgs) {
 
 export default function AddPart() {
   const { parts } = useLoaderData<typeof loader>();
+  const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
+    invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
+  };
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
   const busy = transition.state === "submitting";
 
   return (
-    <Form
-      className="mt-4 flex max-w-xs flex-col gap-3"
-      method="post"
-      noValidate
-      replace
-    >
+    <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
       <div>
         <input type="hidden" name="actionType" value="part" />
+        <TicketSelect tickets={data.invoice?.tickets ?? []} />
         <fieldset className="flex gap-2">
           <div className="sm:w-40">
             <Select
@@ -94,7 +105,7 @@ export default function AddPart() {
               name="chargeAmount"
               inputMode="decimal"
               placeholder="0.00"
-              errors={actionData?.errors.chargeAmount}
+              errors={actionData?.errors?.chargeAmount}
               isCurrency
               required
             />

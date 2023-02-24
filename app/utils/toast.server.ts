@@ -1,4 +1,4 @@
-import type { Session } from "@remix-run/node";
+import type { Session, TypedResponse } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { sessionStorage } from "~/utils/session.server";
 
@@ -26,13 +26,15 @@ export async function redirectWithToast(
   });
 }
 
-export async function jsonWithToast(
-  data: any,
+export async function jsonWithToast<Data>(
+  data: Data,
+  init: ResponseInit = {},
   session: Session,
   toast: ServerToast
-) {
+): Promise<TypedResponse<Data>> {
   setGlobalToast(session, toast);
   return json(data, {
+    ...init,
     headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
   });
 }

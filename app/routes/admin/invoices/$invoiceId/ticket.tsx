@@ -8,7 +8,7 @@ import { addTicketToInvoiceSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
-import { redirectWithToast } from "~/utils/toast.server";
+import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
@@ -27,7 +27,15 @@ export async function action({ params, request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = addTicketToInvoiceSchema.safeParse(form);
   if (!result.success) {
-    return json({ errors: { ...result.error.flatten().fieldErrors } });
+    return jsonWithToast(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 400 },
+      session,
+      {
+        message: "Error adding ticket",
+        type: "error",
+      }
+    );
   }
   const { ticketId } = result.data;
   const ticket = await prisma.ticket.findUnique({

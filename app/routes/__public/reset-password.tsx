@@ -13,7 +13,10 @@ export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = z.object({ email: z.string().email() }).safeParse(form);
   if (!result.success) {
-    return json({ errors: result.error.flatten().fieldErrors, message: null });
+    return json(
+      { errors: result.error.flatten().fieldErrors, message: null },
+      { status: 400 }
+    );
   }
   const user = await getUserByEmail(result.data.email);
   if (!user) {

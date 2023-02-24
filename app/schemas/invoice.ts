@@ -40,11 +40,21 @@ export const addShippingSchema = z.object({
     required_error: "Charge amount is required",
   }),
 });
+export const editInvoiceSchmea = z.object({
+  _action: z.enum([
+    "deleteCharge",
+    "finishInvoice",
+    "abandonInvoice",
+    "removeTicket",
+  ]),
+});
 export const deleteChargeSchema = z.object({
-  ticketId: z.coerce.number({ required_error: "A ticket is required" }),
   chargeId: z.coerce.number(),
 });
 export const finishInvoiceSchema = z.object({
   vendorInvoiceNumber: z.string().optional(),
   vendorInvoiceDate: z.string().optional(),
+});
+export const abandonInvoiceSchmea = z.object({
+  invoiceId: z.string(),
 });

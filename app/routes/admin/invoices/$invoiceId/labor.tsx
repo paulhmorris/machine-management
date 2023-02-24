@@ -1,8 +1,8 @@
 import type { ActionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import { Form, useTransition } from "@remix-run/react";
 import { useState } from "react";
 import invariant from "tiny-invariant";
+import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Select } from "~/components/shared/Select";
@@ -12,7 +12,7 @@ import { addLaborSchema } from "~/schemas/invoice";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
-import { redirectWithToast } from "~/utils/toast.server";
+import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
@@ -24,7 +24,15 @@ export async function action({ params, request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = addLaborSchema.safeParse(form);
   if (!result.success) {
-    return json({ errors: { ...result.error.flatten().fieldErrors } });
+    return jsonWithToast(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 400 },
+      session,
+      {
+        message: "Error adding labor",
+        type: "error",
+      }
+    );
   }
 
   const { time, ticketId, chargeAmount, isWarranty } = result.data;
@@ -59,6 +67,7 @@ export default function AddLabor() {
       <div>
         <input type="hidden" name="actionType" value="labor" />
         <input type="hidden" name="chargeAmount" value={total} />
+        <TicketSelect tickets={data.invoice?.tickets ?? []} />
         <Select
           name="time"
           label="Time"
