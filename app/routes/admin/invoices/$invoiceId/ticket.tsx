@@ -78,7 +78,10 @@ export default function AddTicket() {
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <Form

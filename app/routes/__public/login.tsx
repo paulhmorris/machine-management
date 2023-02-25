@@ -63,7 +63,10 @@ export default function LoginPage() {
   const actionData = useActionData<typeof action>();
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   useEffect(() => {
     if (passwordWasReset) {

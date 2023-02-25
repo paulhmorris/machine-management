@@ -58,7 +58,10 @@ export default function AddTrip() {
   };
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <Form

@@ -13,7 +13,10 @@ type Props = {
 export function TicketFilter({ ticketStatuses }: Props) {
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
   const [searchParams] = useSearchParams();
 
   const urlStatuses = searchParams.getAll("status[]");

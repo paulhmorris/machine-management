@@ -70,7 +70,10 @@ export default function NewMachine() {
     useLoaderData<typeof loader>();
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
   const [campusId, setCampusId] = useState<string>("");
   const [locationId, setLocationId] = useState<string>("");
 

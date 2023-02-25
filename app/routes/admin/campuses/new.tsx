@@ -47,7 +47,10 @@ export async function action({ request }: ActionArgs) {
 export default function NewLocation() {
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <>

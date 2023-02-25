@@ -74,7 +74,10 @@ export default function AddPart() {
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>

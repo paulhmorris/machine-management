@@ -15,7 +15,10 @@ type Props = {
 export function MachinesFilter({ campuses, locations, machineTypes }: Props) {
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   const filters: Array<Filter<MachineQueryParam>> = [
     {

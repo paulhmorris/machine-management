@@ -55,7 +55,10 @@ export async function action({ params, request }: ActionArgs) {
 export default function AddLabor() {
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
   const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };

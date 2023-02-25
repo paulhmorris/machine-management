@@ -64,7 +64,10 @@ export default function NewLocation() {
   const { campuses } = useLoaderData<typeof loader>();
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <>

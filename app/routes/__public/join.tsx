@@ -70,7 +70,10 @@ export default function Join() {
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {

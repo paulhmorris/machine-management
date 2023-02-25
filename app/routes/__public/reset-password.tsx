@@ -55,7 +55,10 @@ export default function ResetPassword() {
   const actionData = useActionData<typeof action>();
   const transition = useTransition();
   const busy =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <>
