@@ -13,6 +13,7 @@ import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest } from "~/utils/utils";
 
 const newUserSchema = z.object({
+  userId: z.string().cuid(),
   email: z.string().email(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
@@ -53,21 +54,25 @@ export async function action({ request }: ActionArgs) {
       { type: "error", message: "Error creating user" }
     );
   }
-  const { email, firstName, lastName, role, campusRole, campusId } =
+  const { userId, email, firstName, lastName, role, campusRole, campusId } =
     result.data;
-  await prisma.user.create({
+  const user = await prisma.user.update({
+    where: { id: userId },
     data: {
       firstName,
       lastName,
       email,
       role,
       campusUserRole: {
-        create: { campusId, role: campusRole },
+        connectOrCreate: {
+          where: { campusId_userId: { campusId, userId } },
+          create: { campusId, role: campusRole },
+        },
       },
     },
   });
-  return redirectWithToast(`/admin/users/`, session, {
-    message: "User created successfully",
+  return redirectWithToast(`/admin/users/${user.id}`, session, {
+    message: "User saved successfully",
     type: "success",
   });
 }
@@ -93,6 +98,7 @@ export default function NewUser() {
         )}
       </h1>
       <Form className="mt-4 sm:max-w-[16rem]" method="post">
+        <input type="hidden" name="userId" value={user.id} />
         <div className="space-y-4">
           <Input
             label="Email"
