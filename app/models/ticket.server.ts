@@ -41,7 +41,7 @@ export function getTicketById(id: number) {
       errorType: true,
       status: true,
       assignedTo: {
-        include: { campusUserRoles: true },
+        include: { campusUserRole: true },
       },
       machine: {
         include: {

@@ -59,7 +59,7 @@ export default function TicketEvents() {
               {event.createdBy.firstName} {event.createdBy.lastName}{" "}
             </TableCell>
             <TableCell>
-              {event.assignedTo?.firstName} {event.assignedTo.lastName}
+              {event.assignedTo?.firstName} {event.assignedTo?.lastName}
             </TableCell>
             <TableCell>
               <Badge

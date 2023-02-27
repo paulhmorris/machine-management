@@ -82,7 +82,7 @@ export default function RelatedTickets() {
               />
             </TableCell>
             <TableCell>
-              {ticket.assignedTo.firstName} {ticket.assignedTo.lastName}
+              {ticket.assignedTo?.firstName} {ticket.assignedTo?.lastName}
             </TableCell>
           </tr>
         ))}

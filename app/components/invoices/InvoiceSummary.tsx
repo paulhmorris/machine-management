@@ -1,7 +1,10 @@
-import type { InvoicePayload } from "~/routes/admin/invoices/$invoiceId";
+import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { formatCurrency } from "~/utils/formatters";
 import { calculateTotalByType } from "~/utils/utils";
 
+type InvoicePayload = NonNullable<
+  Awaited<ReturnType<typeof getInvoiceWithAllRelations>>
+>;
 export function InvoiceSummary({ invoice }: { invoice: InvoicePayload }) {
   const laborTotal = calculateTotalByType(invoice.charges, 1);
   const tripChargeTotal = calculateTotalByType(invoice.charges, 2);

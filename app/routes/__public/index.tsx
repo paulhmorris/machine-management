@@ -1,6 +1,6 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
@@ -35,9 +35,8 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function Index() {
-  const navigation = useNavigation();
-  const busy =
-    navigation.state === "loading" || navigation.state === "submitting";
+  const transition = useTransition();
+  const busy = transition.state === "submitting";
   const machineIdRef = useRef<HTMLInputElement>(null);
   const actionData = useActionData<typeof action>();
 

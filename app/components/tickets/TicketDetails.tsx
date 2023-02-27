@@ -15,13 +15,11 @@ type Props = {
 };
 
 export function TicketDetails({ ticket }: Props) {
-  if (!ticket) return null;
+  if (!ticket || !ticket.assignedTo) return null;
   const campus = ticket.machine.pocket.location.campus;
   const location = ticket.machine.pocket.location;
   const floor = ticket.machine.pocket.floor;
-  const assignedToRole = ticket.assignedTo.campusUserRoles.find(
-    (role) => role.campusId === campus.id
-  )?.role;
+  const assignedToRole = ticket.assignedTo.campusUserRole?.role;
 
   return (
     <div className="sm:rounded-lg">

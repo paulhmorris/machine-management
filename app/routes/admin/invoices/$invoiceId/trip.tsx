@@ -1,5 +1,5 @@
 import type { ActionArgs } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
 import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
@@ -51,17 +51,17 @@ export async function action({ params, request }: ActionArgs) {
 }
 
 export default function AddTrip() {
-  const navigation = useNavigation();
+  const transition = useTransition();
   const actionData = useActionData<typeof action>();
   const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
   const busy =
-    navigation.state === "submitting" ||
-    ((navigation.type === "actionRedirect" ||
-      navigation.type === "actionReload") &&
-      navigation.state === "loading");
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
 
   return (
     <Form

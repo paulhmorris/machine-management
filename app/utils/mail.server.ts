@@ -39,6 +39,10 @@ export async function sendMachineReportEmail({
     },
   });
 
+  if (!ticket.assignedTo) {
+    throw new Error("Ticket is not assigned to anyone!");
+  }
+
   try {
     const info = await transporter.sendMail({
       from: '"Fred Foo 👻" <foo@example.com>',
