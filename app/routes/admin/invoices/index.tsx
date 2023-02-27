@@ -2,7 +2,7 @@ import type { LoaderArgs } from "@remix-run/node";
 import { IconPlus } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
-import { InProgressInvoice } from "~/components/invoices/InProgressInvoice";
+import { InProgressInvoices } from "~/components/invoices/InProgressInvoices";
 import { CustomLink } from "~/components/shared/CustomLink";
 import type { TableColumn } from "~/components/tables";
 import {
@@ -48,50 +48,43 @@ export default function InvoiceIndex() {
         href="/admin/invoices/new"
       />
       {inProgressInvoices.length > 0 && (
-        <section className="my-4">
-          <h2>In Progress</h2>
-          <ul className="mt-2 flex flex-wrap gap-4">
-            {inProgressInvoices.map((invoice) => (
-              <InProgressInvoice key={invoice.id} invoice={invoice} />
-            ))}
-          </ul>
+        <section className="mb-4">
+          <InProgressInvoices invoices={inProgressInvoices} />
         </section>
       )}
-      <div className="mt-4">
-        <TableWrapper>
-          <TableHead
-            columns={columns}
-            sortConfig={sortConfig}
-            sortFn={requestSort}
-          />
-          <TableBody>
-            {items.map((invoice, index) => {
-              return (
-                <tr
-                  key={invoice.id}
-                  className={classNames(
-                    index % 2 === 0 ? undefined : "bg-gray-50"
-                  )}
-                >
-                  <TableCell>
-                    <CustomLink to={`/admin/vendors/${invoice.vendorId}`}>
-                      {invoice.vendor.name}
-                    </CustomLink>
-                  </TableCell>
-                  <TableCell>
-                    {dayjs(invoice.invoicedOn).format("M/D/YYYY")}
-                  </TableCell>
-                  <TableCell>#{invoice.vendorInvoiceNumber}</TableCell>
-                  <TableCell>
-                    {dayjs(invoice.submittedOn).format("M/D/YYYY")}
-                  </TableCell>
-                  <TableCell>{formatCurrency(invoice.total ?? 0)}</TableCell>
-                </tr>
-              );
-            })}
-          </TableBody>
-        </TableWrapper>
-      </div>
+      <TableWrapper>
+        <TableHead
+          columns={columns}
+          sortConfig={sortConfig}
+          sortFn={requestSort}
+        />
+        <TableBody>
+          {items.map((invoice, index) => {
+            return (
+              <tr
+                key={invoice.id}
+                className={classNames(
+                  index % 2 === 0 ? undefined : "bg-gray-50"
+                )}
+              >
+                <TableCell>
+                  <CustomLink to={`/admin/vendors/${invoice.vendorId}`}>
+                    {invoice.vendor.name}
+                  </CustomLink>
+                </TableCell>
+                <TableCell>
+                  {dayjs(invoice.invoicedOn).format("M/D/YYYY")}
+                </TableCell>
+                <TableCell>#{invoice.vendorInvoiceNumber}</TableCell>
+                <TableCell>
+                  {dayjs(invoice.submittedOn).format("M/D/YYYY")}
+                </TableCell>
+                <TableCell>{formatCurrency(invoice.total ?? 0)}</TableCell>
+              </tr>
+            );
+          })}
+        </TableBody>
+      </TableWrapper>
     </main>
   );
 }

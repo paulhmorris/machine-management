@@ -9,7 +9,7 @@ import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
-import { addLaborSchema } from "~/schemas/invoice";
+import { addLaborSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";

@@ -15,7 +15,7 @@ import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
-import { addPartSchema } from "~/schemas/invoice";
+import { addPartSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";

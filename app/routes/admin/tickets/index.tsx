@@ -10,11 +10,11 @@ import {
   getAllTicketsWithCount,
   getTicketStatuses,
 } from "~/models/ticket.server";
-import { requireVendorOrAdmin } from "~/utils/auth.server";
+import { requireAdmin } from "~/utils/auth.server";
 import { getAllSearchParams, getSearchParam } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
-  await requireVendorOrAdmin(request);
+  await requireAdmin(request);
   const dateFrom = getSearchParam("dateFrom", request) ?? undefined;
   const dateTo = getSearchParam("dateTo", request) ?? undefined;
   const urlStatuses = getAllSearchParams("status", request);

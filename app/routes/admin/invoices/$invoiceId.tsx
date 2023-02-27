@@ -8,11 +8,10 @@ import {
   IconPackage,
   IconTicket,
   IconTool,
-  IconTrash,
   IconTruckDelivery,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
 import invariant from "tiny-invariant";
 import { z } from "zod";
@@ -22,6 +21,7 @@ import { RemoveTicketModal } from "~/components/invoices/RemoveTicketModal";
 import { Button } from "~/components/shared/Button";
 import { ButtonNavLink } from "~/components/shared/ButtonNavLink";
 import { Input } from "~/components/shared/Input";
+import { TrashButton } from "~/components/shared/TrashButton";
 import { deleteCharge } from "~/models/charge.server";
 import {
   abandonInvoice,
@@ -34,12 +34,12 @@ import {
   deleteChargeSchema,
   editInvoiceSchmea,
   finishInvoiceSchema,
-} from "~/schemas/invoice";
+} from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, classNames } from "~/utils/utils";
+import { badRequest, classNames, wait } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -53,6 +53,7 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export async function action({ request, params }: ActionArgs) {
+  await wait(1000);
   const user = await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
@@ -170,6 +171,11 @@ export default function Invoice() {
   const [openAbandon, setOpenAbandon] = useState(false);
   const [removeTicket, setRemoveTicket] = useState(false);
   const busy = fetcher.state === "submitting";
+
+  // Reset state after form submission, otherwise the modal will open again :(
+  useEffect(() => {
+    setRemoveTicket(false);
+  }, [invoice]);
 
   return (
     <>
@@ -291,22 +297,16 @@ export default function Invoice() {
                                         name="chargeId"
                                         value={charge.id}
                                       />
-                                      <button
+                                      <TrashButton
                                         type="submit"
                                         name="_action"
                                         value="deleteCharge"
-                                        className="group cursor-pointer rounded-md p-2 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                                         disabled={busy}
                                       >
                                         <span className="sr-only">
                                           Delete Charge
                                         </span>
-                                        <IconTrash
-                                          size={20}
-                                          className="transition-colors duration-75 group-hover:text-red-500"
-                                          aria-hidden="true"
-                                        />
-                                      </button>
+                                      </TrashButton>
                                     </fetcher.Form>
                                   </div>
                                 </li>
@@ -317,21 +317,15 @@ export default function Invoice() {
                     )}
                   </Disclosure>
                   <div className="mt-5 self-start">
-                    <button
+                    <TrashButton
                       type="submit"
                       name="_action"
                       value="removeTicket"
-                      className="group cursor-pointer rounded-md p-2 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={busy}
                       onClick={() => setRemoveTicket(true)}
                     >
                       <span className="sr-only">Remove Ticket</span>
-                      <IconTrash
-                        size={20}
-                        className="transition-colors duration-75 group-hover:text-red-500"
-                        aria-hidden="true"
-                      />
-                    </button>
+                    </TrashButton>
                     <RemoveTicketModal
                       open={removeTicket}
                       setOpen={setRemoveTicket}

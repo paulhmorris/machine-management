@@ -35,7 +35,7 @@ export async function requireAdmin(request: Request) {
   throw await logout(request);
 }
 
-export async function requireVendorOrAdmin(request: Request) {
+export async function requireAdminOrVendor(request: Request) {
   const userId = await requireUserId(request);
   const user = await getUserById(userId);
   if (user) {

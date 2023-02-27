@@ -7,7 +7,7 @@ import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
-import { addReimbursementSchema } from "~/schemas/invoice";
+import { addReimbursementSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";

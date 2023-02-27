@@ -6,12 +6,13 @@ import { classNames } from "~/utils/utils";
 interface TextareaProps extends ComponentPropsWithRef<"textarea"> {
   name: string;
   label: string;
+  description?: string;
   resizeable?: boolean;
   errors?: string[] | undefined;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ name, label, resizeable = true, errors, ...props }, ref) => {
+  ({ name, label, description, resizeable = true, errors, ...props }, ref) => {
     return (
       <div>
         <label
@@ -22,7 +23,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {props.required ? (
             "*"
           ) : (
-            <span className="ml-1 text-sm text-gray-400">(optional)</span>
+            <span className="ml-1 text-xs text-gray-400">(optional)</span>
           )}
         </label>
         <div className="mt-1">
@@ -32,13 +33,26 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             rows={props.rows ?? 4}
             name={name}
             id={name}
+            aria-describedby={`${name}-error ${name}-description`}
+            aria-invalid={errors ? true : props["aria-invalid"]}
             className={classNames(
               "block w-full rounded-md border-gray-300 shadow-sm placeholder:text-gray-300 focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
               resizeable ? "resize-y" : "resize-none"
             )}
             defaultValue={""}
           />
-          <FieldError name={name} errors={errors} />
+          {errors ? (
+            <FieldError name={name} errors={errors} />
+          ) : (
+            description && (
+              <p
+                className="mt-2 text-sm text-gray-500"
+                id={`${name}-description`}
+              >
+                {description}
+              </p>
+            )
+          )}
         </div>
       </div>
     );

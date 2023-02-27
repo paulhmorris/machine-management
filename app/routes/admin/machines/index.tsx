@@ -14,14 +14,14 @@ import {
 } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { getMachinesForTable } from "~/models/machine.server";
-import { requireVendorOrAdmin } from "~/utils/auth.server";
+import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { classNames, getAllSearchParams } from "~/utils/utils";
 
 export type MachineQueryParam = "campus" | "loc" | "type";
 
 export async function loader({ request }: LoaderArgs) {
-  await requireVendorOrAdmin(request);
+  await requireAdmin(request);
   const campusIds = getAllSearchParams("campus", request);
   const locationIds = getAllSearchParams("loc", request);
   const machineTypeQuery = getAllSearchParams("type", request);
@@ -44,7 +44,13 @@ export async function loader({ request }: LoaderArgs) {
         : {}),
     },
   });
-  return json({ machines, locations, campuses, machineTypes });
+  const flatMachines = machines.map((m) => ({
+    ...m,
+    campus: m.pocket.location.campus.name,
+    location: m.pocket.location.name,
+    type: m.type.name,
+  }));
+  return json({ machines: flatMachines, locations, campuses, machineTypes });
 }
 
 export default function TicketIndex() {
@@ -68,39 +74,37 @@ export default function TicketIndex() {
         campuses={campuses}
         machineTypes={machineTypes}
       />
-      <div className="mt-4">
-        <TableWrapper>
-          <TableHead
-            columns={columns}
-            sortConfig={sortConfig}
-            sortFn={requestSort}
-            includeActionCol
-          />
-          <TableBody>
-            {items.map((machine, index) => {
-              return (
-                <tr
-                  key={machine.id}
-                  className={classNames(
-                    index % 2 === 0 ? undefined : "bg-gray-50"
-                  )}
-                >
-                  <TableCell>{machine.pocket.location.campus.name}</TableCell>
-                  <TableCell>{machine.publicId}</TableCell>
-                  <TableCell>{machine.type.name}</TableCell>
-                  <TableCell>{machine.pocket.location.name}</TableCell>
-                  <TableCell>{machine.pocket.floor ?? ""}</TableCell>
-                  <TableCell>
-                    <CustomLink to={`/admin/machines/${machine.id}`}>
-                      View
-                    </CustomLink>
-                  </TableCell>
-                </tr>
-              );
-            })}
-          </TableBody>
-        </TableWrapper>
-      </div>
+      <TableWrapper>
+        <TableHead
+          columns={columns}
+          sortConfig={sortConfig}
+          sortFn={requestSort}
+          includeActionCol
+        />
+        <TableBody>
+          {items.map((machine, index) => {
+            return (
+              <tr
+                key={machine.id}
+                className={classNames(
+                  index % 2 === 0 ? undefined : "bg-gray-50"
+                )}
+              >
+                <TableCell>{machine.campus}</TableCell>
+                <TableCell>{machine.publicId}</TableCell>
+                <TableCell>{machine.type}</TableCell>
+                <TableCell>{machine.location}</TableCell>
+                <TableCell>{machine.pocket.floor ?? ""}</TableCell>
+                <TableCell>
+                  <CustomLink to={`/admin/machines/${machine.id}`}>
+                    Edit
+                  </CustomLink>
+                </TableCell>
+              </tr>
+            );
+          })}
+        </TableBody>
+      </TableWrapper>
     </main>
   );
 }
@@ -110,5 +114,5 @@ const columns: TableColumn[] = [
   { key: "publicId", title: "Id", sortable: true },
   { key: "type", title: "Type", sortable: true },
   { key: "location", title: "Location", sortable: true },
-  { key: "floor", title: "Floor", sortable: true },
+  { key: "floor", title: "Floor", sortable: false },
 ];

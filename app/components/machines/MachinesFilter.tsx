@@ -42,7 +42,7 @@ export function MachinesFilter({ campuses, locations, machineTypes }: Props) {
   ];
 
   return (
-    <Form method="get" className="mt-6 space-y-4" replace={true}>
+    <Form method="get" className="space-y-4" replace={true}>
       <div>
         <TableFilters unmount={false} filters={filters} />
       </div>

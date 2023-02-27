@@ -1,5 +1,5 @@
 import type { ActionArgs } from "@remix-run/node";
-import { Form, useActionData, useTransition } from "@remix-run/react";
+import { Form, useActionData } from "@remix-run/react";
 import dayjs from "dayjs";
 import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
@@ -8,7 +8,7 @@ import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
-import { addTripSchema } from "~/schemas/invoice";
+import { addTripSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
@@ -51,17 +51,17 @@ export async function action({ params, request }: ActionArgs) {
 }
 
 export default function AddTrip() {
-  const transition = useTransition();
+  const navigation = useNavigation();
   const actionData = useActionData<typeof action>();
   const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
   const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+    navigation.state === "submitting" ||
+    ((navigation.type === "actionRedirect" ||
+      navigation.type === "actionReload") &&
+      navigation.state === "loading");
 
   return (
     <Form

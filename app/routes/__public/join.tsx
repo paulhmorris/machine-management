@@ -15,7 +15,7 @@ import { CustomLink } from "~/components/shared/CustomLink";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { createUser, getUserByEmail } from "~/models/user.server";
-import { joinSchema } from "~/schemas/login";
+import { joinSchema } from "~/schemas/loginSchemas";
 
 export async function loader({ request }: LoaderArgs) {
   const userId = await getUserId(request);

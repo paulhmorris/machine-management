@@ -51,7 +51,7 @@ export async function action({ request }: ActionArgs) {
     },
   });
   return redirectWithToast(`/admin/pockets/${pocket.id}`, session, {
-    message: "Location created successfully",
+    message: "Pocket created successfully",
     type: "success",
   });
 }

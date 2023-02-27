@@ -8,8 +8,8 @@ export function TableCell({ children, allowWrap = false }: Props) {
   return (
     <td
       className={classNames(
-        "px-4 py-2.5 text-sm",
-        allowWrap ? "break-words" : "whitespace-nowrap"
+        "max-w-sm px-4 py-2.5 text-sm",
+        allowWrap ? "break-words" : "truncate"
       )}
     >
       {children}

@@ -5,7 +5,7 @@ import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
-import { addTicketToInvoiceSchema } from "~/schemas/invoice";
+import { addTicketToInvoiceSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";

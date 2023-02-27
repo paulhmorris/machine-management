@@ -20,7 +20,7 @@ model User {
   password             Password?
   vendorId             String?
   vendor               Vendor?         @relation(fields: [vendorId], references: [id])
-  campusUserRoles      CampusUser[]
+  campusUserRole       CampusUser?
   tickets              Ticket[]
   createdTicketEvents  TicketEvent[]   @relation("createdByUser")
   assignedTicketEvents TicketEvent[]   @relation("assignedToUser")
@@ -91,7 +91,7 @@ model CampusUser {
   user     User       @relation(fields: [userId], references: [id])
   role     CampusRole
   campusId String
-  userId   String
+  userId   String     @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,6 +119,9 @@ model Pocket {
   machines    Machine[]
   location    Location  @relation(fields: [locationId], references: [id])
   locationId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Machine {

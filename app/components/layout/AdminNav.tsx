@@ -7,6 +7,7 @@ import {
   IconHome,
   IconMapPins,
   IconTicket,
+  IconUser,
   IconUsers,
   IconWashMachine,
 } from "@tabler/icons-react";
@@ -15,7 +16,7 @@ import { useUser } from "~/utils/utils";
 export function AdminNav() {
   const user = useUser();
   return (
-    <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6">
+    <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6 text-[15px]">
       <nav>
         <Link to="/" className="inline-flex items-center px-1">
           <IconWashMachine size={48} className="text-cyan-700" />
@@ -23,28 +24,55 @@ export function AdminNav() {
             Machine Manager
           </span>
         </Link>
-        <ul className="mt-10 space-y-2">
-          {nav.map((item) => {
-            return (
-              <NavLink
-                key={item.href}
-                to={`/admin${item.href}`}
-                end={item.end}
-                className={({ isActive }) =>
-                  `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${
-                    isActive ? "bg-gray-100" : ""
-                  }`
-                }
-              >
-                <li className="flex items-center space-x-4">
-                  <div className={`${item.iconBg} rounded-md p-1.5`}>
-                    <span aria-hidden="true">{item.icon}</span>
-                  </div>
-                  <span className="capitalize">{item.name}</span>
-                </li>
-              </NavLink>
-            );
-          })}
+        <ul className="mt-10 space-y-2 border-b border-gray-200 pb-6">
+          {nav
+            .filter((n) => n.section === "main")
+            .map((item) => {
+              return (
+                <NavLink
+                  key={item.href}
+                  to={`/admin${item.href}`}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${
+                      isActive ? "bg-gray-100" : ""
+                    }`
+                  }
+                >
+                  <li className="flex items-center space-x-4">
+                    <div className={`${item.iconBg} rounded-md p-1.5`}>
+                      <span aria-hidden="true">{item.icon}</span>
+                    </div>
+                    <span className="capitalize">{item.name}</span>
+                  </li>
+                </NavLink>
+              );
+            })}
+        </ul>
+        <ul className="mt-6 space-y-2">
+          {nav
+            .filter((n) => n.section === "settings")
+            .map((item) => {
+              return (
+                <NavLink
+                  key={item.href}
+                  to={`/admin${item.href}`}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${
+                      isActive ? "bg-gray-100" : ""
+                    }`
+                  }
+                >
+                  <li className="flex items-center space-x-4">
+                    <div className={`${item.iconBg} rounded-md p-1.5`}>
+                      <span aria-hidden="true">{item.icon}</span>
+                    </div>
+                    <span className="capitalize">{item.name}</span>
+                  </li>
+                </NavLink>
+              );
+            })}
         </ul>
       </nav>
       <div className="mt-auto border-t border-gray-200 pt-4 text-sm">
@@ -70,6 +98,7 @@ export function AdminNav() {
 const nav = [
   {
     name: "Home",
+    section: "main",
     href: "",
     icon: <IconHome size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -77,6 +106,7 @@ const nav = [
   },
   {
     name: "Tickets",
+    section: "main",
     href: "/tickets",
     icon: <IconTicket size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -84,6 +114,7 @@ const nav = [
   },
   {
     name: "Invoices",
+    section: "main",
     href: "/invoices",
     icon: <IconFileDollar size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -91,6 +122,7 @@ const nav = [
   },
   {
     name: "Machines",
+    section: "main",
     href: "/machines",
     icon: <IconWashMachine size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -98,6 +130,7 @@ const nav = [
   },
   {
     name: "Vendors",
+    section: "settings",
     href: "/vendors",
     icon: <IconUsers size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -105,6 +138,7 @@ const nav = [
   },
   {
     name: "Campuses",
+    section: "settings",
     href: "/campuses",
     icon: <IconBuildingBank size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -112,6 +146,7 @@ const nav = [
   },
   {
     name: "Locations",
+    section: "settings",
     href: "/locations",
     icon: <IconMapPins size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
@@ -119,9 +154,18 @@ const nav = [
   },
   {
     name: "Pockets",
+    section: "settings",
     href: "/pockets",
     icon: <IconDoor size={20} className="text-cyan-600" />,
     iconBg: "bg-cyan-700/10",
     end: false,
   },
-];
+  {
+    name: "Users",
+    section: "settings",
+    href: "/users",
+    icon: <IconUser size={20} className="text-cyan-600" />,
+    iconBg: "bg-cyan-700/10",
+    end: false,
+  },
+] as const;

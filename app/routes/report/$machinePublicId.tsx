@@ -13,7 +13,7 @@ import {
   getErrorTypesForReport,
   getMachineForReport,
 } from "~/models/machine.server";
-import { reportSchema } from "~/schemas/report";
+import { reportSchema } from "~/schemas/reportSchemas";
 import { prisma } from "~/utils/db.server";
 import { badRequest, getSearchParam } from "~/utils/utils";
 

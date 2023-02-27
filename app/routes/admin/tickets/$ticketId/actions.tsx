@@ -30,7 +30,10 @@ import {
   reassignTicket,
   updateTicketStatus,
 } from "~/models/ticket.server";
-import { ticketActionSchema, ticketAssignmentSchema } from "~/schemas/ticket";
+import {
+  ticketActionSchema,
+  ticketAssignmentSchema,
+} from "~/schemas/ticketSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { sendMachineReportEmail as sendTicketAssignmentEmail } from "~/utils/mail.server";

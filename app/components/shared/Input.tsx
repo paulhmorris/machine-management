@@ -6,6 +6,7 @@ import { classNames } from "~/utils/utils";
 interface InputProps extends ComponentPropsWithRef<"input"> {
   name: string;
   label: string;
+  description?: string;
   hideLabel?: boolean;
   hideHelperText?: boolean;
   errors?: string[] | undefined;
@@ -14,7 +15,16 @@ interface InputProps extends ComponentPropsWithRef<"input"> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { name, label, errors, hideLabel, hideHelperText, isCurrency, ...props },
+    {
+      name,
+      label,
+      description,
+      errors,
+      hideLabel,
+      hideHelperText,
+      isCurrency,
+      ...props
+    },
     ref
   ) => {
     return (
@@ -31,7 +41,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {props.required
             ? "*"
             : !hideHelperText && (
-                <span className="ml-1 text-sm text-gray-400">(optional)</span>
+                <span className="ml-1 text-xs text-gray-400">(optional)</span>
               )}
         </label>
         <div className={hideLabel ? "relative -mt-0.5" : "relative mt-1"}>
@@ -48,14 +58,25 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             type={props.type ?? "text"}
             step={isCurrency ? "0.01" : props.step}
             aria-invalid={errors ? true : props["aria-invalid"]}
-            aria-describedby={`${name}-error`}
+            aria-describedby={`${name}-error ${name}-description`}
             className={classNames(
               isCurrency && "pl-7",
               "mt-1 block w-full rounded-md border-gray-300 shadow-sm transition duration-100 placeholder:text-gray-300 hover:border-cyan-700 focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
               props.className
             )}
           />
-          <FieldError name={name} errors={errors} />
+          {errors ? (
+            <FieldError name={name} errors={errors} />
+          ) : (
+            description && (
+              <p
+                className="mt-2 text-sm text-gray-500"
+                id={`${name}-description`}
+              >
+                {description}
+              </p>
+            )
+          )}
         </div>
       </div>
     );

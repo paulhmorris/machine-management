@@ -14,7 +14,7 @@ import { CustomLink } from "~/components/shared/CustomLink";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { verifyLogin } from "~/models/user.server";
-import { loginSchema } from "~/schemas/login";
+import { loginSchema } from "~/schemas/loginSchemas";
 import { createUserSession, getUserId } from "~/utils/session.server";
 
 export async function loader({ request }: LoaderArgs) {

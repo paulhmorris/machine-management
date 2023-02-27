@@ -9,38 +9,30 @@ import { prisma } from "~/utils/db.server";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-
-  const vendors = await prisma.vendor.findMany({});
-  return json({ vendors });
+  return json({ campuses: await prisma.campus.findMany() });
 }
 
-export default function TicketIndex() {
-  const { vendors } = useLoaderData<typeof loader>();
+export default function CampusIndex() {
+  const { campuses } = useLoaderData<typeof loader>();
 
   return (
     <main className="flex flex-col">
       <PageHeader
-        title="Vendors"
-        actionText="New Vendor"
+        title="Campuses"
+        actionText="New Campus"
         actionIcon={<IconPlus size={18} />}
-        href="/admin/vendors/new"
+        href="/admin/campus/new"
       />
       <ul className="flex max-w-md flex-col gap-4">
-        {vendors.map((vendor) => {
+        {campuses.map((campus) => {
           return (
             <li
               className="rounded-md border border-gray-300 bg-white p-4"
-              key={vendor.id}
+              key={campus.id}
             >
-              <div className="grid grid-cols-6 items-center">
-                <h3 className="col-span-3 font-medium">{vendor.name}</h3>
-                <p className="col-span-2 text-sm leading-6 text-gray-500">
-                  {vendor.isActive ? "Active" : "Inactive"}
-                </p>
-                <ButtonLink
-                  className="col-span-1"
-                  to={`/admin/vendors/${vendor.id}`}
-                >
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{campus.name}</h3>
+                <ButtonLink to={`/admin/campuses/${campus.id}`}>
                   Edit
                 </ButtonLink>
               </div>

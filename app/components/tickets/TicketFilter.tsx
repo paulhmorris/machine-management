@@ -42,7 +42,7 @@ export function TicketFilter({ ticketStatuses }: Props) {
   return (
     <Form
       method="get"
-      className="mt-6 flex w-full flex-col gap-4 text-sm"
+      className="flex w-full flex-col gap-4 text-sm"
       replace={true}
     >
       <TableFilters filters={filters} direction="right" unmount={false} />

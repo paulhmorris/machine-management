@@ -2,10 +2,10 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { toast } from "react-hot-toast";
 import { Button } from "~/components/shared/Button";
-import { requireVendorOrAdmin } from "~/utils/auth.server";
+import { requireAdmin } from "~/utils/auth.server";
 
 export async function loader({ request }: LoaderArgs) {
-  await requireVendorOrAdmin(request);
+  await requireAdmin(request);
   return json({});
 }
 

@@ -20,11 +20,10 @@ async function seed() {
   const hashedPassword = await bcrypt.hash("password", 10);
 
   // Campus, locations, pockets, and vendor
-  const campus = await prisma.campus.create({
-    data: {
-      name: "TCU",
-    },
+  await prisma.campus.createMany({
+    data: [{ name: "TCU" }, { name: "SMU" }, { name: "UNT" }, { name: "UTA" }],
   });
+  const campus = await prisma.campus.findFirst();
   const vendor = await prisma.vendor.create({
     data: {
       name: "AAdvantage Repair",
@@ -32,7 +31,7 @@ async function seed() {
       hourlyRate: 50,
       campuses: {
         connect: {
-          id: campus.id,
+          id: campus!.id,
         },
       },
     },
@@ -41,14 +40,14 @@ async function seed() {
     await prisma.location.create({
       data: {
         name: faker.address.city(),
-        campusId: campus.id,
+        campusId: campus!.id,
       },
     });
     await prisma.invoice.create({
       data: {
         total: faker.datatype.float({ min: 0, max: 1000 }),
         vendorId: vendor.id,
-        campusId: campus.id,
+        campusId: campus!.id,
         vendorInvoiceNumber: `INV-${faker.random.numeric(6)}`,
         invoicedOn: faker.date.past(),
         paidOn: faker.date.past(),
@@ -169,7 +168,7 @@ async function seed() {
     await prisma.campusUser.create({
       data: {
         userId: user.id,
-        campusId: campus.id,
+        campusId: campus!.id,
         role: faker.helpers.arrayElement([
           "ATTENDANT",
           "CAMPUS_TECH",

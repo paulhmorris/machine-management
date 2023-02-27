@@ -1,7 +1,7 @@
+export { PageHeader as TableHeader } from "../shared/PageHeader";
 export { TableBody } from "./TableBody";
 export { TableCell } from "./TableCell";
 export { TableHead } from "./TableHead";
-export { TableHeader } from "./TableHeader";
 export { TableWrapper } from "./TableWrapper";
 
 export type TableColumn<T extends any[] = []> = {

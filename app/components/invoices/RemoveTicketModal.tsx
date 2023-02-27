@@ -15,6 +15,7 @@ type Props = {
 export function RemoveTicketModal(props: Props) {
   const fetcher = useFetcher();
   const busy = fetcher.state === "submitting" || fetcher.state === "loading";
+
   return (
     <Modal {...props}>
       <ModalHeader
@@ -24,7 +25,7 @@ export function RemoveTicketModal(props: Props) {
       <div className="mt-5 gap-2 sm:mt-4 sm:flex sm:flex-row-reverse">
         <fetcher.Form
           method="post"
-          action={`/admin/invoices/${props.invoiceId}/ticket`}
+          action={`/admin/invoices/${props.invoiceId}`}
           replace={true}
         >
           <input type="hidden" name="ticketId" value={props.ticketId} />

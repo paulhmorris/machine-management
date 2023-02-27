@@ -1,10 +1,3 @@
-// id            String      @id @default(cuid())
-// publicId      String      @unique
-// serialNumber  String?
-// description   String?
-// type          MachineType @relation(fields: [machineTypeId], references: [id])
-// pocket        Pocket      @relation(fields: [pocketId], references: [id])
-
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
