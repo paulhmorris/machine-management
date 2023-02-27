@@ -126,7 +126,7 @@ export default function Location() {
         </Select>
         <div className="flex items-center gap-2">
           <Button type="submit" disabled={busy}>
-            {busy && <Spinner />}
+            {busy && <Spinner className="mr-2" />}
             {busy ? "Saving..." : "Save Location"}
           </Button>
           <Button variant="ghost" type="reset" disabled={busy}>

@@ -21,7 +21,7 @@ export default function CampusIndex() {
         title="Campuses"
         actionText="New Campus"
         actionIcon={<IconPlus size={18} />}
-        href="/admin/campus/new"
+        href="/admin/campuses/new"
       />
       <ul className="flex max-w-md flex-col gap-4">
         {campuses.map((campus) => {

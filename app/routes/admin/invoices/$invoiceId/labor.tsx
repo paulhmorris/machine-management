@@ -73,23 +73,25 @@ export default function AddLabor() {
         <input type="hidden" name="actionType" value="labor" />
         <input type="hidden" name="chargeAmount" value={total} />
         <TicketSelect tickets={data.invoice?.tickets ?? []} />
-        <Select
-          name="time"
-          label="Time"
-          defaultValue=""
-          required
-          onChange={(e) => setTimeInMin(Number(e.target.value))}
-          className="sm:w-40"
-        >
-          <option value="" disabled>
-            Select Time
-          </option>
-          {[...Array(18).keys()].map((i) => (
-            <option key={i} value={i * 10 + 10}>
-              {i * 10 + 10} mins
+        <div className="mt-2">
+          <Select
+            name="time"
+            label="Time"
+            defaultValue=""
+            required
+            onChange={(e) => setTimeInMin(Number(e.target.value))}
+            className="sm:w-40"
+          >
+            <option value="" disabled>
+              Select Time
             </option>
-          ))}
-        </Select>
+            {[...Array(18).keys()].map((i) => (
+              <option key={i} value={i * 10 + 10}>
+                {i * 10 + 10} mins
+              </option>
+            ))}
+          </Select>
+        </div>
         <div className="mt-2 text-sm">
           <Checkbox
             id="isWarranty"

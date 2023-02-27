@@ -1,6 +1,11 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  useLoaderData,
+  useSearchParams,
+  useTransition,
+} from "@remix-run/react";
 import { useRef } from "react";
 
 import invariant from "tiny-invariant";
@@ -8,6 +13,7 @@ import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { ButtonLink } from "~/components/shared/ButtonLink";
 import { Input } from "~/components/shared/Input";
+import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
 import {
   getErrorTypesForReport,
@@ -69,7 +75,12 @@ export async function action({ params, request }: ActionArgs) {
 export default function MachineReport() {
   const { machine, errorTypes } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
-  // const actionData = useActionData<typeof action>();
+  const transition = useTransition();
+  const busy =
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
   const errorParam = Number(searchParams.get("error"));
   const commentsRef = useRef<HTMLTextAreaElement>(null);
 
@@ -119,9 +130,10 @@ export default function MachineReport() {
             type="submit"
             variant="primary"
             className="mt-4"
-            disabled={Boolean(!errorParam)}
+            disabled={Boolean(!errorParam) || busy}
           >
-            Submit
+            {busy && <Spinner className="mr-2" />}
+            {busy ? "Submitting..." : "Submit"}
           </Button>
         </div>
       </Form>

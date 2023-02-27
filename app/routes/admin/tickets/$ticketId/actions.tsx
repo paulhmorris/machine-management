@@ -164,8 +164,12 @@ export async function action({ request, params }: ActionArgs) {
 export default function TicketActions() {
   const { ticket, campusUsers } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
-  const { state } = useTransition();
-  const busy = state === "submitting" || state === "loading";
+  const transition = useTransition();
+  const busy =
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
   const formName =
     searchParams.get("form") ?? (ticket.status.id === 4 ? "reopen" : "close");
 

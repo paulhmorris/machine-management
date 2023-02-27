@@ -84,7 +84,7 @@ export default function AddPart() {
       <div>
         <input type="hidden" name="actionType" value="part" />
         <TicketSelect tickets={data.invoice?.tickets ?? []} />
-        <fieldset className="flex gap-2">
+        <fieldset className="mt-2 flex gap-2">
           <div className="sm:w-40">
             <Select
               name="partId"

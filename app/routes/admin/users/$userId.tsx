@@ -165,7 +165,7 @@ export default function NewUser() {
         </div>
         <div className="mt-4 flex items-center gap-2">
           <Button type="submit" disabled={busy}>
-            {busy && <Spinner />}
+            {busy && <Spinner className="mr-2" />}
             {busy ? "Saving..." : "Save User"}
           </Button>
           <Button variant="ghost" type="reset" disabled={busy}>

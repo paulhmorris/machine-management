@@ -69,7 +69,7 @@ export default function NewVendor() {
   return (
     <>
       <h1>New Vendor</h1>
-      <Form className="mt-4 space-y-4 sm:max-w-[16rem]" method="post">
+      <Form className="mt-4 space-y-4 sm:max-w-[18rem]" method="post">
         <Input label="Vendor Name" name="name" required />
         <Input
           label="Trip Charge"
@@ -102,7 +102,7 @@ export default function NewVendor() {
           </ul>
         </fieldset>
         <Button type="submit" disabled={busy}>
-          {busy && <Spinner />}
+          {busy && <Spinner className="mr-2" />}
           {busy ? "Creating..." : "Create Vendor"}
         </Button>
       </Form>

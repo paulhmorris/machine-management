@@ -59,30 +59,32 @@ export default function InvoiceIndex() {
           sortFn={requestSort}
         />
         <TableBody>
-          {items.map((invoice, index) => {
-            return (
-              <tr
-                key={invoice.id}
-                className={classNames(
-                  index % 2 === 0 ? undefined : "bg-gray-50"
-                )}
-              >
-                <TableCell>
-                  <CustomLink to={`/admin/vendors/${invoice.vendorId}`}>
-                    {invoice.vendor.name}
-                  </CustomLink>
-                </TableCell>
-                <TableCell>
-                  {dayjs(invoice.invoicedOn).format("M/D/YYYY")}
-                </TableCell>
-                <TableCell>#{invoice.vendorInvoiceNumber}</TableCell>
-                <TableCell>
-                  {dayjs(invoice.submittedOn).format("M/D/YYYY")}
-                </TableCell>
-                <TableCell>{formatCurrency(invoice.total ?? 0)}</TableCell>
-              </tr>
-            );
-          })}
+          {items
+            .filter((i) => i.submittedOn)
+            .map((invoice, index) => {
+              return (
+                <tr
+                  key={invoice.id}
+                  className={classNames(
+                    index % 2 === 0 ? undefined : "bg-gray-50"
+                  )}
+                >
+                  <TableCell>
+                    <CustomLink to={`/admin/vendors/${invoice.vendorId}`}>
+                      {invoice.vendor.name}
+                    </CustomLink>
+                  </TableCell>
+                  <TableCell>
+                    {dayjs(invoice.invoicedOn).format("M/D/YYYY")}
+                  </TableCell>
+                  <TableCell>#{invoice.vendorInvoiceNumber}</TableCell>
+                  <TableCell>
+                    {dayjs(invoice.submittedOn).format("M/D/YYYY")}
+                  </TableCell>
+                  <TableCell>{formatCurrency(invoice.total ?? 0)}</TableCell>
+                </tr>
+              );
+            })}
         </TableBody>
       </TableWrapper>
     </main>

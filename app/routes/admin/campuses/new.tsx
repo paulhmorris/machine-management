@@ -44,7 +44,7 @@ export async function action({ request }: ActionArgs) {
   });
 }
 
-export default function NewLocation() {
+export default function NewCampus() {
   const transition = useTransition();
   const busy =
     transition.state === "submitting" ||
@@ -58,7 +58,7 @@ export default function NewLocation() {
       <Form className="mt-4 space-y-4 sm:max-w-[16rem]" method="post">
         <Input label="Name" name="name" required />
         <Button type="submit" disabled={busy}>
-          {busy && <Spinner />}
+          {busy && <Spinner className="mr-2" />}
           {busy ? "Creating..." : "Create Campus"}
         </Button>
       </Form>

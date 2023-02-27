@@ -79,7 +79,7 @@ export default function NewLocation() {
           ))}
         </Select>
         <Button type="submit" disabled={busy}>
-          {busy && <Spinner />}
+          {busy && <Spinner className="mr-2" />}
           {busy ? "Creating..." : "Create Location"}
         </Button>
       </Form>

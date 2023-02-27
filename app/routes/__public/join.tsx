@@ -110,7 +110,7 @@ export default function Join() {
         />
 
         <input type="hidden" name="redirectTo" value={redirectTo} />
-        <Button type="submit">
+        <Button type="submit" disabled={busy}>
           {busy && <Spinner className="mr-2" />}
           {busy ? "Creating Account..." : "Create Account"}
         </Button>
