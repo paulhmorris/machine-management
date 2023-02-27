@@ -92,6 +92,8 @@ CREATE TABLE "Pocket" (
     "position" INTEGER DEFAULT 1,
     "description" TEXT,
     "locationId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Pocket_pkey" PRIMARY KEY ("id")
 );
@@ -233,6 +235,9 @@ CREATE UNIQUE INDEX "Password_userId_key" ON "Password"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PasswordReset_token_key" ON "PasswordReset"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CampusUser_userId_key" ON "CampusUser"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CampusUser_campusId_userId_key" ON "CampusUser"("campusId", "userId");
