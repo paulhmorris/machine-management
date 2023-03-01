@@ -3,14 +3,16 @@ import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 const newUserSchema = z.object({
   userId: z.string().cuid(),
@@ -25,16 +27,12 @@ const newUserSchema = z.object({
 export async function loader({ params, request }: LoaderArgs) {
   await requireAdmin(request);
   const { userId } = params;
-  if (!userId) {
-    throw badRequest("Missing user id");
-  }
+  if (!userId) throw badRequest("User ID is required");
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { campusUserRole: true },
   });
-  if (!user) {
-    throw badRequest("User not found");
-  }
+  if (!user) throw notFoundResponse("User not found");
   return json({
     user,
     campuses: await prisma.campus.findMany(),
@@ -136,7 +134,6 @@ export default function NewUser() {
                 label="Campus"
                 name="campusId"
                 defaultValue={user.campusUserRole?.campusId ?? ""}
-                required
               >
                 <option value="" disabled>
                   Select campus
@@ -151,7 +148,6 @@ export default function NewUser() {
                 label="Role"
                 name="campusRole"
                 defaultValue={user.campusUserRole?.role ?? ""}
-                required
               >
                 <option value="" disabled>
                   Select a role
@@ -175,4 +171,12 @@ export default function NewUser() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

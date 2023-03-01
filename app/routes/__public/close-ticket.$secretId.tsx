@@ -63,8 +63,11 @@ export default function CloseTicket() {
   const [searchParams] = useSearchParams();
   const actionData = useActionData<typeof action>();
   const thanks = searchParams.get("thanks");
-  const { state } = useTransition();
-  const busy = state === "loading" || state === "submitting";
+  const { state, type } = useTransition();
+  const busy =
+    state === "submitting" ||
+    ((type === "actionRedirect" || type === "actionReload") &&
+      state === "loading");
 
   return (
     <main>

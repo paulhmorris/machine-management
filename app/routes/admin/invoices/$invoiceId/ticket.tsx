@@ -1,29 +1,29 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
-import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { addTicketToInvoiceSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
-  invariant(typeof invoiceId === "string", "Expected invoiceId");
+  if (!invoiceId) throw badRequest("Invoice ID is required");
+
   const invoice = await prisma.invoice.findUnique({
     where: { id: invoiceId },
     select: { id: true, tickets: { select: { id: true } } },
   });
-  if (!invoice) {
-    throw badRequest(`Invoice ${invoiceId} not found`);
-  }
+  if (!invoice) throw notFoundResponse(`Invoice ${invoiceId} not found`);
 
   const form = Object.fromEntries(await request.formData());
   const result = addTicketToInvoiceSchema.safeParse(form);
@@ -85,7 +85,7 @@ export default function AddTicket() {
 
   return (
     <Form
-      className="mt-4 flex max-w-xs flex-col gap-3 sm:w-32"
+      className="flex max-w-xs flex-col gap-3 sm:w-32"
       method="post"
       replace
     >
@@ -104,4 +104,12 @@ export default function AddTicket() {
       </Button>
     </Form>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

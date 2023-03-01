@@ -3,9 +3,11 @@ import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
@@ -87,7 +89,7 @@ export default function NewUser() {
               Assign this user to a campus
             </legend>
             <div className="mt-2 space-y-2">
-              <Select label="Campus" name="campusId" required>
+              <Select label="Campus" name="campusId">
                 <option value="" disabled>
                   Select campus
                 </option>
@@ -97,7 +99,7 @@ export default function NewUser() {
                   </option>
                 ))}
               </Select>
-              <Select label="Role" name="campusRole" defaultValue="" required>
+              <Select label="Role" name="campusRole" defaultValue="">
                 <option value="" disabled>
                   Select a role
                 </option>
@@ -120,4 +122,12 @@ export default function NewUser() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

@@ -1,5 +1,7 @@
 import { Outlet } from "@remix-run/react";
 import { AdminNav } from "~/components/layout/AdminNav";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 
 export default function AdminLayout() {
   return (
@@ -12,4 +14,12 @@ export default function AdminLayout() {
       </div>
     </div>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

@@ -1,5 +1,5 @@
 import type { Charge, ChargeType } from "@prisma/client";
-import { json } from "@remix-run/node";
+import { json, Response } from "@remix-run/node";
 import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
@@ -75,6 +75,13 @@ export function badRequest<Data = unknown>(
   init?: Omit<ResponseInit, "status">
 ) {
   return json<Data>(data, { ...init, status: 400 });
+}
+
+export function notFoundResponse(
+  msg: string,
+  init?: Omit<ResponseInit, "status">
+) {
+  return new Response(msg, { ...init, status: 404 });
 }
 
 export function getSearchParam(param: string, request: Request) {

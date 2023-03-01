@@ -2,8 +2,9 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
-import invariant from "tiny-invariant";
 import { Badge } from "~/components/shared/Badge";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
 import {
   TableBody,
@@ -17,12 +18,12 @@ import { requireAdmin } from "~/utils/auth.server";
 import type { TTicketStatus } from "~/utils/constants";
 import { prisma } from "~/utils/db.server";
 import { getTicketStatusBadgeColor } from "~/utils/formatters";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { ticketId } = params;
-  invariant(ticketId, "Ticket ID is required");
+  if (!ticketId) throw badRequest("Ticket ID is required");
 
   const ticket = await prisma.ticket.findUnique({
     where: { id: Number(ticketId) },
@@ -30,9 +31,7 @@ export async function loader({ request, params }: LoaderArgs) {
       machine: true,
     },
   });
-  if (!ticket) {
-    throw badRequest(`Ticket with id ${ticketId} not found`);
-  }
+  if (!ticket) throw notFoundResponse(`Ticket ${ticketId} not found`);
   const relatedTickets = await getTicketsByMachineId(
     ticket.machineId,
     ticket.id
@@ -89,4 +88,12 @@ export default function RelatedTickets() {
       </TableBody>
     </TableWrapper>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

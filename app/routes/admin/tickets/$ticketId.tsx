@@ -1,22 +1,21 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { Outlet } from "@remix-run/react";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
-import invariant from "tiny-invariant";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { TicketDetails } from "~/components/tickets/TicketDetails";
 import { TicketNav } from "~/components/tickets/TicketNav";
 import { getTicketById } from "~/models/ticket.server";
 import { requireAdmin } from "~/utils/auth.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { ticketId } = params;
-  invariant(ticketId, "Ticket ID is required");
+  if (!ticketId) throw badRequest("Ticket ID is required");
 
   const ticket = await getTicketById(Number(ticketId));
-  if (!ticket) {
-    throw badRequest(`Ticket with id ${ticketId} not found`);
-  }
+  if (!ticket) throw notFoundResponse(`Ticket ${ticketId} not found`);
 
   return typedjson({ ticket });
 }
@@ -35,4 +34,12 @@ export default function TicketLayout() {
       </div>
     </main>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

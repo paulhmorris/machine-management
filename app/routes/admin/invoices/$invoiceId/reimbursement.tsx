@@ -1,6 +1,5 @@
 import type { ActionArgs } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
-import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
@@ -11,13 +10,13 @@ import { addReimbursementSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { useMatchesData } from "~/utils/utils";
+import { badRequest, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
-  invariant(invoiceId, "Expected invoiceId");
+  if (!invoiceId) throw badRequest("Invoice ID is required");
 
   const form = Object.fromEntries(await request.formData());
   const result = addReimbursementSchema.safeParse(form);
@@ -65,7 +64,7 @@ export default function AddLabor() {
       transition.state === "loading");
 
   return (
-    <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
+    <Form className="flex max-w-xs flex-col gap-3" method="post" replace>
       <TicketSelect tickets={data.invoice?.tickets ?? []} />
       <div className="flex flex-col gap-2 sm:flex-row">
         <input type="hidden" name="actionType" value="reimbursement" />

@@ -1,5 +1,5 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import { json, redirect, Response } from "@remix-run/node";
 import {
   Form,
   useLoaderData,
@@ -9,12 +9,13 @@ import {
 import { useRef } from "react";
 
 import invariant from "tiny-invariant";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { ButtonLink } from "~/components/shared/ButtonLink";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import {
   getErrorTypesForReport,
   getMachineForReport,
@@ -28,7 +29,9 @@ export async function loader({ params }: LoaderArgs) {
   invariant(machinePublicId, "Expected machinePublicId");
   const machine = await getMachineForReport(machinePublicId);
   if (!machine) {
-    throw badRequest(`Machine with id ${machinePublicId} not found`);
+    throw new Response(`Machine with id ${machinePublicId} not found`, {
+      status: 404,
+    });
   }
   const errorTypes = await getErrorTypesForReport();
   return json({ machine, errorTypes });
@@ -37,39 +40,40 @@ export async function loader({ params }: LoaderArgs) {
 export async function action({ params, request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const errorType = getSearchParam("error", request);
-  invariant(typeof errorType === "string", "Expected errorId");
+  if (!errorType) throw badRequest("Error type is required");
   const { machinePublicId } = params;
-  invariant(machinePublicId, "Expected machinePublicId");
+  if (!machinePublicId) throw badRequest("Machine ID is required");
 
-  try {
-    const { notes, reporterEmail, machineId } = reportSchema.parse(form);
-    const ticket = await prisma.ticket.create({
-      data: {
-        notes,
-        reporterEmail,
-        machine: { connect: { publicId: machineId } },
-        status: { connect: { id: 1 } },
-        assignedTo: { connect: { email: "tmfd@remix.run" } },
-        errorType: { connect: { id: Number(errorType) } },
-      },
-    });
-    await prisma.ticketEvent.create({
-      data: {
-        assignedTo: { connect: { email: "tmfd@remix.run" } },
-        createdBy: { connect: { email: "tmfd@remix.run" } },
-        ticket: { connect: { id: ticket.id } },
-        status: { connect: { id: 1 } },
-        comments: notes,
-      },
-    });
-    return redirect(
-      `/report/thanks${reporterEmail ? "?providedEmail=true" : ""}`
+  const result = reportSchema.safeParse(form);
+  if (!result.success) {
+    return json(
+      { errors: { ...result.error.flatten().fieldErrors } },
+      { status: 400 }
     );
-  } catch (error) {
-    if (error instanceof z.ZodError<typeof reportSchema>) {
-      return json({ error: error.flatten() });
-    }
   }
+  const { notes, reporterEmail, machineId } = result.data;
+  const ticket = await prisma.ticket.create({
+    data: {
+      notes,
+      reporterEmail,
+      machine: { connect: { publicId: machineId } },
+      status: { connect: { id: 1 } },
+      assignedTo: { connect: { email: "tmfd@remix.run" } },
+      errorType: { connect: { id: Number(errorType) } },
+    },
+  });
+  await prisma.ticketEvent.create({
+    data: {
+      assignedTo: { connect: { email: "tmfd@remix.run" } },
+      createdBy: { connect: { email: "tmfd@remix.run" } },
+      ticket: { connect: { id: ticket.id } },
+      status: { connect: { id: 1 } },
+      comments: notes,
+    },
+  });
+  return redirect(
+    `/report/thanks${reporterEmail ? "?providedEmail=true" : ""}`
+  );
 }
 
 export default function MachineReport() {
@@ -139,4 +143,12 @@ export default function MachineReport() {
       </Form>
     </div>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

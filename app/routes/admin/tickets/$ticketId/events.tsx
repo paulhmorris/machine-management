@@ -2,8 +2,9 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
-import invariant from "tiny-invariant";
 import { Badge } from "~/components/shared/Badge";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
 import {
   TableBody,
@@ -15,11 +16,12 @@ import { useSortableData } from "~/hooks/useSortableData";
 import { getTicketEventsByTicketId } from "~/models/ticketEvent.server";
 import { requireAdmin } from "~/utils/auth.server";
 import { getTicketStatusBadgeColor } from "~/utils/formatters";
+import { badRequest } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { ticketId } = params;
-  invariant(ticketId, "Ticket ID is required");
+  if (!ticketId) throw badRequest("Ticket ID is required");
   const ticketEvents = await getTicketEventsByTicketId(Number(ticketId));
   return json({ ticketEvents });
 }
@@ -74,4 +76,12 @@ export default function TicketEvents() {
       </TableBody>
     </TableWrapper>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

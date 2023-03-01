@@ -4,15 +4,17 @@ import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 const updateLocationSchema = z.object({
   id: z.string().cuid(),
@@ -24,9 +26,7 @@ const updateLocationSchema = z.object({
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { locationId } = params;
-  if (!locationId) {
-    throw badRequest("Missing locationId");
-  }
+  if (!locationId) throw badRequest("Location ID is required");
   const location = await prisma.location.findUnique({
     where: { id: locationId },
     select: {
@@ -42,9 +42,7 @@ export async function loader({ request, params }: LoaderArgs) {
       },
     },
   });
-  if (!location) {
-    throw badRequest("Location not found");
-  }
+  if (!location) throw notFoundResponse("Location not found");
 
   return json({
     location,
@@ -136,4 +134,12 @@ export default function Location() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

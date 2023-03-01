@@ -2,18 +2,19 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { IconChevronRight, IconPlus } from "@tabler/icons-react";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { PageHeader } from "~/components/shared/PageHeader";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getFormattedEnum } from "~/utils/formatters";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-
   const users = await prisma.user.findMany({
     include: { campusUserRole: true },
+    orderBy: { lastName: "asc" },
   });
-
   return json({ users });
 }
 
@@ -27,7 +28,7 @@ export default function UserIndex() {
         href="/admin/users/new"
         actionIcon={<IconPlus size={18} />}
       />
-      <ul className="divide-y divide-gray-200">
+      <ul className="divide-y divide-gray-200 pb-24">
         {users.map((user) => (
           <li key={user.email}>
             <Link
@@ -56,4 +57,12 @@ export default function UserIndex() {
       </ul>
     </main>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

@@ -1,12 +1,13 @@
 import type { ActionArgs } from "@remix-run/node";
 import { Form, useTransition } from "@remix-run/react";
 import { useState } from "react";
-import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addLaborSchema } from "~/schemas/invoiceSchemas";
@@ -14,13 +15,13 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { useMatchesData } from "~/utils/utils";
+import { badRequest, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
-  invariant(invoiceId, "Expected invoiceId");
+  if (!invoiceId) throw badRequest("Invoice ID is required");
 
   const form = Object.fromEntries(await request.formData());
   const result = addLaborSchema.safeParse(form);
@@ -68,7 +69,7 @@ export default function AddLabor() {
   const total = ((timeInMin * rate) / 60).toFixed(2);
 
   return (
-    <Form className="mt-4 flex max-w-xs flex-col gap-3" method="post" replace>
+    <Form className="flex max-w-xs flex-col gap-3" method="post" replace>
       <div>
         <input type="hidden" name="actionType" value="labor" />
         <input type="hidden" name="chargeAmount" value={total} />
@@ -116,4 +117,12 @@ export default function AddLabor() {
       </Button>
     </Form>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

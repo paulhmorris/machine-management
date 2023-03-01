@@ -34,15 +34,3 @@ export async function requireAdmin(request: Request) {
 
   throw await logout(request);
 }
-
-export async function requireAdminOrVendor(request: Request) {
-  const userId = await requireUserId(request);
-  const user = await getUserById(userId);
-  if (user) {
-    if (user.role === "ADMIN" || user.role === "VENDOR") {
-      return user;
-    }
-  }
-
-  throw await logout(request);
-}

@@ -9,8 +9,10 @@ import {
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { verifyLogin } from "~/models/user.server";
 import { prisma } from "~/utils/db.server";
 import { getSearchParam } from "~/utils/utils";
@@ -138,4 +140,12 @@ export default function NewPassword() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

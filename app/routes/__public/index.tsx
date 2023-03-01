@@ -4,8 +4,10 @@ import { Form, useActionData, useTransition } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { prisma } from "~/utils/db.server";
 
 const machineSearchSchema = z.object({
@@ -36,7 +38,11 @@ export async function action({ request }: ActionArgs) {
 
 export default function Index() {
   const transition = useTransition();
-  const busy = transition.state === "submitting";
+  const busy =
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading");
   const machineIdRef = useRef<HTMLInputElement>(null);
   const actionData = useActionData<typeof action>();
 
@@ -80,4 +86,12 @@ export default function Index() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

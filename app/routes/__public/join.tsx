@@ -11,9 +11,11 @@ import * as React from "react";
 import { createUserSession, getUserId } from "~/utils/session.server";
 
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { CustomLink } from "~/components/shared/CustomLink";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { joinSchema } from "~/schemas/loginSchemas";
 
@@ -130,4 +132,12 @@ export default function Join() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

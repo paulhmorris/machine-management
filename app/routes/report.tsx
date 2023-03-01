@@ -1,4 +1,6 @@
 import { Outlet } from "@remix-run/react";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 
 export default function ReportLayout() {
   return (
@@ -6,4 +8,12 @@ export default function ReportLayout() {
       <Outlet />
     </main>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

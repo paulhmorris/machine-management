@@ -2,7 +2,8 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
-import invariant from "tiny-invariant";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
 import {
   TableBody,
@@ -14,11 +15,12 @@ import { useSortableData } from "~/hooks/useSortableData";
 import { getChargesByTicketId } from "~/models/charge.server";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
+import { badRequest } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { ticketId } = params;
-  invariant(ticketId, "Ticket ID is required");
+  if (!ticketId) throw badRequest("Ticket ID is required");
   const charges = await getChargesByTicketId(Number(ticketId));
   return json({ charges });
 }
@@ -70,4 +72,12 @@ export default function TicketCharges() {
       </TableBody>
     </TableWrapper>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

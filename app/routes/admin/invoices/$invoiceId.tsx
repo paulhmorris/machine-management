@@ -13,15 +13,16 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
-import invariant from "tiny-invariant";
 import { z } from "zod";
 import { AbandonInvoiceModal } from "~/components/invoices/AbandonInvoiceModal";
 import { InvoiceSummary } from "~/components/invoices/InvoiceSummary";
 import { RemoveTicketModal } from "~/components/invoices/RemoveTicketModal";
 import { Button } from "~/components/shared/Button";
 import { ButtonNavLink } from "~/components/shared/ButtonNavLink";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { TrashButton } from "~/components/shared/TrashButton";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { deleteCharge } from "~/models/charge.server";
 import {
   abandonInvoice,
@@ -39,25 +40,23 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, classNames, wait } from "~/utils/utils";
+import { badRequest, classNames, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { invoiceId } = params;
-  invariant(typeof invoiceId === "string", "Expected invoiceId");
+  if (!invoiceId) throw badRequest("Invoice ID is required");
+
   const invoice = await getInvoiceWithAllRelations(invoiceId);
-  if (!invoice) {
-    throw badRequest(`Invoice ${invoiceId} not found`);
-  }
+  if (!invoice) throw notFoundResponse(`Invoice ${invoiceId} not found`);
   return typedjson({ invoice });
 }
 
 export async function action({ request, params }: ActionArgs) {
-  await wait(1000);
   const user = await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
-  invariant(typeof invoiceId === "string", "Expected invoiceId");
+  if (!invoiceId) throw badRequest("Invoice ID is required");
 
   const form = Object.fromEntries(await request.formData());
   const result = editInvoiceSchmea.safeParse(form);
@@ -217,7 +216,9 @@ export default function Invoice() {
               );
             })}
           </div>
-          <Outlet />
+          <div className="mt-4">
+            <Outlet />
+          </div>
         </section>
 
         <section className="mt-4 pb-8">
@@ -407,3 +408,11 @@ const actions = [
     icon: <IconCurrencyDollar size={iconSize} stroke={stroke} />,
   },
 ];
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
+}

@@ -14,7 +14,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 const updateMachineSchema = z.object({
   id: z.string().cuid(),
@@ -28,9 +28,7 @@ const updateMachineSchema = z.object({
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { machineId } = params;
-  if (!machineId) {
-    throw badRequest("Missing machineId");
-  }
+  if (!machineId) throw badRequest("Machine ID is required");
   const machine = await prisma.machine.findUnique({
     where: { id: machineId },
     select: {
@@ -55,9 +53,7 @@ export async function loader({ request, params }: LoaderArgs) {
       },
     },
   });
-  if (!machine) {
-    throw badRequest("Machine not found");
-  }
+  if (!machine) throw notFoundResponse(`Machine ${machineId} not found`);
 
   return json({
     machine,

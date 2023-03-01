@@ -1,11 +1,12 @@
 import type { ActionArgs } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
-import invariant from "tiny-invariant";
 import { TicketSelect } from "~/components/invoices/TicketSelect";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { addTripSchema } from "~/schemas/invoiceSchemas";
@@ -13,13 +14,13 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { useMatchesData } from "~/utils/utils";
+import { badRequest, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
-  invariant(invoiceId, "Expected invoiceId");
+  if (!invoiceId) throw badRequest("Invoice ID is required");
 
   const form = Object.fromEntries(await request.formData());
   const result = addTripSchema.safeParse(form);
@@ -65,7 +66,7 @@ export default function AddTrip() {
 
   return (
     <Form
-      className="mt-4 flex max-w-xs flex-col gap-3 sm:w-40"
+      className="flex max-w-xs flex-col gap-3 sm:w-40"
       method="post"
       replace
     >
@@ -87,4 +88,12 @@ export default function AddTrip() {
       </Button>
     </Form>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

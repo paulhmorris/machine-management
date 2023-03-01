@@ -5,15 +5,17 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 const updatePocketSchema = z.object({
   id: z.string().cuid(),
@@ -26,9 +28,7 @@ const updatePocketSchema = z.object({
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { pocketId } = params;
-  if (!pocketId) {
-    throw badRequest("Missing pocketId");
-  }
+  if (!pocketId) throw badRequest("Pocket ID is required");
   const pocket = await prisma.pocket.findUnique({
     where: { id: pocketId },
     select: {
@@ -50,9 +50,7 @@ export async function loader({ request, params }: LoaderArgs) {
       },
     },
   });
-  if (!pocket) {
-    throw badRequest("Machine not found");
-  }
+  if (!pocket) throw notFoundResponse("Machine not found");
 
   return json({
     pocket,
@@ -187,4 +185,12 @@ export default function Machine() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

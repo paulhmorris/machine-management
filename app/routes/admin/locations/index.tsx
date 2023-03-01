@@ -2,7 +2,9 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { IconPlus } from "@tabler/icons-react";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { CustomLink } from "~/components/shared/CustomLink";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
 import {
   TableBody,
@@ -82,3 +84,11 @@ const columns: TableColumn[] = [
   { key: "name", title: "Name", sortable: true },
   { key: "description", title: "Description", sortable: false },
 ];
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
+}

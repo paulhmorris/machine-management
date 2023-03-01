@@ -3,7 +3,9 @@ import { IconPlus } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
 import { InProgressInvoices } from "~/components/invoices/InProgressInvoices";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { CustomLink } from "~/components/shared/CustomLink";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
 import {
   TableBody,
@@ -89,4 +91,12 @@ export default function InvoiceIndex() {
       </TableWrapper>
     </main>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

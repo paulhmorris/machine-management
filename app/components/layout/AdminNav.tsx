@@ -4,7 +4,6 @@ import {
   IconChevronRight,
   IconDoor,
   IconFileDollar,
-  IconHome,
   IconMapPins,
   IconTicket,
   IconUser,
@@ -96,14 +95,14 @@ export function AdminNav() {
 }
 
 const nav = [
-  {
-    name: "Home",
-    section: "main",
-    href: "",
-    icon: <IconHome size={20} className="text-cyan-600" />,
-    iconBg: "bg-cyan-700/10",
-    end: true,
-  },
+  // {
+  //   name: "Home",
+  //   section: "main",
+  //   href: "",
+  //   icon: <IconHome size={20} className="text-cyan-600" />,
+  //   iconBg: "bg-cyan-700/10",
+  //   end: true,
+  // },
   {
     name: "Tickets",
     section: "main",

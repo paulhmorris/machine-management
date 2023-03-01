@@ -4,14 +4,16 @@ import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Checkbox } from "~/components/shared/Checkbox";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 const updateVendorSchema = z.object({
   id: z.string().cuid(),
@@ -23,13 +25,13 @@ const updateVendorSchema = z.object({
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
+  const { vendorId } = params;
+  if (!vendorId) throw badRequest("Vendor ID is required");
   const vendor = await prisma.vendor.findUnique({
-    where: { id: params.vendorId },
+    where: { id: vendorId },
     include: { campuses: true },
   });
-  if (!vendor) {
-    throw badRequest("Vendor not found");
-  }
+  if (!vendor) throw notFoundResponse(`Vendor ${vendorId} not found`);
   return json({
     campuses: await prisma.campus.findMany(),
     vendor,
@@ -140,4 +142,12 @@ export default function Vendor() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

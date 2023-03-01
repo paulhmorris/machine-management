@@ -2,6 +2,8 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
+import { CaughtError } from "~/components/shared/CaughtError";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { TableHeader } from "~/components/tables";
 import { TicketFilter } from "~/components/tickets/TicketFilter";
 import { TicketTable } from "~/components/tickets/TicketTable";
@@ -76,4 +78,12 @@ export default function TicketIndex() {
       </div>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

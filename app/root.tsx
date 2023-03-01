@@ -7,6 +7,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useCatch,
   useLoaderData,
 } from "@remix-run/react";
 import { Notifications } from "~/components/shared/Notifications";
@@ -84,6 +85,31 @@ export function ErrorBoundary({ error }: { error: Error }) {
         <div>
           <h1>Error</h1>
           <pre>{error.message}</pre>
+        </div>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body
+        style={{
+          display: "grid",
+          placeItems: "center",
+          textAlign: "center",
+        }}
+      >
+        <div>
+          <h1>Error {caught.status}</h1>
+          <pre>{caught.data}</pre>
         </div>
         <Scripts />
       </body>

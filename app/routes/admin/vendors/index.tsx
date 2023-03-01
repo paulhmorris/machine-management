@@ -3,13 +3,14 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { IconPlus } from "@tabler/icons-react";
 import { ButtonLink } from "~/components/shared/ButtonLink";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { PageHeader } from "~/components/shared/PageHeader";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-
   const vendors = await prisma.vendor.findMany({});
   return json({ vendors });
 }
@@ -50,4 +51,12 @@ export default function TicketIndex() {
       </ul>
     </main>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }

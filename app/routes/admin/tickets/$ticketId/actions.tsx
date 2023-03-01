@@ -15,7 +15,9 @@ import {
 import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { ButtonLink } from "~/components/shared/ButtonLink";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import {
   AddNoteForm,
   AttendantForm,
@@ -39,7 +41,7 @@ import { prisma } from "~/utils/db.server";
 import { sendMachineReportEmail as sendTicketAssignmentEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest } from "~/utils/utils";
+import { notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -48,7 +50,7 @@ export async function loader({ request, params }: LoaderArgs) {
 
   const ticket = await getTicketWithCampusId(Number(ticketId));
   if (!ticket) {
-    throw badRequest(`Ticket with id ${ticketId} not found`);
+    throw notFoundResponse(`Ticket ${ticketId} not found`);
   }
   const campusUsers = await getCampusUsers(
     ticket.machine.pocket.location.campus.id
@@ -77,9 +79,7 @@ export async function action({ request, params }: ActionArgs) {
       },
     },
   });
-  if (!ticket) {
-    throw badRequest(`Ticket with id ${ticketId} not found`);
-  }
+  if (!ticket) throw notFoundResponse(`Ticket ${ticketId} not found`);
 
   const form = Object.fromEntries(await request.formData());
   const result = ticketActionSchema.safeParse(form);
@@ -280,3 +280,11 @@ const actions = [
     icon: <IconLockOpen size={iconSize} stroke={stroke} />,
   },
 ] as const;
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
+}

@@ -156,7 +156,7 @@ async function seed() {
       data: {
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
-        role: faker.helpers.arrayElement(["USER", "VENDOR"]),
+        role: "USER",
         email: faker.internet.email(),
         password: {
           create: {

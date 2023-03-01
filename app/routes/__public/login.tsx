@@ -9,10 +9,12 @@ import {
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { Button } from "~/components/shared/Button";
+import { CaughtError } from "~/components/shared/CaughtError";
 import { CustomLink } from "~/components/shared/CustomLink";
 
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
+import { UncaughtError } from "~/components/shared/UncaughtError";
 import { verifyLogin } from "~/models/user.server";
 import { loginSchema } from "~/schemas/loginSchemas";
 import { createUserSession, getUserId } from "~/utils/session.server";
@@ -82,17 +84,17 @@ export default function LoginPage() {
           label="Username"
           name="email"
           type="email"
+          autoComplete="username"
           errors={actionData?.errors.email}
           required
-          autoComplete="username"
         />
         <Input
           label="Password"
           name="password"
           type="password"
+          autoComplete="current-password"
           errors={actionData?.errors.password}
           required
-          autoComplete="current-password"
         />
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <CustomLink to="/reset-password" className="text-right text-sm">
@@ -105,4 +107,12 @@ export default function LoginPage() {
       </Form>
     </>
   );
+}
+
+export function CatchBoundary() {
+  return <CaughtError />;
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return <UncaughtError error={error} />;
 }
