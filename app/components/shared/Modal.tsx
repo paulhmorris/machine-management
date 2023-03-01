@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { IconX } from "@tabler/icons-react";
 import type { Dispatch, SetStateAction } from "react";
-import { Fragment, useRef } from "react";
+import { Fragment } from "react";
 
 type Props = {
   open: boolean;
@@ -10,16 +10,9 @@ type Props = {
 };
 
 export function Modal({ open, setOpen, children }: Props) {
-  const cancelButtonRef = useRef(null);
-
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog
-        as="div"
-        className="relative z-10"
-        initialFocus={cancelButtonRef}
-        onClose={setOpen}
-      >
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-75"
