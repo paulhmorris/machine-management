@@ -2,6 +2,7 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect, Response } from "@remix-run/node";
 import {
   Form,
+  useActionData,
   useLoaderData,
   useSearchParams,
   useTransition,
@@ -12,7 +13,6 @@ import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
 import { ButtonLink } from "~/components/shared/ButtonLink";
 import { CaughtError } from "~/components/shared/CaughtError";
-import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
 import { UncaughtError } from "~/components/shared/UncaughtError";
@@ -51,11 +51,10 @@ export async function action({ params, request }: ActionArgs) {
       { status: 400 }
     );
   }
-  const { notes, reporterEmail, machineId } = result.data;
+  const { notes, machineId } = result.data;
   const ticket = await prisma.ticket.create({
     data: {
       notes,
-      reporterEmail,
       machine: { connect: { publicId: machineId } },
       status: { connect: { id: 1 } },
       assignedTo: { connect: { email: "tmfd@remix.run" } },
@@ -71,9 +70,7 @@ export async function action({ params, request }: ActionArgs) {
       comments: notes,
     },
   });
-  return redirect(
-    `/report/thanks${reporterEmail ? "?providedEmail=true" : ""}`
-  );
+  return redirect(`/report/thanks`);
 }
 
 export default function MachineReport() {
@@ -87,6 +84,7 @@ export default function MachineReport() {
       transition.state === "loading");
   const errorParam = Number(searchParams.get("error"));
   const commentsRef = useRef<HTMLTextAreaElement>(null);
+  const actionData = useActionData<typeof action>();
 
   return (
     <div className="pb-12">
@@ -121,13 +119,8 @@ export default function MachineReport() {
               label="Comments"
               ref={commentsRef}
               maxLength={255}
+              errors={actionData?.errors.notes}
               required
-            />
-            <Input
-              name="reporterEmail"
-              label="Your email"
-              type="email"
-              autoComplete="email"
             />
           </div>
           <Button
