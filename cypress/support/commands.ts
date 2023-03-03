@@ -28,6 +28,18 @@ declare global {
       cleanupUser: typeof cleanupUser;
 
       /**
+       * Deletes the current @user
+       *
+       * @returns {typeof cleanupMachine}
+       * @memberof Chainable
+       * @example
+       *    cy.cleanupMachine()
+       * @example
+       *    cy.cleanupMachine({ publicId: 'ABC123' })
+       */
+      cleanupMachine: typeof cleanupMachine;
+
+      /**
        * Extends the standard visit command to wait for the page to load
        *
        * @returns {typeof visitAndCheck}
@@ -44,12 +56,14 @@ declare global {
 
 function login({
   email = faker.internet.email(undefined, undefined, "example.com"),
+  password = faker.internet.password(),
 }: {
   email?: string;
+  password?: string;
 } = {}) {
   cy.then(() => ({ email })).as("user");
   cy.exec(
-    `npx ts-node --require tsconfig-paths/register ./cypress/support/create-user.ts "${email}"`
+    `npx ts-node --require tsconfig-paths/register ./cypress/support/create-user.ts "${email}" "${password}"`
   ).then(({ stdout }) => {
     const cookieValue = stdout
       .replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>")
@@ -80,6 +94,25 @@ function deleteUserByEmail(email: string) {
   cy.clearCookie("__session");
 }
 
+function cleanupMachine({ publicId }: { publicId?: string } = {}) {
+  if (publicId) {
+    deleteMachineByPublicId(publicId);
+  } else {
+    cy.get("@machine").then((machine) => {
+      const publicId = (machine as { publicId?: string }).publicId;
+      if (publicId) {
+        deleteMachineByPublicId(publicId);
+      }
+    });
+  }
+}
+
+function deleteMachineByPublicId(publicId: string) {
+  cy.exec(
+    `npx ts-node --require tsconfig-paths/register ./cypress/support/delete-machine.ts ${publicId}`
+  );
+}
+
 // We're waiting a second because of this issue happen randomly
 // https://github.com/cypress-io/cypress/issues/7306
 // Also added custom types to avoid getting detached
@@ -93,3 +126,4 @@ function visitAndCheck(url: string, waitTime = 1000) {
 Cypress.Commands.add("login", login);
 Cypress.Commands.add("cleanupUser", cleanupUser);
 Cypress.Commands.add("visitAndCheck", visitAndCheck);
+Cypress.Commands.add("cleanupMachine", cleanupMachine);

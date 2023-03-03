@@ -12,7 +12,7 @@ import { createUserSession } from "~/utils/session.server";
 
 installGlobals();
 
-async function createAndLogin(email: string) {
+async function createAndLogin(email: string, password: string) {
   if (!email) {
     throw new Error("email required for login");
   }
@@ -20,7 +20,7 @@ async function createAndLogin(email: string) {
     throw new Error("All test emails must end in @example.com");
   }
 
-  const user = await createUser(email, "myreallystrongpassword");
+  const user = await createUser(email, password, "ADMIN");
 
   const response = await createUserSession({
     request: new Request("test://test"),
@@ -45,4 +45,6 @@ async function createAndLogin(email: string) {
   );
 }
 
-createAndLogin(process.argv[2]).catch((error) => console.error(error));
+createAndLogin(process.argv[2], process.argv[3]).catch((error) =>
+  console.error(error)
+);

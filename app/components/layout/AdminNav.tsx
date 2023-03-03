@@ -1,7 +1,6 @@
-import { Link, NavLink } from "@remix-run/react";
+import { Form, Link, NavLink } from "@remix-run/react";
 import {
   IconBuildingBank,
-  IconChevronRight,
   IconDoor,
   IconFileDollar,
   IconMapPins,
@@ -74,22 +73,22 @@ export function AdminNav() {
             })}
         </ul>
       </nav>
-      <div className="mt-auto border-t border-gray-200 pt-4 text-sm">
-        <Link
-          to={`/admin/users/${user?.id}`}
-          className="group flex items-center rounded-md px-3 py-2 hover:bg-gray-100"
-        >
-          <div>
-            <span className="block font-bold ">
-              {user?.firstName} {user?.lastName}
-            </span>
-            <span className="block text-gray-400">{user?.email}</span>
-          </div>
-          <span className="ml-auto transition duration-200 ease-out group-hover:translate-x-1">
-            <IconChevronRight size={20} />
+      <nav className="mt-auto justify-between gap-2 space-y-2 truncate border-t border-gray-200 px-3 py-2 pt-4 text-sm">
+        <div>
+          <span className="block font-bold ">
+            {user?.firstName} {user?.lastName}
           </span>
-        </Link>
-      </div>
+          <span className="block text-gray-400">{user?.email}</span>
+        </div>
+        <Form method="post" action="/logout">
+          <button
+            type="submit"
+            className="text-sm font-medium text-gray-400 hover:text-cyan-700"
+          >
+            Logout
+          </button>
+        </Form>
+      </nav>
     </div>
   );
 }

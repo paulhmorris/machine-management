@@ -47,9 +47,13 @@ export function useMatchesData(
   return route?.data;
 }
 
-function isUser(user: any): user is User {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  return user && typeof user === "object" && typeof user.email === "string";
+export function isUser(user: unknown): user is User {
+  return (
+    typeof user !== "undefined" &&
+    user !== null &&
+    typeof user === "object" &&
+    "email" in user
+  );
 }
 
 export function useOptionalUser(): User | undefined {

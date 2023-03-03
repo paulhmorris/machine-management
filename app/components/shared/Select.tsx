@@ -19,23 +19,32 @@ export const Select = forwardRef<HTMLSelectElement, Props>(
   ) => {
     return (
       <div>
-        <label
-          htmlFor={name}
-          className={hideLabel ? "sr-only" : "block text-sm font-medium"}
-        >
-          {label}
+        <div>
+          <label
+            htmlFor={name}
+            className={classNames(
+              hideLabel && "sr-only",
+              "inline-block whitespace-nowrap text-sm font-medium text-gray-700"
+            )}
+          >
+            {label}
+          </label>
           {props.required ? (
-            "*"
+            <span id="additional-label" className="text-sm">
+              *
+            </span>
           ) : (
-            <span className="ml-1 text-xs text-gray-400">(optional)</span>
+            <span id="additional-label" className="ml-1 text-xs text-gray-400">
+              (optional)
+            </span>
           )}
-        </label>
+        </div>
         <select
           {...props}
           ref={ref}
           id={name}
           name={name}
-          aria-describedby={`${name}-error ${name}-description`}
+          aria-describedby={`${name}-error ${name}-description additional-label`}
           aria-invalid={errors ? true : props["aria-invalid"]}
           className={classNames(
             "mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base shadow-sm focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",

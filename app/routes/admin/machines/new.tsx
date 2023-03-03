@@ -136,7 +136,11 @@ export default function NewMachine() {
           </option>
           {campusId &&
             locations
-              .filter((l) => l.campusId === campusId)
+              .filter(
+                (l) =>
+                  l.campusId === campusId &&
+                  pockets.some((p) => p.locationId === l.id)
+              )
               .map((loc) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.name}

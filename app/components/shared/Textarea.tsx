@@ -8,24 +8,45 @@ interface TextareaProps extends ComponentPropsWithRef<"textarea"> {
   label: string;
   description?: string;
   resizeable?: boolean;
+  hideLabel?: boolean;
   errors?: string[] | undefined;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ name, label, description, resizeable = true, errors, ...props }, ref) => {
+  (
+    {
+      name,
+      label,
+      description,
+      resizeable = true,
+      hideLabel,
+      errors,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <div>
-        <label
-          htmlFor={name}
-          className="block font-medium text-gray-700 sm:text-sm"
-        >
-          {label}
+        <div>
+          <label
+            htmlFor={name}
+            className={classNames(
+              hideLabel && "sr-only",
+              "inline-block whitespace-nowrap text-sm font-medium text-gray-700"
+            )}
+          >
+            {label}
+          </label>
           {props.required ? (
-            "*"
+            <span id="additional-label" className="text-sm">
+              <span className="sr-only">Required</span>*
+            </span>
           ) : (
-            <span className="ml-1 text-xs text-gray-400">(optional)</span>
+            <span id="additional-label" className="ml-1 text-xs text-gray-400">
+              (optional)
+            </span>
           )}
-        </label>
+        </div>
         <div className="mt-1">
           <textarea
             {...props}
