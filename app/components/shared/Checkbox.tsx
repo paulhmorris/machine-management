@@ -23,7 +23,7 @@ export function Checkbox({ id, name, label, ...props }: CheckboxProps) {
         />
       </div>
       <div className="ml-3">
-        <label htmlFor={id} className="cursor-pointer font-medium">
+        <label htmlFor={id} className="cursor-pointer text-sm font-medium">
           {label}
         </label>
       </div>

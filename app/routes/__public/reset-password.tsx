@@ -1,16 +1,18 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
-import crypto from "crypto";
-import dayjs from "dayjs";
 import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import {
+  generatePasswordReset,
+  getCurrentPasswordReset,
+} from "~/models/passwordReset.server";
 import { getUserByEmail } from "~/models/user.server";
-import { prisma } from "~/utils/db.server";
+import { sendPasswordResetEmail } from "~/utils/mail.server";
 
 export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
@@ -28,9 +30,7 @@ export async function action({ request }: ActionArgs) {
       message: null,
     });
   }
-  const existingReset = await prisma.passwordReset.findFirst({
-    where: { userId: user.id, expiresAt: { gte: new Date() } },
-  });
+  const existingReset = await getCurrentPasswordReset({ userId: user.id });
   if (existingReset) {
     return json({
       errors: { email: ["A password reset is already pending for this email"] },
@@ -38,15 +38,8 @@ export async function action({ request }: ActionArgs) {
     });
   }
 
-  const token = crypto.randomBytes(32).toString("hex");
-  await prisma.passwordReset.create({
-    data: {
-      token,
-      user: { connect: { id: user.id } },
-      expiresAt: dayjs().add(15, "minute").toDate(),
-    },
-  });
-
+  const reset = await generatePasswordReset({ email: user.email });
+  await sendPasswordResetEmail({ email: user.email, token: reset.token });
   return json({
     message: "Thanks! Check your email for a password reset link.",
     errors: { email: [] },

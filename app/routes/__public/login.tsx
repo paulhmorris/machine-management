@@ -62,6 +62,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/admin";
   const passwordWasReset = searchParams.get("passwordReset");
+  const tokenExpired = searchParams.get("tokenExpired");
   const actionData = useActionData<typeof action>();
   const transition = useTransition();
   const busy =
@@ -74,7 +75,12 @@ export default function LoginPage() {
     if (passwordWasReset) {
       toast.success("Your password was successfully reset 🎉");
     }
-  }, [passwordWasReset]);
+    if (tokenExpired) {
+      toast.error(
+        "Your password reset token has expired. Please request another."
+      );
+    }
+  }, [passwordWasReset, tokenExpired]);
 
   return (
     <>

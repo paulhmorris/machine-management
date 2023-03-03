@@ -1,32 +1,25 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
+import { Checkbox } from "~/components/shared/Checkbox";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
+import { generatePasswordReset } from "~/models/passwordReset.server";
+import { newUserSchema } from "~/schemas/userSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { sendPasswordSetupEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 
-const newUserSchema = z.object({
-  email: z.string().email(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  role: z.enum(["ADMIN", "USER"]),
-  campusId: z.string().cuid(),
-  campusRole: z.enum(["ATTENDANT", "MACHINE_TECH", "CAMPUS_TECH"]),
-});
-
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-  return json({
-    campuses: await prisma.campus.findMany(),
-  });
+  return json({ campuses: await getAllCampuses() });
 }
 
 export async function action({ request }: ActionArgs) {
@@ -42,7 +35,7 @@ export async function action({ request }: ActionArgs) {
       { type: "error", message: "Error creating user" }
     );
   }
-  const { email, firstName, lastName, role, campusRole, campusId } =
+  const { email, firstName, lastName, role, campusRole, campusId, sendEmail } =
     result.data;
   await prisma.user.create({
     data: {
@@ -50,11 +43,22 @@ export async function action({ request }: ActionArgs) {
       lastName,
       email,
       role,
-      campusUserRole: {
-        create: { campusId, role: campusRole },
-      },
+      campusUserRole: campusRole
+        ? {
+            create: {
+              role: campusRole,
+              campus: { connect: { id: campusId } },
+            },
+          }
+        : undefined,
     },
   });
+
+  if (sendEmail) {
+    const { token } = await generatePasswordReset({ email });
+    await sendPasswordSetupEmail({ email, token });
+  }
+
   return redirectWithToast(`/admin/users/`, session, {
     message: "User created successfully",
     type: "success",
@@ -73,12 +77,18 @@ export default function NewUser() {
   return (
     <>
       <h1>New User</h1>
-      <Form className="mt-4 sm:max-w-[16rem]" method="post">
+      <Form className="mt-4 sm:max-w-[20rem]" method="post">
         <div className="space-y-4">
           <Input label="Email" name="email" required />
           <Input label="First Name" name="firstName" />
           <Input label="Last Name" name="lastName" />
-          <Select label="Permissions" name="role" required defaultValue="USER">
+          <Select
+            label="Permissions"
+            name="role"
+            description="Admins can access the management site."
+            defaultValue="USER"
+            required
+          >
             <option value="ADMIN">Admin</option>
             <option value="USER">Vendor/Attendant</option>
           </Select>
@@ -90,9 +100,7 @@ export default function NewUser() {
             </legend>
             <div className="mt-2 space-y-2">
               <Select label="Campus" name="campusId">
-                <option value="" disabled>
-                  Select campus
-                </option>
+                <option value="">Select campus</option>
                 {campuses.map((campus) => (
                   <option key={campus.id} value={campus.id}>
                     {campus.name}
@@ -100,15 +108,21 @@ export default function NewUser() {
                 ))}
               </Select>
               <Select label="Role" name="campusRole" defaultValue="">
-                <option value="" disabled>
-                  Select a role
-                </option>
+                <option value="">Select a role</option>
                 <option value="ATTENDANT">Attendant</option>
                 <option value="CAMPUS_TECH">Campus Tech</option>
                 <option value="MACHINE_TECH">Machine Tech</option>
               </Select>
             </div>
           </fieldset>
+        </div>
+        <div className="mt-4 border-t border-gray-200 pt-4">
+          <Checkbox
+            id="sendEmail"
+            name="sendEmail"
+            label="Send a password setup email"
+            defaultChecked={true}
+          />
         </div>
         <div className="mt-4 flex items-center gap-2">
           <Button type="submit" disabled={busy}>

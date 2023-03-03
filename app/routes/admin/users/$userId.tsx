@@ -1,28 +1,24 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData, useTransition } from "@remix-run/react";
-import { z } from "zod";
+import {
+  Form,
+  useFetcher,
+  useLoaderData,
+  useTransition,
+} from "@remix-run/react";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
+import { updateUserSchema } from "~/schemas/userSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, notFoundResponse } from "~/utils/utils";
-
-const newUserSchema = z.object({
-  userId: z.string().cuid(),
-  email: z.string().email(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  role: z.enum(["ADMIN", "USER"]),
-  campusId: z.string().cuid(),
-  campusRole: z.enum(["ATTENDANT", "MACHINE_TECH", "CAMPUS_TECH"]),
-});
 
 export async function loader({ params, request }: LoaderArgs) {
   await requireAdmin(request);
@@ -35,7 +31,7 @@ export async function loader({ params, request }: LoaderArgs) {
   if (!user) throw notFoundResponse("User not found");
   return json({
     user,
-    campuses: await prisma.campus.findMany(),
+    campuses: await getAllCampuses(),
   });
 }
 
@@ -43,7 +39,7 @@ export async function action({ request }: ActionArgs) {
   await requireAdmin(request);
   const session = await getSession(request);
   const form = Object.fromEntries(await request.formData());
-  const result = newUserSchema.safeParse(form);
+  const result = updateUserSchema.safeParse(form);
   if (!result.success) {
     return jsonWithToast(
       { errors: { ...result.error.flatten().fieldErrors } },
@@ -61,12 +57,17 @@ export async function action({ request }: ActionArgs) {
       lastName,
       email,
       role,
-      campusUserRole: {
-        connectOrCreate: {
-          where: { campusId_userId: { campusId, userId } },
-          create: { campusId, role: campusRole },
-        },
-      },
+      campusUserRole: campusRole
+        ? {
+            upsert: {
+              update: { campusId },
+              create: {
+                campus: { connect: { id: campusId } },
+                role: campusRole,
+              },
+            },
+          }
+        : undefined,
     },
   });
   return redirectWithToast(`/admin/users/${user.id}`, session, {
@@ -77,6 +78,7 @@ export async function action({ request }: ActionArgs) {
 
 export default function NewUser() {
   const { user, campuses } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
   const transition = useTransition();
   const busy =
     transition.state === "submitting" ||
@@ -95,6 +97,18 @@ export default function NewUser() {
           <>{user.email}</>
         )}
       </h1>
+      <fetcher.Form method="post" action="/admin/users/send-password-reset">
+        <input type="hidden" name="userId" value={user.id} />
+        <Button
+          type="submit"
+          variant="secondary"
+          disabled={busy}
+          className="mt-2"
+        >
+          {busy && <Spinner className="mr-2" />}
+          {busy ? "Sending..." : "Send Password Reset"}
+        </Button>
+      </fetcher.Form>
       <Form className="mt-4 sm:max-w-[16rem]" method="post">
         <input type="hidden" name="userId" value={user.id} />
         <div className="space-y-4">

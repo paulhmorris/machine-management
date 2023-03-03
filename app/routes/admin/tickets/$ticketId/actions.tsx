@@ -110,11 +110,17 @@ export async function action({ request, params }: ActionArgs) {
       );
     }
     const { assignedToUserId } = result.data;
+    const assignedTo = await prisma.user.findUnique({
+      where: { id: assignedToUserId },
+      include: { campusUserRole: true },
+    });
+    const updatedStatus =
+      assignedTo?.campusUserRole?.role === "ATTENDANT" ? 2 : 5;
     await reassignTicket({
       ticketId: ticket.id,
       assignedToUserId,
       createdByUserId: user.id,
-      ticketStatusId: ticket.ticketStatusId,
+      ticketStatusId: updatedStatus,
     });
     await sendTicketAssignmentEmail({
       ticketId: ticket.id,
@@ -146,7 +152,7 @@ export async function action({ request, params }: ActionArgs) {
         actionType === "close"
           ? 4
           : actionType === "reopen"
-          ? 1
+          ? 9
           : ticket.ticketStatusId,
     });
     return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {

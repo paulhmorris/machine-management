@@ -1,4 +1,4 @@
-import type { Ticket } from "@prisma/client";
+import type { PasswordReset, Ticket, User } from "@prisma/client";
 import dayjs from "dayjs";
 import {
   createTestAccount,
@@ -74,7 +74,7 @@ export async function sendMachineReportEmail({
       Notes: ${ticket.notes ?? "No notes"}
       <br />
       <br />
-      <a href="http://localhost:3000/close-ticket/${
+      <a href="${process.env.URL}/close-ticket/${
         ticket.secretId
       }">Resolve this ticket</a>
       `,
@@ -133,6 +133,74 @@ export async function sendTicketCloseEmail(
       <br />
       Machine ID: ${machine.publicId}
       <br />
+      `,
+    });
+    console.log("Message sent: %s", info.messageId);
+    console.log("Preview URL: %s", getTestMessageUrl(info));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function sendPasswordResetEmail({
+  email,
+  token,
+}: {
+  email: User["email"];
+  token: PasswordReset["token"];
+}) {
+  const testAccount = await createTestAccount();
+  const transporter = createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
+    },
+  });
+
+  try {
+    const info = await transporter.sendMail({
+      from: '"Fred Foo 👻" <foo@example.com>',
+      to: email,
+      subject: "Machine Manager: Password Reset",
+      html: `
+        <a href="${process.env.URL}/new-password?token=${token}">Reset your password</a>
+      `,
+    });
+    console.log("Message sent: %s", info.messageId);
+    console.log("Preview URL: %s", getTestMessageUrl(info));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function sendPasswordSetupEmail({
+  email,
+  token,
+}: {
+  email: User["email"];
+  token: PasswordReset["token"];
+}) {
+  const testAccount = await createTestAccount();
+  const transporter = createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
+    },
+  });
+
+  try {
+    const info = await transporter.sendMail({
+      from: '"Fred Foo 👻" <foo@example.com>',
+      to: email,
+      subject: "Machine Manager: Password Setup",
+      html: `
+        <a href="${process.env.URL}/setup-password?token=${token}">Setup your password</a>
       `,
     });
     console.log("Message sent: %s", info.messageId);

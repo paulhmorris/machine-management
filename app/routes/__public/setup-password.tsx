@@ -15,12 +15,8 @@ import {
   expirePasswordReset,
   getPasswordResetByToken,
 } from "~/models/passwordReset.server";
-import {
-  getUserById,
-  resetUserPassword,
-  verifyLogin,
-} from "~/models/user.server";
-import { passwordResetSchema } from "~/schemas/passwordSchemas";
+import { getUserById, setupUserPassword } from "~/models/user.server";
+import { passwordSetupSchema } from "~/schemas/passwordSchemas";
 import { getSearchParam } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
@@ -35,28 +31,25 @@ export async function loader({ request }: LoaderArgs) {
 export async function action({ request }: ActionArgs) {
   const tokenParam = getSearchParam("token", request);
   const form = Object.fromEntries(await request.formData());
-  const result = passwordResetSchema.safeParse(form);
+  const result = passwordSetupSchema.safeParse(form);
   if (!result.success) {
     return json(
       { errors: { ...result.error.flatten().fieldErrors } },
       { status: 400 }
     );
   }
-  const { oldPassword, newPassword, token } = result.data;
+  const { password, token } = result.data;
   // Make sure it's not expired again
   const reset = await getPasswordResetByToken({ token });
-  if (!reset) return redirect("/login");
-  if (reset.expiresAt < new Date()) return redirect("/login");
-  if (token !== tokenParam) return redirect("/login");
+  if (!reset || reset.expiresAt < new Date() || token !== tokenParam) {
+    return redirect("/login");
+  }
 
   const userFromToken = await getUserById(reset.userId);
   if (!userFromToken) return redirect("/login");
-  const user = await verifyLogin(userFromToken.email, oldPassword);
-  if (!user) return redirect("/login");
 
-  await resetUserPassword({ userId: user.id, password: newPassword });
+  await setupUserPassword({ userId: userFromToken.id, password });
   await expirePasswordReset({ token });
-
   return redirect("/login?passwordReset=true");
 }
 
@@ -72,7 +65,7 @@ export default function NewPassword() {
 
   return (
     <>
-      <h1 className="mb-8 text-center">Set a new password.</h1>
+      <h1 className="mb-8 text-center">Create a password.</h1>
       <Form method="post" className="mx-auto w-full max-w-sm space-y-4">
         <input
           type="hidden"
@@ -80,25 +73,16 @@ export default function NewPassword() {
           value={searchParams.get("token") ?? ""}
         />
         <Input
-          label="Old password"
-          name="oldPassword"
+          label="Password"
+          name="password"
           type="password"
-          errors={actionData?.errors.oldPassword}
-          autoComplete="current-password"
-          minLength={8}
-          required
-        />
-        <Input
-          label="New Password"
-          name="newPassword"
-          type="password"
-          errors={actionData?.errors.newPassword}
+          errors={actionData?.errors.password}
           autoComplete="new-password"
           minLength={8}
           required
         />
         <Input
-          label="Confirm New Password"
+          label="Confirm Password"
           name="confirmation"
           type="password"
           errors={actionData?.errors.confirmation}
@@ -108,7 +92,7 @@ export default function NewPassword() {
         />
         <Button type="submit" className="w-full" disabled={busy}>
           {busy && <Spinner className="mr-2" />}
-          {busy ? "Resetting..." : "Reset Password"}
+          {busy ? "Creating..." : "Create Password"}
         </Button>
       </Form>
     </>
