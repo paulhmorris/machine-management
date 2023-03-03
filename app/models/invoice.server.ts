@@ -56,6 +56,7 @@ export async function finishInvoice(data: FinishInvoiceInput) {
     where: { id: data.invoiceId },
     data: {
       invoicedOn: dayjs(data.vendorInvoiceDate).toDate(),
+      vendorInvoiceNumber: data.vendorInvoiceNumber,
       total: charges._sum.actualCost ?? 0,
       submittedOn: new Date(),
       submittedBy: { connect: { id: data.userId } },
