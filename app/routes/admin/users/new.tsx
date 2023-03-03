@@ -1,6 +1,8 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
+import type { ChangeEvent } from "react";
+import { useState } from "react";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Checkbox } from "~/components/shared/Checkbox";
@@ -16,6 +18,7 @@ import { prisma } from "~/utils/db.server";
 import { sendPasswordSetupEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
+import { useUser } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -68,11 +71,19 @@ export async function action({ request }: ActionArgs) {
 export default function NewUser() {
   const { campuses } = useLoaderData<typeof loader>();
   const transition = useTransition();
+  const user = useUser();
+  const [campusId, setCampusId] = useState<string>("");
+  const [campusRole, setCampusRole] = useState<string>("");
   const busy =
     transition.state === "submitting" ||
     ((transition.type === "actionRedirect" ||
       transition.type === "actionReload") &&
       transition.state === "loading");
+
+  function handleCampusChange(e: ChangeEvent<HTMLSelectElement>) {
+    setCampusRole("");
+    setCampusId(e.target.value);
+  }
 
   return (
     <>
@@ -89,7 +100,7 @@ export default function NewUser() {
             defaultValue="USER"
             required
           >
-            <option value="ADMIN">Admin</option>
+            {user.role === "ADMIN" && <option value="ADMIN">Admin</option>}
             <option value="USER">Vendor/Attendant</option>
           </Select>
         </div>
@@ -99,16 +110,27 @@ export default function NewUser() {
               Assign this user to a campus
             </legend>
             <div className="mt-2 space-y-2">
-              <Select label="Campus" name="campusId">
-                <option value="">Select campus</option>
+              <Select
+                label="Campus"
+                name="campusId"
+                value={campusId}
+                onChange={handleCampusChange}
+              >
+                <option value="">None</option>
                 {campuses.map((campus) => (
                   <option key={campus.id} value={campus.id}>
                     {campus.name}
                   </option>
                 ))}
               </Select>
-              <Select label="Role" name="campusRole" defaultValue="">
-                <option value="">Select a role</option>
+              <Select
+                label="Role"
+                name="campusRole"
+                value={campusRole}
+                onChange={(e) => setCampusRole(e.target.value)}
+                disabled={campusId === ""}
+              >
+                <option value="">None</option>
                 <option value="ATTENDANT">Attendant</option>
                 <option value="CAMPUS_TECH">Campus Tech</option>
                 <option value="MACHINE_TECH">Machine Tech</option>

@@ -4,14 +4,19 @@ import { classNames } from "~/utils/utils";
 
 interface Props extends TablerIconsProps {
   size?: number;
+  variant?: "white" | "blue";
 }
-export function Spinner({ size = 20, ...props }: Props) {
+export function Spinner({ size = 20, variant = "white", ...props }: Props) {
   return (
     <IconLoader2
       {...props}
       size={size}
       stroke={3}
-      className={classNames("animate-spin text-white/50", props.className)}
+      className={classNames(
+        props.className,
+        "animate-spin",
+        variant === "white" ? "text-white/50" : "text-cyan-700/50"
+      )}
     />
   );
 }

@@ -12,7 +12,7 @@ import { getFormattedEnum } from "~/utils/formatters";
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
   const users = await prisma.user.findMany({
-    include: { campusUserRole: true },
+    include: { campusUserRole: { include: { campus: true } } },
     orderBy: { lastName: "asc" },
   });
   return json({ users });
@@ -37,14 +37,23 @@ export default function UserIndex() {
             >
               <div className="flex items-center px-4 py-4 sm:px-6">
                 <div className="flex min-w-0 flex-1 items-center">
-                  <div className="min-w-0 flex-1 px-4 text-sm md:grid md:grid-cols-3 md:gap-4 ">
-                    <p className="truncate font-medium text-cyan-700">
+                  <div className="min-w-0 flex-1 px-4 text-sm md:grid md:grid-cols-12 md:gap-4 ">
+                    <p className="col-span-3 truncate font-medium text-cyan-700">
                       {user.firstName} {user.lastName}
                     </p>
-                    <p className="text-gray-500">{user.email}</p>
-                    <p className="text-gray-500">
-                      {getFormattedEnum(user.role)}
+                    <p className="col-span-4 truncate text-gray-500">
+                      {user.email}
                     </p>
+                    <p className="col-span-3 text-gray-500">
+                      {user.campusUserRole
+                        ? getFormattedEnum(user.campusUserRole.role)
+                        : getFormattedEnum(user.role)}
+                    </p>
+                    {user.campusUserRole && (
+                      <p className="col-span-2 text-gray-500">
+                        {user.campusUserRole.campus.name}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div>

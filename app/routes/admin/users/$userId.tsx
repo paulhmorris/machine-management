@@ -6,6 +6,8 @@ import {
   useLoaderData,
   useTransition,
 } from "@remix-run/react";
+import type { ChangeEvent } from "react";
+import { useState } from "react";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
@@ -18,7 +20,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, notFoundResponse } from "~/utils/utils";
+import { badRequest, notFoundResponse, useUser } from "~/utils/utils";
 
 export async function loader({ params, request }: LoaderArgs) {
   await requireAdmin(request);
@@ -57,19 +59,37 @@ export async function action({ request }: ActionArgs) {
       lastName,
       email,
       role,
-      campusUserRole: campusRole
-        ? {
-            upsert: {
-              update: { campusId },
-              create: {
-                campus: { connect: { id: campusId } },
-                role: campusRole,
-              },
-            },
-          }
-        : undefined,
+    },
+    include: {
+      campusUserRole: true,
     },
   });
+  // If they deselected the campus and campus role, but the user has one then delete it
+  if (user.campusUserRole && !campusId && !campusRole) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        campusUserRole: {
+          delete: true,
+        },
+      },
+    });
+  }
+  // If they selected a campus and campus role, but the user doesn't have one then create it
+  if (!user.campusUserRole && campusId && campusRole) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        campusUserRole: {
+          create: {
+            campusId,
+            role: campusRole,
+          },
+        },
+      },
+    });
+  }
+
   return redirectWithToast(`/admin/users/${user.id}`, session, {
     message: "User saved successfully",
     type: "success",
@@ -78,13 +98,29 @@ export async function action({ request }: ActionArgs) {
 
 export default function NewUser() {
   const { user, campuses } = useLoaderData<typeof loader>();
+  const currentUser = useUser();
   const fetcher = useFetcher();
   const transition = useTransition();
+  const [campusId, setCampusId] = useState<string>(
+    user.campusUserRole?.campusId ?? ""
+  );
+  const [campusRole, setCampusRole] = useState<string>(
+    user.campusUserRole?.role ?? ""
+  );
   const busy =
     transition.state === "submitting" ||
     ((transition.type === "actionRedirect" ||
       transition.type === "actionReload") &&
       transition.state === "loading");
+  const fetcherBusy =
+    fetcher.state === "submitting" ||
+    ((fetcher.type === "actionRedirect" || fetcher.type === "actionReload") &&
+      fetcher.state === "loading");
+
+  function handleCampusChange(e: ChangeEvent<HTMLSelectElement>) {
+    setCampusRole("");
+    setCampusId(e.target.value);
+  }
 
   return (
     <>
@@ -102,11 +138,11 @@ export default function NewUser() {
         <Button
           type="submit"
           variant="secondary"
-          disabled={busy}
+          disabled={fetcherBusy}
           className="mt-2"
         >
-          {busy && <Spinner className="mr-2" />}
-          {busy ? "Sending..." : "Send Password Reset"}
+          {fetcherBusy && <Spinner className="mr-2" variant="white" />}
+          {fetcherBusy ? "Sending..." : "Send Password Reset"}
         </Button>
       </fetcher.Form>
       <Form className="mt-4 sm:max-w-[16rem]" method="post">
@@ -128,15 +164,17 @@ export default function NewUser() {
             name="lastName"
             defaultValue={user.lastName ?? ""}
           />
-          <Select
-            label="Permissions"
-            name="role"
-            defaultValue={user.role}
-            required
-          >
-            <option value="ADMIN">Admin</option>
-            <option value="USER">Vendor/Attendant</option>
-          </Select>
+          {currentUser.role === "ADMIN" && (
+            <Select
+              label="Permissions"
+              name="role"
+              defaultValue={user.role}
+              required
+            >
+              <option value="ADMIN">Admin</option>
+              <option value="USER">Vendor/Attendant</option>
+            </Select>
+          )}
         </div>
         <div className="mt-8 border-t border-gray-200 pt-8">
           <fieldset>
@@ -147,11 +185,10 @@ export default function NewUser() {
               <Select
                 label="Campus"
                 name="campusId"
-                defaultValue={user.campusUserRole?.campusId ?? ""}
+                value={campusId}
+                onChange={handleCampusChange}
               >
-                <option value="" disabled>
-                  Select campus
-                </option>
+                <option value="">None</option>
                 {campuses.map((campus) => (
                   <option key={campus.id} value={campus.id}>
                     {campus.name}
@@ -161,11 +198,11 @@ export default function NewUser() {
               <Select
                 label="Role"
                 name="campusRole"
-                defaultValue={user.campusUserRole?.role ?? ""}
+                value={campusRole}
+                onChange={(e) => setCampusRole(e.target.value)}
+                disabled={campusId === ""}
               >
-                <option value="" disabled>
-                  Select a role
-                </option>
+                <option value="">None</option>
                 <option value="ATTENDANT">Attendant</option>
                 <option value="CAMPUS_TECH">Campus Tech</option>
                 <option value="MACHINE_TECH">Machine Tech</option>
