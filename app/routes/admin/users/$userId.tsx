@@ -141,7 +141,7 @@ export default function NewUser() {
           disabled={fetcherBusy}
           className="mt-2"
         >
-          {fetcherBusy && <Spinner className="mr-2" variant="white" />}
+          {fetcherBusy && <Spinner className="mr-2" variant="blue" />}
           {fetcherBusy ? "Sending..." : "Send Password Reset"}
         </Button>
       </fetcher.Form>
