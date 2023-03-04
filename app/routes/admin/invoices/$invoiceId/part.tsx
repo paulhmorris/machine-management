@@ -16,9 +16,9 @@ import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import { createCharge } from "~/models/charge.server";
 import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
+import { getAllParts } from "~/models/part.server";
 import { addPartSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, useMatchesData } from "~/utils/utils";
@@ -26,7 +26,7 @@ import { badRequest, useMatchesData } from "~/utils/utils";
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
   return json({
-    parts: await prisma.part.findMany(),
+    parts: await getAllParts(),
   });
 }
 

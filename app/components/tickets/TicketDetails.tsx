@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import type { ReactNode } from "react";
 import { Badge } from "~/components/shared/Badge";
 import { CustomLink } from "~/components/shared/CustomLink";
-import type { getTicketById } from "~/models/ticket.server";
+import type { getTicketByIdWithAllRelations } from "~/models/ticket.server";
 import type { TTicketStatus } from "~/utils/constants";
 import {
   getFormattedEnum,
@@ -11,7 +11,7 @@ import {
 } from "~/utils/formatters";
 
 type Props = {
-  ticket: Awaited<ReturnType<typeof getTicketById>>;
+  ticket: Awaited<ReturnType<typeof getTicketByIdWithAllRelations>>;
 };
 
 export function TicketDetails({ ticket }: Props) {

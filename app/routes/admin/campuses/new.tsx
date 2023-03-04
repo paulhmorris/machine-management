@@ -1,20 +1,16 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useTransition } from "@remix-run/react";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { newCampusSchema } from "~/schemas/campusSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-
-const newCampusSchema = z.object({
-  name: z.string(),
-});
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -36,9 +32,7 @@ export async function action({ request }: ActionArgs) {
   }
   const { name } = result.data;
   const campus = await prisma.campus.create({
-    data: {
-      name,
-    },
+    data: { name },
   });
   return redirectWithToast(`/admin/campuses/${campus.id}`, session, {
     message: "Campus created successfully",

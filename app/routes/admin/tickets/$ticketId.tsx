@@ -5,7 +5,7 @@ import { CaughtError } from "~/components/shared/CaughtError";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import { TicketDetails } from "~/components/tickets/TicketDetails";
 import { TicketNav } from "~/components/tickets/TicketNav";
-import { getTicketById } from "~/models/ticket.server";
+import { getTicketByIdWithAllRelations } from "~/models/ticket.server";
 import { requireAdmin } from "~/utils/auth.server";
 import { badRequest, notFoundResponse } from "~/utils/utils";
 
@@ -14,7 +14,7 @@ export async function loader({ request, params }: LoaderArgs) {
   const { ticketId } = params;
   if (!ticketId) throw badRequest("Ticket ID is required");
 
-  const ticket = await getTicketById(Number(ticketId));
+  const ticket = await getTicketByIdWithAllRelations(Number(ticketId));
   if (!ticket) throw notFoundResponse(`Ticket ${ticketId} not found`);
 
   return typedjson({ ticket });

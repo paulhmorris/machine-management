@@ -9,6 +9,8 @@ import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
+import { getAllLocations } from "~/models/location.server";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
@@ -23,9 +25,10 @@ const newPocketSchema = z.object({
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-  const campuses = await prisma.campus.findMany();
-  const locations = await prisma.location.findMany();
-  return json({ campuses, locations });
+  return json({
+    campuses: await getAllCampuses(),
+    locations: await getAllLocations(),
+  });
 }
 
 export async function action({ request }: ActionArgs) {

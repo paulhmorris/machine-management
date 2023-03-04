@@ -1,7 +1,11 @@
 import type { Machine, Prisma, Ticket, TicketEvent } from "@prisma/client";
 import { prisma } from "~/utils/db.server";
 
-export async function getAllTicketsWithCount({
+export function getTicketById(id: Ticket["id"]) {
+  return prisma.ticket.findUnique({ where: { id } });
+}
+
+export function getAllTicketsWithCount({
   where = {},
 }: {
   where?: Prisma.TicketWhereInput;
@@ -34,7 +38,7 @@ export async function getAllTicketsWithCount({
   });
 }
 
-export function getTicketById(id: number) {
+export function getTicketByIdWithAllRelations(id: number) {
   return prisma.ticket.findUnique({
     where: { id },
     include: {
@@ -94,37 +98,47 @@ type UpdateTicketArgs = {
   createdByUserId: TicketEvent["createdByUserId"];
   comments?: TicketEvent["comments"];
 };
-export async function reassignTicket(data: UpdateTicketArgs) {
+export async function reassignTicket({
+  ticketId,
+  ticketStatusId,
+  assignedToUserId,
+  createdByUserId,
+  comments,
+}: UpdateTicketArgs) {
   await prisma.ticketEvent.create({
     data: {
-      ticketId: data.ticketId,
-      assignedToUserId: data.assignedToUserId,
-      createdByUserId: data.createdByUserId,
-      ticketStatusId: data.ticketStatusId,
-      comments: data.comments,
+      ticketId,
+      assignedToUserId,
+      createdByUserId,
+      ticketStatusId,
+      comments,
     },
   });
-  return await prisma.ticket.update({
-    where: { id: data.ticketId },
-    data: { assignedToUserId: data.assignedToUserId },
-    select: { assignedTo: { select: { email: true } } },
+  await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { assignedToUserId, ticketStatusId },
   });
 }
 
-export async function updateTicketStatus(data: UpdateTicketArgs) {
-  await prisma.ticket.update({
-    where: { id: data.ticketId },
-    data: { ticketStatusId: data.ticketStatusId },
-  });
-
+export async function updateTicketStatus({
+  ticketId,
+  ticketStatusId,
+  assignedToUserId,
+  createdByUserId,
+  comments,
+}: UpdateTicketArgs) {
   await prisma.ticketEvent.create({
     data: {
-      ticketId: data.ticketId,
-      createdByUserId: data.createdByUserId,
-      assignedToUserId: data.assignedToUserId,
-      ticketStatusId: data.ticketStatusId,
-      comments: data.comments,
+      ticketId,
+      createdByUserId,
+      assignedToUserId,
+      ticketStatusId,
+      comments,
     },
+  });
+  await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { ticketStatusId },
   });
 }
 

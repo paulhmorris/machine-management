@@ -3,27 +3,22 @@ import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
 import { Radio } from "~/components/shared/Radio";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
+import { getAllCampuses } from "~/models/campus.server";
+import { getAllLocations } from "~/models/location.server";
+import { getAllMachineTypes } from "~/models/machine.server";
+import { getAllPockets } from "~/models/pocket.server";
+import { updateMachineSchema } from "~/schemas/machineSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, notFoundResponse } from "~/utils/utils";
-
-const updateMachineSchema = z.object({
-  id: z.string().cuid(),
-  publicId: z.string(),
-  serialNumber: z.string().optional(),
-  description: z.string().max(255).optional(),
-  machineTypeId: z.coerce.number(),
-  pocketId: z.string().cuid(),
-});
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -57,10 +52,10 @@ export async function loader({ request, params }: LoaderArgs) {
 
   return json({
     machine,
-    campuses: await prisma.campus.findMany(),
-    locations: await prisma.location.findMany(),
-    pockets: await prisma.pocket.findMany(),
-    machineTypes: await prisma.machineType.findMany(),
+    campuses: await getAllCampuses(),
+    locations: await getAllLocations(),
+    pockets: await getAllPockets(),
+    machineTypes: await getAllMachineTypes(),
   });
 }
 

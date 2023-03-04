@@ -77,3 +77,7 @@ export function getMachinesForTable({
     },
   });
 }
+
+export function getAllMachineTypes() {
+  return prisma.machineType.findMany();
+}

@@ -6,12 +6,12 @@ import { ButtonLink } from "~/components/shared/ButtonLink";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { PageHeader } from "~/components/shared/PageHeader";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
 import { requireAdmin } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-  return json({ campuses: await prisma.campus.findMany() });
+  return json({ campuses: await getAllCampuses() });
 }
 
 export default function CampusIndex() {

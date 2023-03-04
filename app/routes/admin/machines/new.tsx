@@ -2,38 +2,29 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import { useState } from "react";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
+import { getAllLocations } from "~/models/location.server";
+import { getAllMachineTypes } from "~/models/machine.server";
+import { getAllPockets } from "~/models/pocket.server";
+import { newMachineSchema } from "~/schemas/machineSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 
-const newMachineSchema = z.object({
-  publicId: z.string(),
-  serialNumber: z.string().optional(),
-  description: z.string().max(255).optional(),
-  machineTypeId: z.coerce.number(),
-  pocketId: z.string().cuid(),
-});
-
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-  const campuses = await prisma.campus.findMany();
-  const locations = await prisma.location.findMany();
-  const pockets = await prisma.pocket.findMany();
-  const machineTypes = await prisma.machineType.findMany();
-
   return json({
-    campuses,
-    locations,
-    pockets,
-    machineTypes,
+    campuses: await getAllCampuses(),
+    locations: await getAllLocations(),
+    pockets: await getAllPockets(),
+    machineTypes: await getAllMachineTypes(),
   });
 }
 

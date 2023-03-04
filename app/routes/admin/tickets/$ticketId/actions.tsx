@@ -28,20 +28,21 @@ import {
 } from "~/components/tickets/ActionForms";
 import { getCampusUsers } from "~/models/campusUser.server";
 import {
+  getTicketById,
   getTicketWithCampusId,
   reassignTicket,
   updateTicketStatus,
 } from "~/models/ticket.server";
+import { getUserWithCampusRole } from "~/models/user.server";
 import {
   ticketActionSchema,
   ticketAssignmentSchema,
 } from "~/schemas/ticketSchemas";
 import { requireAdmin } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
 import { sendMachineReportEmail as sendTicketAssignmentEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { notFoundResponse } from "~/utils/utils";
+import { badRequest, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -63,22 +64,8 @@ export async function action({ request, params }: ActionArgs) {
   const session = await getSession(request);
   await requireAdmin(request);
   const { ticketId } = params;
-  invariant(ticketId, "Ticket ID is required");
-  const ticket = await prisma.ticket.findUnique({
-    where: { id: Number(ticketId) },
-    select: {
-      id: true,
-      secretId: true,
-      reportedOn: true,
-      notes: true,
-      ticketStatusId: true,
-      errorType: true,
-      assignedToUserId: true,
-      machine: {
-        select: { publicId: true },
-      },
-    },
-  });
+  if (!ticketId) throw badRequest("Ticket ID is required");
+  const ticket = await getTicketById(Number(ticketId));
   if (!ticket) throw notFoundResponse(`Ticket ${ticketId} not found`);
 
   const form = Object.fromEntries(await request.formData());
@@ -110,10 +97,8 @@ export async function action({ request, params }: ActionArgs) {
       );
     }
     const { assignedToUserId } = result.data;
-    const assignedTo = await prisma.user.findUnique({
-      where: { id: assignedToUserId },
-      include: { campusUserRole: true },
-    });
+
+    const assignedTo = await getUserWithCampusRole(assignedToUserId);
     const updatedStatus =
       assignedTo?.campusUserRole?.role === "ATTENDANT" ? 2 : 5;
     await reassignTicket({
@@ -126,6 +111,7 @@ export async function action({ request, params }: ActionArgs) {
       ticketId: ticket.id,
       notes: comments,
     });
+
     return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
       message: "Ticket assigned successfully",
       type: "success",

@@ -1,27 +1,22 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
+import { newLocationSchema } from "~/schemas/locationSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 
-const newLocationSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  campusId: z.string().cuid(),
-});
-
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
-  const campuses = await prisma.campus.findMany();
+  const campuses = await getAllCampuses();
 
   return json({ campuses });
 }

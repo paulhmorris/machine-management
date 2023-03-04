@@ -2,28 +2,24 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getCampusById } from "~/models/campus.server";
+import { updateCampusSchema } from "~/schemas/campusSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, notFoundResponse } from "~/utils/utils";
 
-const updateCampusSchema = z.object({
-  id: z.string().cuid(),
-  name: z.string(),
-});
-
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
   const { campusId } = params;
   if (!campusId) throw badRequest("Campus ID is required");
-  const campus = await prisma.campus.findUnique({ where: { id: campusId } });
+  const campus = await getCampusById(campusId);
   if (!campus) throw notFoundResponse(`Campus ${campusId} not found`);
   return json({ campus });
 }

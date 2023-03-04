@@ -2,7 +2,6 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
-import { z } from "zod";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
@@ -10,18 +9,13 @@ import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import { getAllCampuses } from "~/models/campus.server";
+import { updateLocationSchema } from "~/schemas/locationSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, notFoundResponse } from "~/utils/utils";
-
-const updateLocationSchema = z.object({
-  id: z.string().cuid(),
-  name: z.string(),
-  description: z.string().max(255).optional(),
-  campusId: z.string().cuid(),
-});
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -46,7 +40,7 @@ export async function loader({ request, params }: LoaderArgs) {
 
   return json({
     location,
-    campuses: await prisma.campus.findMany(),
+    campuses: await getAllCampuses(),
   });
 }
 

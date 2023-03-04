@@ -6,7 +6,7 @@ import {
   getTestMessageUrl,
 } from "nodemailer";
 import { getMachineForRequestEmail as getMachineForEmail } from "~/models/machine.server";
-import { getTicketById } from "~/models/ticket.server";
+import { getTicketByIdWithAllRelations } from "~/models/ticket.server";
 import { badRequest } from "~/utils/utils";
 
 type MachineReportEmailData = {
@@ -17,7 +17,7 @@ export async function sendMachineReportEmail({
   ticketId,
   notes,
 }: MachineReportEmailData) {
-  const ticket = await getTicketById(ticketId);
+  const ticket = await getTicketByIdWithAllRelations(ticketId);
   if (!ticket) {
     return badRequest("Ticket not found, unable to send email.");
   }
@@ -91,7 +91,7 @@ export async function sendTicketCloseEmail(
   notes: string,
   email: string
 ) {
-  const ticket = await getTicketById(ticketId);
+  const ticket = await getTicketByIdWithAllRelations(ticketId);
   if (!ticket) {
     return badRequest("Ticket not found, unable to send email.");
   }
