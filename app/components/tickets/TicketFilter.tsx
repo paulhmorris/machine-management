@@ -6,17 +6,14 @@ import { Button } from "~/components/shared/Button";
 import { Input } from "~/components/shared/Input";
 import type { Filter } from "~/components/shared/TableFilters";
 import { TableFilters } from "~/components/shared/TableFilters";
+import { getBusyState } from "~/utils/utils";
 
 type Props = {
   ticketStatuses: TicketStatus[];
 };
 export function TicketFilter({ ticketStatuses }: Props) {
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
   const [searchParams] = useSearchParams();
 
   const urlStatuses = searchParams.getAll("status[]");

@@ -18,7 +18,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, notFoundResponse } from "~/utils/utils";
+import { badRequest, getBusyState, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -100,11 +100,7 @@ export default function Machine() {
   const [locationId, setLocationId] = useState<string>(machineLocationId);
 
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   return (
     <>

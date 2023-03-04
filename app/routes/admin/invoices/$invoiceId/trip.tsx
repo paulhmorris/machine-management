@@ -14,7 +14,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, useMatchesData } from "~/utils/utils";
+import { badRequest, getBusyState, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
@@ -58,11 +58,7 @@ export default function AddTrip() {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   return (
     <Form

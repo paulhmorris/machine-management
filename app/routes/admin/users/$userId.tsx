@@ -20,7 +20,12 @@ import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, notFoundResponse, useUser } from "~/utils/utils";
+import {
+  badRequest,
+  getBusyState,
+  notFoundResponse,
+  useUser,
+} from "~/utils/utils";
 
 export async function loader({ params, request }: LoaderArgs) {
   await requireAdmin(request);
@@ -107,11 +112,7 @@ export default function NewUser() {
   const [campusRole, setCampusRole] = useState<string>(
     user.campusUserRole?.role ?? ""
   );
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
   const fetcherBusy =
     fetcher.state === "submitting" ||
     ((fetcher.type === "actionRedirect" || fetcher.type === "actionReload") &&

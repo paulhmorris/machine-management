@@ -15,7 +15,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, useMatchesData } from "~/utils/utils";
+import { badRequest, getBusyState, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
@@ -55,11 +55,7 @@ export async function action({ params, request }: ActionArgs) {
 
 export default function AddLabor() {
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
   const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };

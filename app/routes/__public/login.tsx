@@ -18,6 +18,7 @@ import { UncaughtError } from "~/components/shared/UncaughtError";
 import { verifyLogin } from "~/models/user.server";
 import { loginSchema } from "~/schemas/loginSchemas";
 import { createUserSession, getUserId } from "~/utils/session.server";
+import { getBusyState } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const userId = await getUserId(request);
@@ -65,11 +66,7 @@ export default function LoginPage() {
   const tokenExpired = searchParams.get("tokenExpired");
   const actionData = useActionData<typeof action>();
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   useEffect(() => {
     if (passwordWasReset) {

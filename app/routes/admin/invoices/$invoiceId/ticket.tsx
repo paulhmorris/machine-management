@@ -11,7 +11,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, notFoundResponse } from "~/utils/utils";
+import { badRequest, getBusyState, notFoundResponse } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
@@ -77,11 +77,7 @@ export async function action({ params, request }: ActionArgs) {
 export default function AddTicket() {
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   return (
     <Form

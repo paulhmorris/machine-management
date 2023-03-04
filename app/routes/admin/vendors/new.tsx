@@ -8,11 +8,12 @@ import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import { getAllCampuses } from "~/models/campus.server";
+import { createVendor } from "~/models/vendor.server";
 import { newVendorSchema } from "~/schemas/vendorSchemas";
 import { requireAdmin } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
+import { getBusyState } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -36,16 +37,10 @@ export async function action({ request }: ActionArgs) {
       { type: "error", message: "Error creating vendor" }
     );
   }
-  const { name, campusId, hourlyRate, tripCharge } = result.data;
-  const vendor = await prisma.vendor.create({
-    data: {
-      name,
-      hourlyRate,
-      tripCharge,
-      campuses: {
-        connect: { id: campusId },
-      },
-    },
+
+  const vendor = await createVendor({
+    ...result.data,
+    campuses: { connect: { id: result.data.campusId } },
   });
   return redirectWithToast(`/admin/vendors/${vendor.id}`, session, {
     message: "Vendor created successfully",
@@ -56,11 +51,7 @@ export async function action({ request }: ActionArgs) {
 export default function NewVendor() {
   const { campuses } = useLoaderData<typeof loader>();
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   return (
     <>

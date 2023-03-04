@@ -13,6 +13,7 @@ import {
 } from "~/models/passwordReset.server";
 import { getUserByEmail } from "~/models/user.server";
 import { sendPasswordResetEmail } from "~/utils/mail.server";
+import { getBusyState } from "~/utils/utils";
 
 export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
@@ -49,11 +50,7 @@ export async function action({ request }: ActionArgs) {
 export default function ResetPassword() {
   const actionData = useActionData<typeof action>();
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   return (
     <>

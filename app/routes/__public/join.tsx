@@ -18,6 +18,7 @@ import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { joinSchema } from "~/schemas/loginSchemas";
+import { getBusyState } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const userId = await getUserId(request);
@@ -71,11 +72,7 @@ export default function Join() {
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {

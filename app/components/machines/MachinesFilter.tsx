@@ -6,6 +6,7 @@ import { Select } from "~/components/shared/Select";
 import type { Filter } from "~/components/shared/TableFilters";
 import { TableFilters } from "~/components/shared/TableFilters";
 import type { MachineQueryParam } from "~/routes/admin/machines";
+import { getBusyState } from "~/utils/utils";
 
 type Props = {
   campuses: Array<Pick<Campus, "id" | "name">>;
@@ -14,11 +15,7 @@ type Props = {
 };
 export function MachinesFilter({ campuses, locations, machineTypes }: Props) {
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   const filters: Array<Filter<MachineQueryParam>> = [
     {

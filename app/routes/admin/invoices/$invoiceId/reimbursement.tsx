@@ -10,7 +10,7 @@ import { addReimbursementSchema } from "~/schemas/invoiceSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, useMatchesData } from "~/utils/utils";
+import { badRequest, getBusyState, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionArgs) {
   await requireAdmin(request);
@@ -57,11 +57,7 @@ export default function AddLabor() {
   };
   const transition = useTransition();
   const actionData = useActionData<typeof action>();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   return (
     <Form className="flex max-w-xs flex-col gap-3" method="post" replace>

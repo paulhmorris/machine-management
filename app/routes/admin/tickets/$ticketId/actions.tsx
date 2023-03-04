@@ -39,10 +39,15 @@ import {
   ticketAssignmentSchema,
 } from "~/schemas/ticketSchemas";
 import { requireAdmin } from "~/utils/auth.server";
-import { sendMachineReportEmail as sendTicketAssignmentEmail } from "~/utils/mail.server";
+import { sendMachineReportEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, notFoundResponse } from "~/utils/utils";
+import {
+  badRequest,
+  getBusyState,
+  getTicketActionAvailability,
+  notFoundResponse,
+} from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -107,10 +112,7 @@ export async function action({ request, params }: ActionArgs) {
       createdByUserId: user.id,
       ticketStatusId: updatedStatus,
     });
-    await sendTicketAssignmentEmail({
-      ticketId: ticket.id,
-      notes: comments,
-    });
+    await sendMachineReportEmail({ ticketId: ticket.id, notes: comments });
 
     return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
       message: "Ticket assigned successfully",
@@ -157,48 +159,21 @@ export default function TicketActions() {
   const { ticket, campusUsers } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
   const formName =
     searchParams.get("form") ?? (ticket.status.id === 4 ? "reopen" : "close");
 
-  const attendants = campusUsers.filter((user) => user.role === "ATTENDANT");
+  const attendants = campusUsers.filter(({ role }) => role === "ATTENDANT");
   const machineTechs = campusUsers.filter(
-    (user) => user.role === "MACHINE_TECH"
+    ({ role }) => role === "MACHINE_TECH"
   );
-  const campusTechs = campusUsers.filter((user) => user.role === "CAMPUS_TECH");
-
-  function actionIsAvailable(actionName: string, statusId: number) {
-    const canClose = [1, 2, 3, 5, 6, 7, 8, 9, 10];
-    const canAssignAttendant = [1, 8, 9];
-    const canAssignTech = [1, 2, 8, 9, 10];
-    const canReopen = 4;
-
-    switch (actionName) {
-      case "close":
-        return canClose.includes(statusId);
-      case "attendant":
-        return canAssignAttendant.includes(statusId);
-      case "machineTech":
-      case "campusTech":
-        return canAssignTech.includes(statusId);
-      case "reopen":
-        return statusId === canReopen;
-      case "note":
-        return true;
-      default:
-        return false;
-    }
-  }
+  const campusTechs = campusUsers.filter(({ role }) => role === "CAMPUS_TECH");
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-start gap-4">
         {actions.map((action) => {
-          if (actionIsAvailable(action.name, ticket.status.id)) {
+          if (getTicketActionAvailability(action.name, ticket.status.id)) {
             return (
               <ButtonLink
                 to={`?form=${action.name}`}

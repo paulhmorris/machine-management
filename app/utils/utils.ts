@@ -1,6 +1,7 @@
 import type { Charge, ChargeType } from "@prisma/client";
 import { json, Response } from "@remix-run/node";
 import { useMatches } from "@remix-run/react";
+import type { Transition } from "@remix-run/react/dist/transition";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
@@ -115,4 +116,39 @@ export function calculateTotalByType(
     }
     return acc;
   }, 0);
+}
+
+export function getBusyState(transition: Transition) {
+  return (
+    transition.state === "submitting" ||
+    ((transition.type === "actionRedirect" ||
+      transition.type === "actionReload") &&
+      transition.state === "loading")
+  );
+}
+
+export function getTicketActionAvailability(
+  actionName: string,
+  statusId: number
+) {
+  const canClose = [1, 2, 3, 5, 6, 7, 8, 9, 10];
+  const canAssignAttendant = [1, 8, 9];
+  const canAssignTech = [1, 2, 8, 9, 10];
+  const canReopen = 4;
+
+  switch (actionName) {
+    case "close":
+      return canClose.includes(statusId);
+    case "attendant":
+      return canAssignAttendant.includes(statusId);
+    case "machineTech":
+    case "campusTech":
+      return canAssignTech.includes(statusId);
+    case "reopen":
+      return statusId === canReopen;
+    case "note":
+      return true;
+    default:
+      return false;
+  }
 }

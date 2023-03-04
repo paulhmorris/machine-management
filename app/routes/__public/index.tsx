@@ -9,6 +9,7 @@ import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import { prisma } from "~/utils/db.server";
+import { getBusyState } from "~/utils/utils";
 
 const machineSearchSchema = z.object({
   machineId: z.string().min(1, "Machine number is required"),
@@ -38,11 +39,7 @@ export async function action({ request }: ActionArgs) {
 
 export default function Index() {
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
   const machineIdRef = useRef<HTMLInputElement>(null);
   const actionData = useActionData<typeof action>();
 

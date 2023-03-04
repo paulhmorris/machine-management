@@ -18,7 +18,7 @@ import { prisma } from "~/utils/db.server";
 import { sendPasswordSetupEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { useUser } from "~/utils/utils";
+import { getBusyState, useUser } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -74,11 +74,7 @@ export default function NewUser() {
   const user = useUser();
   const [campusId, setCampusId] = useState<string>("");
   const [campusRole, setCampusRole] = useState<string>("");
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
 
   function handleCampusChange(e: ChangeEvent<HTMLSelectElement>) {
     setCampusRole("");

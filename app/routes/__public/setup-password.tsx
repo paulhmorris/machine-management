@@ -17,7 +17,7 @@ import {
 } from "~/models/passwordReset.server";
 import { getUserById, setupUserPassword } from "~/models/user.server";
 import { passwordSetupSchema } from "~/schemas/passwordSchemas";
-import { getSearchParam } from "~/utils/utils";
+import { getBusyState, getSearchParam } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   const token = getSearchParam("token", request);
@@ -56,11 +56,7 @@ export async function action({ request }: ActionArgs) {
 export default function NewPassword() {
   const [searchParams] = useSearchParams();
   const transition = useTransition();
-  const busy =
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" ||
-      transition.type === "actionReload") &&
-      transition.state === "loading");
+  const busy = getBusyState(transition);
   const actionData = useActionData<typeof action>();
 
   return (
