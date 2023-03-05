@@ -17,6 +17,7 @@ export function getInvoiceWithAllRelations(invoiceId: Invoice["id"]) {
 
 export function getInvoicesForIndex() {
   return prisma.invoice.findMany({
+    where: { submittedOn: { not: null } },
     include: {
       vendor: true,
       campus: true,

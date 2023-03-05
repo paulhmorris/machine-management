@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Input } from "~/components/shared/Input";
+import { Radio } from "~/components/shared/Radio";
 import { Select } from "~/components/shared/Select";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
@@ -75,6 +76,7 @@ export default function NewMachine() {
           label="Machine Id"
           name="publicId"
           placeholder="ABC123"
+          description="This must be unique."
           required
         />
         <Input
@@ -85,16 +87,20 @@ export default function NewMachine() {
         <Input
           label="Description"
           name="description"
-          placeholder="It's really cute."
+          placeholder="Maytag Neptune"
           maxLength={255}
         />
-        <Select label="Type" name="machineTypeId" required>
+        <ul className="mt-1 flex gap-4">
           {machineTypes.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
+            <Radio
+              required
+              label={type.name}
+              name="machineTypeId"
+              key={type.id}
+              value={type.id}
+            />
           ))}
-        </Select>
+        </ul>
         <Select
           label="Campus"
           name="campusId"

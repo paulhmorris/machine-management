@@ -65,12 +65,7 @@ export default function Vendor() {
       </p>
       <Form className="mt-4 space-y-4 sm:max-w-[20rem]" method="post">
         <input type="hidden" name="id" value={campus.id} />
-        <Input
-          label="Campus Name"
-          name="name"
-          defaultValue={campus.name}
-          required
-        />
+        <Input label="Name" name="name" defaultValue={campus.name} required />
         <div className="flex items-center gap-2">
           <Button type="submit" disabled={busy}>
             {busy && <Spinner className="mr-2" />}

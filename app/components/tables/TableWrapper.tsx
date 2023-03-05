@@ -9,7 +9,7 @@ export function TableWrapper({ children }: Props) {
           {children}
         </table>
         <p className="mt-8 text-center text-sm font-medium opacity-50">
-          You've reached the end! 🎉
+          You've reached the end.
         </p>
       </div>
     </div>

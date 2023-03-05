@@ -15,7 +15,7 @@ export function Radio(props: RadioProps) {
         id={props.value?.toString()}
         name={props.name}
         type="radio"
-        className="h-4 w-4 cursor-pointer border-gray-300 text-cyan-700 transition duration-75 focus:ring-cyan-700"
+        className="h-4 w-4 cursor-pointer border-gray-300 text-cyan-700 transition duration-75 focus:ring-cyan-700/25"
       />
       <label
         htmlFor={props.value?.toString()}

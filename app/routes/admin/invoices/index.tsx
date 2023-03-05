@@ -37,7 +37,7 @@ export default function InvoiceIndex() {
     { key: "vendor", title: "Vendor", sortable: true },
     { key: "invoicedOn", title: "Invoice Date", sortable: true },
     { key: "vendorInvoiceNumber", title: "Invoice #", sortable: false },
-    { key: "submittedOn", title: "Submit Date", sortable: true },
+    { key: "submittedOn", title: "Submitted", sortable: true },
     { key: "total", title: "Total", sortable: false },
   ];
 
