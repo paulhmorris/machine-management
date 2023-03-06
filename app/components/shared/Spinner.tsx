@@ -14,7 +14,7 @@ export function Spinner({ size = 20, variant = "white", ...props }: Props) {
       stroke={3}
       className={classNames(
         props.className,
-        "animate-spin",
+        "animate-spin transition-opacity",
         variant === "white" ? "text-white/50" : "text-cyan-700/50"
       )}
     />

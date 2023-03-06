@@ -1,26 +1,36 @@
-import { Form, Link, NavLink } from "@remix-run/react";
+import { Form, Link, NavLink, useTransition } from "@remix-run/react";
 import {
   IconBuildingBank,
   IconDoor,
   IconFileDollar,
+  IconLoader,
   IconMapPins,
   IconTicket,
   IconUser,
   IconUsers,
   IconWashMachine,
 } from "@tabler/icons-react";
-import { useUser } from "~/utils/utils";
+import { useSpinDelay } from "spin-delay";
+import { classNames, useUser } from "~/utils/utils";
 
 export function AdminNav() {
   const user = useUser();
+  const transition = useTransition();
+  const showSpinner = useSpinDelay(transition.state !== "idle");
   return (
     <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6 text-[15px]">
       <nav>
-        <Link to="/" className="inline-flex items-center px-1">
+        <Link to="/" className="flex items-center px-1">
           <IconWashMachine size={48} className="text-cyan-700" />
           <span className="text-sm font-bold text-cyan-700">
             Machine Manager
           </span>
+          <IconLoader
+            className={classNames(
+              showSpinner ? "opacity-100" : "opacity-0",
+              "ml-6 animate-spin text-gray-400 transition-opacity"
+            )}
+          />
         </Link>
         <ul className="mt-10 space-y-2 border-b border-gray-200 pb-6">
           {nav
