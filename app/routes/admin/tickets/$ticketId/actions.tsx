@@ -1,20 +1,16 @@
+import { Tab } from "@headlessui/react";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import {
-  Form,
-  useLoaderData,
-  useSearchParams,
-  useTransition,
-} from "@remix-run/react";
+import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import {
   IconLock,
   IconLockOpen,
   IconNotes,
   IconUserPlus,
 } from "@tabler/icons-react";
+import { Fragment } from "react";
 import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
-import { ButtonLink } from "~/components/shared/ButtonLink";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
@@ -45,7 +41,7 @@ import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import {
   badRequest,
   getBusyState,
-  getTicketActionAvailability,
+  getTicketActionAvailability as actionIsAvailable,
   notFoundResponse,
 } from "~/utils/utils";
 
@@ -157,11 +153,8 @@ export async function action({ request, params }: ActionArgs) {
 
 export default function TicketActions() {
   const { ticket, campusUsers } = useLoaderData<typeof loader>();
-  const [searchParams] = useSearchParams();
   const transition = useTransition();
   const busy = getBusyState(transition);
-  const formName =
-    searchParams.get("form") ?? (ticket.status.id === 4 ? "reopen" : "close");
 
   const attendants = campusUsers.filter(({ role }) => role === "ATTENDANT");
   const machineTechs = campusUsers.filter(
@@ -171,44 +164,52 @@ export default function TicketActions() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex justify-start gap-4">
-        {actions.map((action) => {
-          if (getTicketActionAvailability(action.name, ticket.status.id)) {
+      <Tab.Group>
+        <Tab.List as="div" className="flex flex-wrap justify-start gap-4">
+          {actions.map((action) => {
             return (
-              <ButtonLink
-                to={`?form=${action.name}`}
-                replace={true}
-                variant={action.name === formName ? "primary" : "secondary"}
+              <Tab
                 key={action.name}
+                disabled={!actionIsAvailable(action.name, ticket.status.id)}
+                className="disabled:pointer-events-none disabled:opacity-50"
               >
-                {action.title}
-                {action.icon}
-              </ButtonLink>
+                {({ selected }) => (
+                  <Button variant={selected ? "primary" : "secondary"}>
+                    {action.title}
+                    {action.icon}
+                  </Button>
+                )}
+              </Tab>
             );
-          }
-          return null;
-        })}
-      </div>
-      <Form method="post" className="max-w-sm space-y-4">
-        {formName === "close" ? (
-          <CloseForm />
-        ) : formName === "attendant" ? (
-          <AttendantForm campusUsers={attendants} />
-        ) : formName === "machineTech" ? (
-          <MachineTechForm campusUsers={machineTechs} />
-        ) : formName === "campusTech" ? (
-          <CampusTechForm campusUsers={campusTechs} />
-        ) : formName === "note" ? (
-          <AddNoteForm />
-        ) : formName === "reopen" ? (
-          <ReopenForm />
-        ) : null}
-        <Button type="submit" disabled={busy}>
-          {" "}
-          {busy && <Spinner className="mr-2" />}
-          {busy ? "Submitting..." : "Submit"}
-        </Button>
-      </Form>
+          })}
+        </Tab.List>
+        <Form method="post" className="max-w-sm">
+          <Tab.Panels as={Fragment}>
+            <Tab.Panel>
+              <CloseForm />
+            </Tab.Panel>
+            <Tab.Panel>
+              <AttendantForm campusUsers={attendants} />
+            </Tab.Panel>
+            <Tab.Panel>
+              <MachineTechForm campusUsers={machineTechs} />
+            </Tab.Panel>
+            <Tab.Panel>
+              <CampusTechForm campusUsers={campusTechs} />
+            </Tab.Panel>
+            <Tab.Panel>
+              <AddNoteForm />
+            </Tab.Panel>
+            <Tab.Panel>
+              <ReopenForm />
+            </Tab.Panel>
+          </Tab.Panels>
+          <Button type="submit" disabled={busy} className="mt-4">
+            {busy && <Spinner className="mr-2" />}
+            {busy ? "Submitting..." : "Submit"}
+          </Button>
+        </Form>
+      </Tab.Group>
     </div>
   );
 }

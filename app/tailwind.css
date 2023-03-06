@@ -3,10 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply text-gray-600;
-  }
-
   h1 {
     @apply text-3xl font-extrabold;
   }

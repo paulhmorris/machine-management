@@ -25,6 +25,7 @@ export function formatDateWithTime(date: string | Date) {
 export function getTicketStatusBadgeColor(status: string): BadgeProps["color"] {
   switch (status) {
     case "New":
+    case "Reopened":
       return "bg-blue-100 text-blue-800 border-blue-300";
     case "Awaiting Inspection":
     case "Tech Repair Requested":
@@ -36,7 +37,6 @@ export function getTicketStatusBadgeColor(status: string): BadgeProps["color"] {
     case "Tech Repair Acknowledged":
     case "Tech Repair Scheduled":
       return "bg-green-100 text-green-800 border-green-300";
-    case "Reopened":
     case "Inspected, Needs Service":
       return "bg-red-100 text-red-800 border-red-300";
     default:

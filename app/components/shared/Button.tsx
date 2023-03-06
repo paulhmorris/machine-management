@@ -22,7 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             "border-transparent bg-transparent text-cyan-700 focus:ring-cyan-600/50 hover:enabled:bg-gray-100",
           variant === "danger" &&
             "border-red-600 bg-red-600 text-white shadow-sm focus:ring-red-700/50 hover:enabled:border-red-700 hover:enabled:bg-red-700",
-          "inline-flex items-center justify-center space-x-2 rounded-md border px-4 py-4 text-base font-medium transition duration-75 focus:outline-none focus:ring-2  focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:py-2 sm:text-sm",
+          "inline-flex items-center justify-center gap-2 rounded-md border px-4 py-4 text-base font-medium transition duration-75 focus:outline-none focus:ring-2  focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:py-2 sm:text-sm",
           props.className
         )}
       >

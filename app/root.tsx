@@ -43,8 +43,9 @@ export const meta: MetaFunction = () => ({
 export async function loader({ request }: LoaderArgs) {
   const session = await getSession(request);
   const toast = getGlobalToast(session);
+  const user = await getUser(request);
   return json(
-    { user: await getUser(request), toast },
+    { user, toast },
     {
       headers: {
         "Set-Cookie": await sessionStorage.commitSession(session),
@@ -62,7 +63,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body className="h-full text-gray-600">
         <Notifications serverToast={toast} />
         <Outlet />
         <ScrollRestoration />
