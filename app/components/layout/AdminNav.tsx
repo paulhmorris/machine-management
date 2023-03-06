@@ -28,7 +28,7 @@ export function AdminNav() {
           <IconLoader
             className={classNames(
               showSpinner ? "opacity-100" : "opacity-0",
-              "ml-6 animate-spin text-gray-400 transition-opacity"
+              "ml-2 animate-spin text-gray-400 transition-opacity"
             )}
           />
         </Link>
