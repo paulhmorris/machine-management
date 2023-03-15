@@ -1,4 +1,4 @@
-import type { Charge, ChargeType } from "@prisma/client";
+import type { Charge } from "@prisma/client";
 import { json, Response } from "@remix-run/node";
 import { useMatches } from "@remix-run/react";
 import type { Transition } from "@remix-run/react/dist/transition";
@@ -107,7 +107,7 @@ export function wait(ms: number): Promise<void> {
 }
 
 export function calculateTotalByType(
-  charges: Array<Charge & { type: ChargeType }>,
+  charges: Array<Pick<Charge, "actualCost" | "typeId">>,
   typeId: Charge["typeId"]
 ) {
   return charges.reduce((acc, charge) => {

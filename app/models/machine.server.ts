@@ -4,17 +4,19 @@ import { prisma } from "~/utils/db.server";
 export function getMachineForReport(publicId: Machine["publicId"]) {
   return prisma.machine.findUnique({
     where: { publicId: publicId.toUpperCase() },
-    include: {
+    select: {
+      type: true,
+      publicId: true,
       pocket: {
-        include: {
+        select: {
           location: {
-            include: {
-              campus: true,
+            select: {
+              name: true,
+              campus: { select: { name: true } },
             },
           },
         },
       },
-      type: true,
     },
   });
 }

@@ -8,12 +8,16 @@ export function getPasswordResetByToken({
 }: {
   token: PasswordReset["token"];
 }) {
-  return prisma.passwordReset.findUnique({ where: { token } });
+  return prisma.passwordReset.findUnique({
+    where: { token },
+    select: { expiresAt: true, userId: true },
+  });
 }
 
 export function getCurrentPasswordReset({ userId }: { userId: User["id"] }) {
   return prisma.passwordReset.findFirst({
     where: { userId, expiresAt: { gte: new Date() } },
+    select: { id: true },
   });
 }
 

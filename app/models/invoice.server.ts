@@ -5,19 +5,36 @@ import { prisma } from "~/utils/db.server";
 export function getInvoiceWithAllRelations(invoiceId: Invoice["id"]) {
   return prisma.invoice.findUnique({
     where: { id: invoiceId },
-    include: {
-      tickets: true,
-      campus: true,
-      charges: { include: { type: true, part: true } },
-      vendor: true,
+    select: {
+      id: true,
       submittedBy: true,
+      campus: {
+        select: { name: true },
+      },
+      tickets: {
+        select: { id: true },
+      },
+      vendor: {
+        select: { name: true, hourlyRate: true, tripCharge: true },
+      },
+      charges: {
+        select: {
+          id: true,
+          description: true,
+          warrantyCovered: true,
+          actualCost: true,
+          ticketId: true,
+          type: true,
+          typeId: true,
+          part: true,
+        },
+      },
     },
   });
 }
 
 export function getInvoicesForIndex() {
   return prisma.invoice.findMany({
-    where: { submittedOn: { not: null } },
     include: {
       vendor: true,
       campus: true,

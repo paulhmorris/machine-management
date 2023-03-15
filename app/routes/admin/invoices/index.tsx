@@ -32,7 +32,7 @@ export default function InvoiceIndex() {
     invoices,
     { key: "invoicedOn", direction: "desc" }
   );
-  const inProgressInvoices = items.filter((i) => !i.submittedOn);
+  const inProgressInvoices = invoices.filter((i) => !i.submittedOn);
   const columns: Array<TableColumn<typeof invoices>> = [
     { key: "vendor", title: "Vendor", sortable: true },
     { key: "invoicedOn", title: "Invoice Date", sortable: true },
@@ -50,10 +50,11 @@ export default function InvoiceIndex() {
         href="/admin/invoices/new"
       />
       {inProgressInvoices.length > 0 && (
-        <section className="mb-4">
+        <section className="mb-6">
           <InProgressInvoices invoices={inProgressInvoices} />
         </section>
       )}
+      <h2>Billed</h2>
       <TableWrapper>
         <TableHead
           columns={columns}

@@ -1,7 +1,11 @@
 import type { Ticket } from "@prisma/client";
 import { Select } from "~/components/shared/Select";
 
-export function TicketSelect({ tickets }: { tickets: Ticket[] }) {
+export function TicketSelect({
+  tickets,
+}: {
+  tickets: Array<Pick<Ticket, "id">>;
+}) {
   return (
     <Select name="ticketId" label="Ticket" required className="sm:w-40">
       <option value="" disabled>

@@ -1,12 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { IconX } from "@tabler/icons-react";
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { Fragment } from "react";
 
 type Props = {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function Modal({ open, setOpen, children }: Props) {

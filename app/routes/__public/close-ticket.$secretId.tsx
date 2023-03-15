@@ -19,6 +19,7 @@ export async function loader({ params }: LoaderArgs) {
   const { secretId } = params;
   const ticket = await prisma.ticket.findUnique({
     where: { secretId },
+    select: { id: true },
   });
   if (!ticket) {
     return redirect("/");
