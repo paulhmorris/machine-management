@@ -29,22 +29,17 @@ export async function action({ request }: ActionArgs) {
   const session = await getSession(request);
   const formData = await request.formData();
   const form = Object.fromEntries(formData);
-  // @ts-expect-error - This is required to get multiple selected checkbox values to be an array
-  form.campusIds = formData.getAll("campusIds");
 
   const result = updateCampusSchema.safeParse(form);
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 },
-      session,
-      { type: "error", message: "Error saving vendor" }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 }, session, {
+      type: "error",
+      message: "Error saving campus",
+    });
   }
-  const { id, name } = result.data;
   const campus = await prisma.campus.update({
-    where: { id },
-    data: { name },
+    where: { id: result.data.id },
+    data: { ...result.data },
   });
   return redirectWithToast(`/admin/campuses/${campus.id}`, session, {
     message: "Campus saved successfully",
@@ -52,7 +47,7 @@ export async function action({ request }: ActionArgs) {
   });
 }
 
-export default function Vendor() {
+export default function Campus() {
   const { campus } = useLoaderData<typeof loader>();
   const transition = useTransition();
   const busy = getBusyState(transition);
@@ -60,12 +55,18 @@ export default function Vendor() {
   return (
     <>
       <h1>{campus.name}</h1>
-      <p className="mt-0.5 text-sm text-gray-400">
-        Last updated {dayjs(campus.updatedAt).format("M/D/YYYY h:mm a")}
-      </p>
+      <p className="mt-0.5 text-sm text-gray-400">Last updated {dayjs(campus.updatedAt).format("M/D/YYYY h:mm a")}</p>
       <Form className="mt-4 space-y-4 sm:max-w-[20rem]" method="post">
         <input type="hidden" name="id" value={campus.id} />
         <Input label="Name" name="name" defaultValue={campus.name} required />
+        <Input
+          label="Monthly Management Fee"
+          name="monthlyFee"
+          defaultValue={campus.monthlyFee}
+          description="A line item for this amount will be automatically added to monthly invoices"
+          isCurrency
+          required
+        />
         <div className="flex items-center gap-2">
           <Button type="submit" disabled={busy}>
             {busy && <Spinner className="mr-2" />}

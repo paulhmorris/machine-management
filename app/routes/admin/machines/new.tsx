@@ -36,15 +36,12 @@ export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = newMachineSchema.safeParse(form);
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 },
-      session,
-      { type: "error", message: "Error creating machine" }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 }, session, {
+      type: "error",
+      message: "Error creating machine",
+    });
   }
-  const { publicId, serialNumber, description, machineTypeId, pocketId } =
-    result.data;
+  const { publicId, serialNumber, description, machineTypeId, pocketId } = result.data;
   const machine = await prisma.machine.create({
     data: {
       publicId,
@@ -61,8 +58,7 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function NewMachine() {
-  const { campuses, locations, pockets, machineTypes } =
-    useLoaderData<typeof loader>();
+  const { campuses, locations, pockets, machineTypes } = useLoaderData<typeof loader>();
   const transition = useTransition();
   const busy = getBusyState(transition);
   const [campusId, setCampusId] = useState<string>("");
@@ -72,42 +68,26 @@ export default function NewMachine() {
     <>
       <h1>New Machine</h1>
       <Form className="mt-4 space-y-4 sm:max-w-[16rem]" method="post">
-        <Input
-          label="Machine Id"
-          name="publicId"
-          placeholder="ABC123"
-          description="This must be unique."
-          required
-        />
+        <Input label="Machine Id" name="publicId" placeholder="ABC123" description="This must be unique." required />
         <Input
           label="Serial Number"
           name="serialNumber"
           placeholder="SN-1234567890"
+          description="Scan barcode to autofill this field"
         />
         <Input
-          label="Description"
-          name="description"
-          placeholder="Maytag Neptune"
-          maxLength={255}
+          label="Model Number"
+          name="modelNumber"
+          placeholder="MAH6500AWW"
+          description="Scan barcode to autofill this field"
         />
+        <Input label="Description" name="description" placeholder="Maytag Neptune" maxLength={255} />
         <ul className="mt-1 flex gap-4">
           {machineTypes.map((type) => (
-            <Radio
-              required
-              label={type.name}
-              name="machineTypeId"
-              key={type.id}
-              value={type.id}
-            />
+            <Radio required label={type.name} name="machineTypeId" key={type.id} value={type.id} />
           ))}
         </ul>
-        <Select
-          label="Campus"
-          name="campusId"
-          defaultValue=""
-          onChange={(e) => setCampusId(e.target.value)}
-          required
-        >
+        <Select label="Campus" name="campusId" defaultValue="" onChange={(e) => setCampusId(e.target.value)} required>
           <option value="" disabled>
             Select campus
           </option>
@@ -130,24 +110,14 @@ export default function NewMachine() {
           </option>
           {campusId &&
             locations
-              .filter(
-                (l) =>
-                  l.campusId === campusId &&
-                  pockets.some((p) => p.locationId === l.id)
-              )
+              .filter((l) => l.campusId === campusId && pockets.some((p) => p.locationId === l.id))
               .map((loc) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.name}
                 </option>
               ))}
         </Select>
-        <Select
-          label="Pocket"
-          name="pocketId"
-          defaultValue=""
-          disabled={locationId === ""}
-          required
-        >
+        <Select label="Pocket" name="pocketId" defaultValue="" disabled={locationId === ""} required>
           <option value="" disabled>
             Select pocket
           </option>

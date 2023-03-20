@@ -1,10 +1,11 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData, useTransition } from "@remix-run/react";
+import { Form, useActionData, useLoaderData, useTransition } from "@remix-run/react";
 import dayjs from "dayjs";
 import { Button } from "~/components/shared/Button";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { Checkbox } from "~/components/shared/Checkbox";
+import { FieldError } from "~/components/shared/FieldError";
 import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
@@ -41,12 +42,10 @@ export async function action({ request }: ActionArgs) {
 
   const result = updateVendorSchema.safeParse(form);
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 },
-      session,
-      { type: "error", message: "Error saving vendor" }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 }, session, {
+      type: "error",
+      message: "Error saving vendor",
+    });
   }
   const { id, name, campusIds, hourlyRate, tripCharge } = result.data;
   const vendor = await prisma.vendor.update({
@@ -68,28 +67,23 @@ export async function action({ request }: ActionArgs) {
 
 export default function Vendor() {
   const { campuses, vendor } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const transition = useTransition();
   const busy = getBusyState(transition);
 
   return (
     <>
       <h1>{vendor.name}</h1>
-      <p className="mt-0.5 text-sm text-gray-400">
-        Last updated {dayjs(vendor.updatedAt).format("M/D/YYYY h:mm a")}
-      </p>
+      <p className="mt-0.5 text-sm text-gray-400">Last updated {dayjs(vendor.updatedAt).format("M/D/YYYY h:mm a")}</p>
       <Form className="mt-4 space-y-4 sm:max-w-[20rem]" method="post">
         <input type="hidden" name="id" value={vendor.id} />
-        <Input
-          label="Vendor Name"
-          name="name"
-          defaultValue={vendor.name}
-          required
-        />
+        <Input label="Vendor Name" name="name" defaultValue={vendor.name} errors={actionData?.errors?.name} required />
         <Input
           label="Trip Charge"
           name="tripCharge"
           type="number"
           defaultValue={vendor.tripCharge}
+          errors={actionData?.errors?.tripCharge}
           isCurrency
           required
         />
@@ -98,13 +92,12 @@ export default function Vendor() {
           name="hourlyRate"
           type="number"
           defaultValue={vendor.hourlyRate}
+          errors={actionData?.errors?.hourlyRate}
           isCurrency
           required
         />
         <fieldset>
-          <legend className="text-sm font-medium text-gray-700">
-            Select the campuses this vendor serves
-          </legend>
+          <legend className="text-sm font-medium text-gray-700">Select the campuses this vendor serves</legend>
           <ul className="mt-1 grid gap-1">
             {campuses.map((campus) => (
               <Checkbox
@@ -114,10 +107,10 @@ export default function Vendor() {
                 value={campus.id}
                 label={campus.name}
                 defaultChecked={vendor.campuses.some((c) => c.id === campus.id)}
-                required
               />
             ))}
           </ul>
+          <FieldError name="campusIds" errors={actionData?.errors?.campusIds} />
         </fieldset>
         <div className="flex items-center gap-2">
           <Button type="submit" disabled={busy}>

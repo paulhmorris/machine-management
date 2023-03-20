@@ -1,10 +1,9 @@
 import { z } from "zod";
-
-export const updateCampusSchema = z.object({
-  id: z.string().cuid(),
-  name: z.string(),
-});
+import { HasCUID } from "~/schemas/helpers";
 
 export const newCampusSchema = z.object({
   name: z.string(),
+  monthlyFee: z.coerce.number(),
 });
+
+export const updateCampusSchema = newCampusSchema.merge(HasCUID);

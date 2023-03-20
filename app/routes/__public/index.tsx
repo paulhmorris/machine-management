@@ -1,4 +1,4 @@
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
 import { useEffect, useRef } from "react";
@@ -11,6 +11,12 @@ import { UncaughtError } from "~/components/shared/UncaughtError";
 import { prisma } from "~/utils/db.server";
 import { getBusyState } from "~/utils/utils";
 
+export const meta: MetaFunction = () => {
+  return {
+    title: "Report a Machine Issue",
+  };
+};
+
 const machineSearchSchema = z.object({
   machineId: z.string().min(1, "Machine number is required"),
 });
@@ -19,20 +25,14 @@ export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = machineSearchSchema.safeParse(form);
   if (!result.success) {
-    return json(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 }
-    );
+    return json({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 });
   }
 
   const machine = await prisma.machine.findUnique({
     where: { publicId: result.data.machineId.trim() },
   });
   if (!machine) {
-    return json(
-      { errors: { machineId: ["Couldn't find that machine"] } },
-      { status: 404 }
-    );
+    return json({ errors: { machineId: ["Couldn't find that machine"] } }, { status: 404 });
   }
   return redirect(`/report/${machine.publicId}`);
 }
@@ -54,15 +54,10 @@ export default function Index() {
     <>
       <h1 className="text-center">Hey there!</h1>
       <p className="mt-4 text-center">
-        If you need to report an issue, please <strong>scan the QR code</strong>{" "}
-        on the machine. You can also enter the machine number below.
+        If you need to report an issue, please <strong>scan the QR code</strong> on the machine. You can also enter the
+        machine number below.
       </p>
-      <Form
-        method="post"
-        action="?index"
-        className="mx-auto mt-8 w-full max-w-xs space-y-2"
-        noValidate
-      >
+      <Form method="post" action="?index" className="mx-auto mt-8 w-full max-w-xs space-y-2" noValidate>
         <Input
           label="Machine Number"
           name="machineId"
@@ -71,12 +66,7 @@ export default function Index() {
           placeholder="ABCXYZ"
           required
         />
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full"
-          disabled={busy}
-        >
+        <Button type="submit" variant="primary" className="w-full" disabled={busy}>
           {busy && <Spinner className="mr-2" />}
           {busy ? "Searching..." : "Make a Report"}
         </Button>

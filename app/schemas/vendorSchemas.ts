@@ -1,16 +1,11 @@
 import { z } from "zod";
+import { HasCUID } from "~/schemas/helpers";
 
 export const newVendorSchema = z.object({
   name: z.string(),
   tripCharge: z.coerce.number(),
   hourlyRate: z.coerce.number(),
-  campusId: z.string().cuid(),
+  campusIds: z.array(z.string().cuid()).min(1, "Must select at least one campus"),
 });
 
-export const updateVendorSchema = z.object({
-  id: z.string().cuid(),
-  name: z.string(),
-  tripCharge: z.coerce.number(),
-  hourlyRate: z.coerce.number(),
-  campusIds: z.array(z.string().cuid()),
-});
+export const updateVendorSchema = newVendorSchema.merge(HasCUID);

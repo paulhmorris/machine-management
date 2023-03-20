@@ -24,13 +24,7 @@ export const ticketStatuses = [
 ] as const;
 export type TTicketStatus = (typeof ticketStatuses)[number];
 
-export const chargeTypes = [
-  "Labor",
-  "Trip Charge",
-  "Part",
-  "Shipping",
-  "Reimbursement",
-] as const;
+export const chargeTypes = ["Labor", "Trip Charge", "Part", "Shipping", "Reimbursement"] as const;
 
 export const machineTypes = ["Washer", "Dryer"] as const;
 export type TMachineType = (typeof machineTypes)[number];

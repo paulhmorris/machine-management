@@ -1,4 +1,4 @@
-import { Form, Link, NavLink, useTransition } from "@remix-run/react";
+import { Link, NavLink, useFetcher, useTransition } from "@remix-run/react";
 import {
   IconBuildingBank,
   IconDoor,
@@ -16,7 +16,10 @@ import { classNames, useUser } from "~/utils/utils";
 export function AdminNav() {
   const user = useUser();
   const transition = useTransition();
+  const fetcher = useFetcher();
+  const busy = fetcher.state === "loading" || fetcher.state === "submitting";
   const showSpinner = useSpinDelay(transition.state !== "idle");
+
   return (
     <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6 text-[15px]">
       <nav>
@@ -90,14 +93,15 @@ export function AdminNav() {
           </span>
           <span className="block text-gray-400">{user?.email}</span>
         </div>
-        <Form method="post" action="/logout">
+        <fetcher.Form method="post" action="/logout">
           <button
             type="submit"
             className="text-sm font-medium text-gray-400 hover:text-cyan-700"
+            disabled={busy}
           >
-            Logout
+            {busy ? "Logging out... 👋🏼" : "Log out"}
           </button>
-        </Form>
+        </fetcher.Form>
       </nav>
     </div>
   );

@@ -2,12 +2,7 @@ import { Tab } from "@headlessui/react";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
-import {
-  IconLock,
-  IconLockOpen,
-  IconNotes,
-  IconUserPlus,
-} from "@tabler/icons-react";
+import { IconLock, IconLockOpen, IconNotes, IconUserPlus } from "@tabler/icons-react";
 import { Fragment } from "react";
 import invariant from "tiny-invariant";
 import { Button } from "~/components/shared/Button";
@@ -23,27 +18,14 @@ import {
   ReopenForm,
 } from "~/components/tickets/ActionForms";
 import { getCampusUsers } from "~/models/campusUser.server";
-import {
-  getTicketById,
-  getTicketWithCampusId,
-  reassignTicket,
-  updateTicketStatus,
-} from "~/models/ticket.server";
+import { getTicketById, getTicketWithCampusId, reassignTicket, updateTicketStatus } from "~/models/ticket.server";
 import { getUserWithCampusRole } from "~/models/user.server";
-import {
-  ticketActionSchema,
-  ticketAssignmentSchema,
-} from "~/schemas/ticketSchemas";
+import { ticketActionSchema, ticketAssignmentSchema } from "~/schemas/ticketSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { sendMachineReportEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import {
-  badRequest,
-  getBusyState,
-  getTicketActionAvailability as actionIsAvailable,
-  notFoundResponse,
-} from "~/utils/utils";
+import { actionIsAvailable, badRequest, getBusyState, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderArgs) {
   await requireAdmin(request);
@@ -54,9 +36,7 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!ticket) {
     throw notFoundResponse(`Ticket ${ticketId} not found`);
   }
-  const campusUsers = await getCampusUsers(
-    ticket.machine.pocket.location.campus.id
-  );
+  const campusUsers = await getCampusUsers(ticket.machine.pocket.location.campus.id);
   return json({ ticket, campusUsers });
 }
 
@@ -72,36 +52,25 @@ export async function action({ request, params }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = ticketActionSchema.safeParse(form);
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 404 },
-      session,
-      {
-        message: "Unknown action type",
-        type: "error",
-      }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 404 }, session, {
+      message: "Unknown action type",
+      type: "error",
+    });
   }
   const { comments, actionType } = result.data;
   // Ticket reassignment
   if (actionType === "assignment") {
     const result = ticketAssignmentSchema.safeParse(form);
     if (!result.success) {
-      return jsonWithToast(
-        { errors: { ...result.error.flatten().fieldErrors } },
-        { status: 404 },
-        session,
-        {
-          message: "Error updating ticket",
-          type: "error",
-        }
-      );
+      return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 404 }, session, {
+        message: "Error updating ticket",
+        type: "error",
+      });
     }
     const { assignedToUserId } = result.data;
 
     const assignedTo = await getUserWithCampusRole(assignedToUserId);
-    const updatedStatus =
-      assignedTo?.campusUserRole?.role === "ATTENDANT" ? 2 : 5;
+    const updatedStatus = assignedTo?.campusUserRole?.role === "ATTENDANT" ? 2 : 5;
     await reassignTicket({
       ticketId: ticket.id,
       assignedToUserId,
@@ -117,27 +86,13 @@ export async function action({ request, params }: ActionArgs) {
   }
 
   // Ticket resolution or notes
-  if (
-    actionType === "close" ||
-    actionType === "note" ||
-    actionType === "reopen"
-  ) {
+  if (actionType === "close" || actionType === "note" || actionType === "reopen") {
     await updateTicketStatus({
       ticketId: ticket.id,
-      assignedToUserId:
-        actionType === "close"
-          ? null
-          : actionType === "reopen"
-          ? user.id
-          : ticket.assignedToUserId,
+      assignedToUserId: actionType === "close" ? null : actionType === "reopen" ? user.id : ticket.assignedToUserId,
       createdByUserId: user.id,
       comments,
-      ticketStatusId:
-        actionType === "close"
-          ? 4
-          : actionType === "reopen"
-          ? 9
-          : ticket.ticketStatusId,
+      ticketStatusId: actionType === "close" ? 4 : actionType === "reopen" ? 9 : ticket.ticketStatusId,
     });
     return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
       message:
@@ -157,9 +112,7 @@ export default function TicketActions() {
   const busy = getBusyState(transition);
 
   const attendants = campusUsers.filter(({ role }) => role === "ATTENDANT");
-  const machineTechs = campusUsers.filter(
-    ({ role }) => role === "MACHINE_TECH"
-  );
+  const machineTechs = campusUsers.filter(({ role }) => role === "MACHINE_TECH");
   const campusTechs = campusUsers.filter(({ role }) => role === "CAMPUS_TECH");
 
   return (

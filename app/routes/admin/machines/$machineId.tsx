@@ -33,6 +33,7 @@ export async function loader({ request, params }: LoaderArgs) {
       description: true,
       publicId: true,
       serialNumber: true,
+      modelNumber: true,
       pocket: {
         select: {
           floor: true,
@@ -65,15 +66,12 @@ export async function action({ request }: ActionArgs) {
   const form = Object.fromEntries(await request.formData());
   const result = updateMachineSchema.safeParse(form);
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 },
-      session,
-      { type: "error", message: "Error creating machine" }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 }, session, {
+      type: "error",
+      message: "Error creating machine",
+    });
   }
-  const { id, publicId, serialNumber, description, machineTypeId, pocketId } =
-    result.data;
+  const { id, publicId, serialNumber, description, machineTypeId, pocketId } = result.data;
   const machine = await prisma.machine.update({
     where: { id },
     data: {
@@ -91,8 +89,7 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function Machine() {
-  const { machine, campuses, locations, pockets, machineTypes } =
-    useLoaderData<typeof loader>();
+  const { machine, campuses, locations, pockets, machineTypes } = useLoaderData<typeof loader>();
   const machineCampusId = machine.pocket.location.campusId;
   const machineLocationId = machine.pocket.location.id;
   const machinePocketId = machine.pocket.id;
@@ -105,9 +102,7 @@ export default function Machine() {
   return (
     <>
       <h1>Machine {machine.publicId}</h1>
-      <p className="mt-0.5 text-sm text-gray-500">
-        Last updated {dayjs(machine.updatedAt).format("M/D/YYYY h:mm A")}
-      </p>
+      <p className="mt-0.5 text-sm text-gray-500">Last updated {dayjs(machine.updatedAt).format("M/D/YYYY h:mm A")}</p>
       <Form
         onReset={(e) => {
           setCampusId(machineCampusId);
@@ -130,7 +125,14 @@ export default function Machine() {
           label="Serial Number"
           name="serialNumber"
           placeholder="SN-1234567890"
+          description="Scan barcode to autofill this field"
           defaultValue={machine.serialNumber ?? ""}
+        />
+        <Input
+          label="Model Number"
+          name="modelNumber"
+          description="Scan barcode to autofill this field"
+          defaultValue={machine.modelNumber ?? ""}
         />
         <Textarea
           label="Description"
@@ -140,9 +142,7 @@ export default function Machine() {
           maxLength={255}
         />
         <fieldset>
-          <legend className="text-sm font-medium text-gray-700">
-            Machine Type
-          </legend>
+          <legend className="text-sm font-medium text-gray-700">Machine Type</legend>
           <ul className="mt-1 flex gap-4">
             {machineTypes.map((type) => (
               <Radio
@@ -192,13 +192,7 @@ export default function Machine() {
                 </option>
               ))}
         </Select>
-        <Select
-          label="Pocket"
-          name="pocketId"
-          defaultValue={machinePocketId}
-          disabled={locationId === ""}
-          required
-        >
+        <Select label="Pocket" name="pocketId" defaultValue={machinePocketId} disabled={locationId === ""} required>
           <option value="" disabled>
             Select pocket
           </option>

@@ -2,12 +2,15 @@ import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { IconPlus } from "@tabler/icons-react";
-import { ButtonLink } from "~/components/shared/ButtonLink";
 import { CaughtError } from "~/components/shared/CaughtError";
-import { PageHeader } from "~/components/shared/PageHeader";
+import { CustomLink } from "~/components/shared/CustomLink";
 import { UncaughtError } from "~/components/shared/UncaughtError";
+import type { TableColumn } from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableHeader, TableWrapper } from "~/components/tables";
+import { useSortableData } from "~/hooks/useSortableData";
 import { getAllCampuses } from "~/models/campus.server";
 import { requireAdmin } from "~/utils/auth.server";
+import { classNames } from "~/utils/utils";
 
 export async function loader({ request }: LoaderArgs) {
   await requireAdmin(request);
@@ -16,35 +19,39 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function CampusIndex() {
   const { campuses } = useLoaderData<typeof loader>();
+  const { items, requestSort, sortConfig } = useSortableData<typeof campuses>(campuses, {
+    key: "name",
+    direction: "asc",
+  });
 
   return (
     <main className="flex flex-col">
-      <PageHeader
+      <TableHeader
         title="Campuses"
-        actionText="New Campus"
         actionIcon={<IconPlus size={18} />}
+        actionText="Add Campus"
         href="/admin/campuses/new"
       />
-      <ul className="flex max-w-md flex-col gap-4">
-        {campuses.map((campus) => {
-          return (
-            <li
-              className="rounded-md border border-gray-300 bg-white p-4"
-              key={campus.id}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">{campus.name}</h3>
-                <ButtonLink to={`/admin/campuses/${campus.id}`}>
-                  Edit
-                </ButtonLink>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      <TableWrapper>
+        <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} includeActionCol />
+        <TableBody>
+          {items.map((campus, index) => {
+            return (
+              <tr key={campus.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
+                <TableCell>{campus.name}</TableCell>
+                <TableCell>
+                  <CustomLink to={`/admin/campuses/${campus.id}`}>Edit</CustomLink>
+                </TableCell>
+              </tr>
+            );
+          })}
+        </TableBody>
+      </TableWrapper>
     </main>
   );
 }
+
+const columns: TableColumn[] = [{ key: "name", title: "Name", sortable: true }];
 
 export function CatchBoundary() {
   return <CaughtError />;

@@ -30,17 +30,18 @@ export async function action({ request }: ActionArgs) {
 
   const result = newVendorSchema.safeParse(form);
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 },
-      session,
-      { type: "error", message: "Error creating vendor" }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 }, session, {
+      type: "error",
+      message: "Error creating vendor",
+    });
   }
 
+  const { name, hourlyRate, tripCharge } = result.data;
   const vendor = await createVendor({
-    ...result.data,
-    campuses: { connect: { id: result.data.campusId } },
+    name,
+    hourlyRate,
+    tripCharge,
+    campuses: { connect: result.data.campusIds.map((c) => ({ id: c })) || [] },
   });
   return redirectWithToast(`/admin/vendors/${vendor.id}`, session, {
     message: "Vendor created successfully",
@@ -58,33 +59,13 @@ export default function NewVendor() {
       <h1>New Vendor</h1>
       <Form className="mt-4 space-y-4 sm:max-w-[18rem]" method="post">
         <Input label="Vendor Name" name="name" required />
-        <Input
-          label="Trip Charge"
-          name="tripCharge"
-          type="number"
-          isCurrency
-          required
-        />
-        <Input
-          label="Hourly Rate"
-          name="hourlyRate"
-          type="number"
-          isCurrency
-          required
-        />
+        <Input label="Trip Charge" name="tripCharge" type="number" isCurrency required />
+        <Input label="Hourly Rate" name="hourlyRate" type="number" isCurrency required />
         <fieldset>
-          <legend className="text-sm font-medium text-gray-500">
-            Select the campuses this vendor serves
-          </legend>
+          <legend className="text-sm font-medium text-gray-500">Select the campuses this vendor serves</legend>
           <ul className="mt-1 grid gap-1">
             {campuses.map((campus) => (
-              <Checkbox
-                key={campus.id}
-                id={campus.id}
-                name="campusId"
-                value={campus.id}
-                label={campus.name}
-              />
+              <Checkbox key={campus.id} id={campus.id} name="campusIds" value={campus.id} label={campus.name} />
             ))}
           </ul>
         </fieldset>

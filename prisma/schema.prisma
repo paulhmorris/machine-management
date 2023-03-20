@@ -63,16 +63,16 @@ model Vendor {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   invoices  Invoice[]
-  campusId  String?
 }
 
 model Campus {
-  id        String     @id @default(cuid())
-  name      String
-  locations Location[]
+  id         String   @id @default(cuid())
+  name       String
+  monthlyFee Float    @default(0.00)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  locations Location[]
   vendors   Vendor[]
   invoices  Invoice[]
   users     CampusUser[]
@@ -127,6 +127,7 @@ model Machine {
   id            String      @id @default(cuid())
   publicId      String      @unique
   serialNumber  String?
+  modelNumber   String?
   description   String?
   type          MachineType @relation(fields: [machineTypeId], references: [id])
   machineTypeId Int

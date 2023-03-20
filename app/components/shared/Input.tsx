@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef } from "react";
 import { forwardRef } from "react";
-import { FieldError } from "~/components/shared/FieldErrors";
+import { FieldError } from "~/components/shared/FieldError";
 import { classNames } from "~/utils/utils";
 
 interface InputProps extends ComponentPropsWithRef<"input"> {
@@ -14,19 +14,7 @@ interface InputProps extends ComponentPropsWithRef<"input"> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      name,
-      label,
-      description,
-      errors,
-      hideLabel,
-      hideHelperText,
-      isCurrency,
-      ...props
-    },
-    ref
-  ) => {
+  ({ name, label, description, errors, hideLabel, hideHelperText, isCurrency, ...props }, ref) => {
     return (
       <div>
         <div>
@@ -70,19 +58,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               props.className
             )}
           />
-          {errors ? (
-            <FieldError name={name} errors={errors} />
-          ) : (
-            description && (
-              <p
-                className="mt-2 text-sm text-gray-500"
-                id={`${name}-description`}
-              >
-                {description}
-              </p>
-            )
-          )}
         </div>
+        {errors ? (
+          <FieldError name={name} errors={errors} />
+        ) : (
+          description && (
+            <p className="mt-2 pl-1 text-xs text-gray-500" id={`${name}-description`}>
+              {description}
+            </p>
+          )
+        )}
       </div>
     );
   }

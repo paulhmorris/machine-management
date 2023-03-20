@@ -1,12 +1,7 @@
 import { RadioGroup } from "@headlessui/react";
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import {
-  Form,
-  useActionData,
-  useLoaderData,
-  useTransition,
-} from "@remix-run/react";
+import { Form, useActionData, useLoaderData, useTransition } from "@remix-run/react";
 import { useRef } from "react";
 
 import { Button } from "~/components/shared/Button";
@@ -14,25 +9,22 @@ import { CaughtError } from "~/components/shared/CaughtError";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
 import { UncaughtError } from "~/components/shared/UncaughtError";
-import {
-  getErrorTypesForReport,
-  getMachineForReport,
-} from "~/models/machine.server";
+import { getErrorTypesForReport, getMachineForReport } from "~/models/machine.server";
 import { reportSchema } from "~/schemas/reportSchemas";
 import { prisma } from "~/utils/db.server";
-import {
-  badRequest,
-  classNames,
-  getBusyState,
-  notFoundResponse,
-} from "~/utils/utils";
+import { badRequest, classNames, getBusyState, notFoundResponse } from "~/utils/utils";
+
+export const meta: MetaFunction = () => {
+  return {
+    title: "Report a Machine Issue",
+  };
+};
 
 export async function loader({ params }: LoaderArgs) {
   const { machinePublicId } = params;
   if (!machinePublicId) throw badRequest("Machine ID is required");
   const machine = await getMachineForReport(machinePublicId);
-  if (!machine)
-    throw notFoundResponse(`Machine with id ${machinePublicId} not found`);
+  if (!machine) throw notFoundResponse(`Machine with id ${machinePublicId} not found`);
   const errorTypes = await getErrorTypesForReport();
   return json({ machine, errorTypes });
 }
@@ -44,10 +36,7 @@ export async function action({ params, request }: ActionArgs) {
 
   const result = reportSchema.safeParse(form);
   if (!result.success) {
-    return json(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 }
-    );
+    return json({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 });
   }
   const { notes, machineId, error } = result.data;
   const ticket = await prisma.ticket.create({
@@ -101,7 +90,7 @@ export default function MachineReport() {
                     onSelect={() => commentsRef.current?.focus()}
                     className={({ checked }) =>
                       classNames(
-                        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-4 text-base font-medium shadow-sm transition duration-75 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:py-2 sm:text-sm",
+                        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-4 text-base font-bold shadow-sm transition duration-75 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:py-2 sm:text-sm",
                         checked
                           ? "border-cyan-700 bg-cyan-700 text-white hover:border-cyan-800 hover:bg-cyan-800"
                           : "border-gray-300 bg-white hover:bg-gray-50"
@@ -114,9 +103,7 @@ export default function MachineReport() {
               })}
             </ul>
             {actionData?.errors.error && (
-              <p className="mt-1 text-center text-sm font-medium text-red-500">
-                {actionData.errors.error}
-              </p>
+              <p className="mt-1 text-center text-sm font-medium text-red-500">{actionData.errors.error}</p>
             )}
           </RadioGroup>
           <div className="mt-4 space-y-4">
@@ -129,12 +116,7 @@ export default function MachineReport() {
               required
             />
           </div>
-          <Button
-            type="submit"
-            variant="primary"
-            className="mt-4"
-            disabled={busy}
-          >
+          <Button type="submit" variant="primary" className="mt-4" disabled={busy}>
             {busy && <Spinner className="mr-2" />}
             {busy ? "Submitting..." : "Submit"}
           </Button>

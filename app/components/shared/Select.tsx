@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef, ReactNode } from "react";
 import { forwardRef } from "react";
-import { FieldError } from "~/components/shared/FieldErrors";
+import { FieldError } from "~/components/shared/FieldError";
 import { classNames } from "~/utils/utils";
 
 interface Props extends ComponentPropsWithRef<"select"> {
@@ -13,10 +13,7 @@ interface Props extends ComponentPropsWithRef<"select"> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, Props>(
-  (
-    { label, name, children, description, errors, hideLabel = false, ...props },
-    ref
-  ) => {
+  ({ label, name, children, description, errors, hideLabel = false, ...props }, ref) => {
     return (
       <div>
         <div>
@@ -57,10 +54,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(
           <FieldError name={name} errors={errors} />
         ) : (
           description && (
-            <p
-              className="mt-2 text-sm text-gray-500"
-              id={`${name}-description`}
-            >
+            <p className="mt-2 text-sm text-gray-500" id={`${name}-description`}>
               {description}
             </p>
           )
