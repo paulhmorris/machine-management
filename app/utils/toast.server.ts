@@ -15,12 +15,7 @@ export function getGlobalToast(session: Session): ServerToast | null {
   return (session.get("globalMessage") as ServerToast) || null;
 }
 
-export async function redirectWithToast(
-  url: string,
-  session: Session,
-  toast: ServerToast,
-  init?: ResponseInit
-) {
+export async function redirectWithToast(url: string, session: Session, toast: ServerToast, init?: ResponseInit) {
   setGlobalToast(session, toast);
   return redirect(url, {
     ...init,

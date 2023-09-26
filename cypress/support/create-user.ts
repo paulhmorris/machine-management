@@ -45,6 +45,4 @@ async function createAndLogin(email: string, password: string) {
   );
 }
 
-createAndLogin(process.argv[2], process.argv[3]).catch((error) =>
-  console.error(error)
-);
+createAndLogin(process.argv[2], process.argv[3]).catch((error) => console.error(error));

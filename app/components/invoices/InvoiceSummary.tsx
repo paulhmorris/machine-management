@@ -2,18 +2,13 @@ import type { getInvoiceWithAllRelations } from "~/models/invoice.server";
 import { formatCurrency } from "~/utils/formatters";
 import { calculateTotalByType } from "~/utils/utils";
 
-type InvoicePayload = NonNullable<
-  Awaited<ReturnType<typeof getInvoiceWithAllRelations>>
->;
+type InvoicePayload = NonNullable<Awaited<ReturnType<typeof getInvoiceWithAllRelations>>>;
 export function InvoiceSummary({ invoice }: { invoice: InvoicePayload }) {
   const laborTotal = calculateTotalByType(invoice.charges, 1);
   const tripChargeTotal = calculateTotalByType(invoice.charges, 2);
-  const shippingPartsTotal =
-    calculateTotalByType(invoice.charges, 3) +
-    calculateTotalByType(invoice.charges, 4);
+  const shippingPartsTotal = calculateTotalByType(invoice.charges, 3) + calculateTotalByType(invoice.charges, 4);
   const reimbursementTotal = calculateTotalByType(invoice.charges, 5);
-  const total =
-    laborTotal + tripChargeTotal + shippingPartsTotal + reimbursementTotal;
+  const total = laborTotal + tripChargeTotal + shippingPartsTotal + reimbursementTotal;
 
   const rows = [
     {
@@ -35,7 +30,7 @@ export function InvoiceSummary({ invoice }: { invoice: InvoicePayload }) {
   ];
 
   return (
-    <div className="mt-auto border border-gray-200 bg-gray-100 py-6 px-4 sm:rounded-lg sm:px-6 lg:grid lg:grid-cols-12 lg:gap-x-8 lg:px-8 lg:py-8">
+    <div className="mt-auto border border-gray-200 bg-gray-100 px-4 py-6 sm:rounded-lg sm:px-6 lg:grid lg:grid-cols-12 lg:gap-x-8 lg:px-8 lg:py-8">
       <dl className="grid grid-cols-2 gap-6 text-sm sm:grid-cols-2 md:gap-x-8 lg:col-span-7">
         <div>
           <dt className="font-medium text-gray-900">Vendor</dt>
@@ -43,14 +38,10 @@ export function InvoiceSummary({ invoice }: { invoice: InvoicePayload }) {
             <span className="block">{invoice.vendor.name}</span>
           </dd>
           <dd className="mt-1 text-gray-500">
-            <span className="block">
-              {formatCurrency(invoice.vendor.hourlyRate)} / hr
-            </span>
+            <span className="block">{formatCurrency(invoice.vendor.hourlyRate)} / hr</span>
           </dd>
           <dd className="mt-1 text-gray-500">
-            <span className="block">
-              {formatCurrency(invoice.vendor.tripCharge)} / trip
-            </span>
+            <span className="block">{formatCurrency(invoice.vendor.tripCharge)} / trip</span>
           </dd>
           <dt className="mt-4 font-medium text-gray-900">Campus</dt>
           <dd className="mt-1 text-gray-500">
@@ -72,13 +63,7 @@ export function InvoiceSummary({ invoice }: { invoice: InvoicePayload }) {
   );
 }
 
-function SummaryRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
+function SummaryRow({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex items-center justify-between py-4">
       <dt>{label}</dt>

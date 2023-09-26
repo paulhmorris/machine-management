@@ -1,12 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import {
-  chargeTypes,
-  errorTypes,
-  machineTypes,
-  ticketStatuses,
-} from "~/utils/constants";
+import { chargeTypes, errorTypes, machineTypes, ticketStatuses } from "~/utils/constants";
 const prisma = new PrismaClient();
 
 async function seed() {
@@ -169,11 +164,7 @@ async function seed() {
       data: {
         userId: user.id,
         campusId: campus!.id,
-        role: faker.helpers.arrayElement([
-          "ATTENDANT",
-          "CAMPUS_TECH",
-          "MACHINE_TECH",
-        ]),
+        role: faker.helpers.arrayElement(["ATTENDANT", "CAMPUS_TECH", "MACHINE_TECH"]),
       },
     });
     await prisma.part.create({
@@ -226,9 +217,7 @@ async function seed() {
     const randomTicket = faker.helpers.arrayElement(tickets);
     await prisma.ticketEvent.create({
       data: {
-        comments: faker.random.words(
-          faker.datatype.number({ min: 10, max: 40 })
-        ),
+        comments: faker.random.words(faker.datatype.number({ min: 10, max: 40 })),
         ticketId: randomTicket.id,
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
         assignedToUserId: admin.id,

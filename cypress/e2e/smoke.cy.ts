@@ -40,23 +40,16 @@ describe("Admin smoke tests", () => {
     cy.findByRole("combobox", { name: /Pocket/i }).select(1);
     cy.findByRole("button", { name: /Create Machine/i }).click();
     const machineHeading = `Machine ${testMachineId}`;
-    cy.findByRole("heading", { name: new RegExp(machineHeading, "i") }).should(
-      "exist"
-    );
+    cy.findByRole("heading", { name: new RegExp(machineHeading, "i") }).should("exist");
 
     cy.visitAndCheck(`/report/${testMachineId}`);
 
-    cy.findByRole("heading", { name: new RegExp(machineHeading, "i") }).should(
-      "exist"
-    );
+    cy.findByRole("heading", { name: new RegExp(machineHeading, "i") }).should("exist");
     cy.findByRole("link", { name: /Shakes violently/i }).click();
     cy.findByRole("textbox", { name: /Comments/i })
       .should("have.focus")
       .type("Test Comment");
-    cy.findByRole("link", { name: /Shakes violently/i }).should(
-      "have.class",
-      "border-cyan-700"
-    );
+    cy.findByRole("link", { name: /Shakes violently/i }).should("have.class", "border-cyan-700");
 
     cy.findByRole("button", { name: /Submit/i }).click();
     cy.url().should("include", "/thanks");
@@ -72,9 +65,7 @@ describe("Public smoke tests", () => {
   });
 
   it("should allow you to report a machine from the public", () => {
-    cy.exec(
-      `npx ts-node --require tsconfig-paths/register ./cypress/support/create-machine.ts "${testMachineId}"`
-    );
+    cy.exec(`npx ts-node --require tsconfig-paths/register ./cypress/support/create-machine.ts "${testMachineId}"`);
     cy.visitAndCheck(`/report/${testMachineId}`);
 
     cy.findByRole("heading", {
@@ -84,10 +75,7 @@ describe("Public smoke tests", () => {
     cy.findByRole("textbox", { name: /Comments/i })
       .should("have.focus")
       .type("Test Comment");
-    cy.findByRole("link", { name: /Shakes violently/i }).should(
-      "have.class",
-      "border-cyan-700"
-    );
+    cy.findByRole("link", { name: /Shakes violently/i }).should("have.class", "border-cyan-700");
 
     cy.findByRole("button", { name: /Submit/i }).click();
     cy.url().should("include", "/thanks");

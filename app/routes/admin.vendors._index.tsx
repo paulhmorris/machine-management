@@ -29,19 +29,11 @@ export default function TicketIndex() {
       <ul className="flex max-w-md flex-col gap-4">
         {vendors.map((vendor) => {
           return (
-            <li
-              className="rounded-md border border-gray-300 bg-white p-4"
-              key={vendor.id}
-            >
+            <li className="rounded-md border border-gray-300 bg-white p-4" key={vendor.id}>
               <div className="grid grid-cols-6 items-center">
                 <h3 className="col-span-3 font-medium">{vendor.name}</h3>
-                <p className="col-span-2 text-sm leading-6 text-gray-500">
-                  {vendor.isActive ? "Active" : "Inactive"}
-                </p>
-                <ButtonLink
-                  className="col-span-1"
-                  to={`/admin/vendors/${vendor.id}`}
-                >
+                <p className="col-span-2 text-sm leading-6 text-gray-500">{vendor.isActive ? "Active" : "Inactive"}</p>
+                <ButtonLink className="col-span-1" to={`/admin/vendors/${vendor.id}`}>
                   Edit
                 </ButtonLink>
               </div>

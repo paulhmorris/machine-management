@@ -1,17 +1,9 @@
 import { Badge } from "~/components/shared/Badge";
 import { CustomLink } from "~/components/shared/CustomLink";
 import type { SortConfig, TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableWrapper } from "~/components/tables";
 import type { TTicketStatus } from "~/utils/constants";
-import {
-  formatDateWithTime,
-  getTicketStatusBadgeColor,
-} from "~/utils/formatters";
+import { formatDateWithTime, getTicketStatusBadgeColor } from "~/utils/formatters";
 import { classNames } from "~/utils/utils";
 
 const columns: TableColumn[] = [
@@ -41,18 +33,10 @@ type Props = {
 export function TicketTable({ items, sortConfig, requestSort }: Props) {
   return (
     <TableWrapper>
-      <TableHead
-        columns={columns}
-        sortFn={requestSort}
-        sortConfig={sortConfig}
-        includeActionCol
-      />
+      <TableHead columns={columns} sortFn={requestSort} sortConfig={sortConfig} includeActionCol />
       <TableBody>
         {items.map((ticket, index) => (
-          <tr
-            key={ticket.id}
-            className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}
-          >
+          <tr key={ticket.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
             <TableCell>{ticket.id}</TableCell>
             <TableCell>{ticket.campus}</TableCell>
             <TableCell>{ticket.location}</TableCell>
@@ -62,16 +46,12 @@ export function TicketTable({ items, sortConfig, requestSort }: Props) {
               <Badge
                 text={ticket.status}
                 size="small"
-                color={getTicketStatusBadgeColor(
-                  ticket.status as TTicketStatus
-                )}
+                color={getTicketStatusBadgeColor(ticket.status as TTicketStatus)}
               />
             </TableCell>
             <TableCell>{formatDateWithTime(ticket.updatedAt)}</TableCell>
             <TableCell>
-              <CustomLink to={`/admin/tickets/${ticket.id}/events`}>
-                View
-              </CustomLink>
+              <CustomLink to={`/admin/tickets/${ticket.id}/events`}>View</CustomLink>
             </TableCell>
           </tr>
         ))}

@@ -5,13 +5,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { MachinesFilter } from "~/components/machines/MachinesFilter";
 import { CustomLink } from "~/components/shared/CustomLink";
 import type { TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableHeader, TableWrapper } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { getMachinesForTable } from "~/models/machine.server";
 import { requireAdmin } from "~/utils/auth.server";
@@ -33,15 +27,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const machines = await getMachinesForTable({
     // Query filters
     where: {
-      ...(campusIds.length
-        ? { pocket: { location: { campusId: { in: campusIds } } } }
-        : {}),
-      ...(locationIds.length && !locationIds.includes("all")
-        ? { pocket: { locationId: { in: locationIds } } }
-        : {}),
-      ...(machineTypeQuery.length
-        ? { machineTypeId: { in: machineTypeQuery.map((m) => Number(m)) } }
-        : {}),
+      ...(campusIds.length ? { pocket: { location: { campusId: { in: campusIds } } } } : {}),
+      ...(locationIds.length && !locationIds.includes("all") ? { pocket: { locationId: { in: locationIds } } } : {}),
+      ...(machineTypeQuery.length ? { machineTypeId: { in: machineTypeQuery.map((m) => Number(m)) } } : {}),
     },
   });
   const flatMachines = machines.map((m) => ({
@@ -54,12 +42,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function TicketIndex() {
-  const { machines, locations, campuses, machineTypes } =
-    useLoaderData<typeof loader>();
-  const { items, requestSort, sortConfig } = useSortableData<typeof machines>(
-    machines,
-    { key: "publicId", direction: "asc" }
-  );
+  const { machines, locations, campuses, machineTypes } = useLoaderData<typeof loader>();
+  const { items, requestSort, sortConfig } = useSortableData<typeof machines>(machines, {
+    key: "publicId",
+    direction: "asc",
+  });
 
   return (
     <main className="flex flex-col">
@@ -69,36 +56,20 @@ export default function TicketIndex() {
         actionText="Add Machine"
         href="/admin/machines/new"
       />
-      <MachinesFilter
-        locations={locations}
-        campuses={campuses}
-        machineTypes={machineTypes}
-      />
+      <MachinesFilter locations={locations} campuses={campuses} machineTypes={machineTypes} />
       <TableWrapper>
-        <TableHead
-          columns={columns}
-          sortConfig={sortConfig}
-          sortFn={requestSort}
-          includeActionCol
-        />
+        <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} includeActionCol />
         <TableBody>
           {items.map((machine, index) => {
             return (
-              <tr
-                key={machine.id}
-                className={classNames(
-                  index % 2 === 0 ? undefined : "bg-gray-50"
-                )}
-              >
+              <tr key={machine.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
                 <TableCell>{machine.campus}</TableCell>
                 <TableCell>{machine.publicId}</TableCell>
                 <TableCell>{machine.type}</TableCell>
                 <TableCell>{machine.location}</TableCell>
                 <TableCell>{machine.pocket.floor ?? ""}</TableCell>
                 <TableCell>
-                  <CustomLink to={`/admin/machines/${machine.id}`}>
-                    Edit
-                  </CustomLink>
+                  <CustomLink to={`/admin/machines/${machine.id}`}>Edit</CustomLink>
                 </TableCell>
               </tr>
             );

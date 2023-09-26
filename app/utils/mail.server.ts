@@ -1,10 +1,6 @@
 import type { PasswordReset, Ticket, User } from "@prisma/client";
 import dayjs from "dayjs";
-import {
-  createTestAccount,
-  createTransport,
-  getTestMessageUrl,
-} from "nodemailer";
+import { createTestAccount, createTransport, getTestMessageUrl } from "nodemailer";
 import { getMachineForRequestEmail as getMachineForEmail } from "~/models/machine.server";
 import { getTicketByIdWithAllRelations } from "~/models/ticket.server";
 import { badRequest } from "~/utils/utils";
@@ -13,10 +9,7 @@ type MachineReportEmailData = {
   ticketId: Ticket["id"];
   notes: string | undefined;
 };
-export async function sendMachineReportEmail({
-  ticketId,
-  notes,
-}: MachineReportEmailData) {
+export async function sendMachineReportEmail({ ticketId, notes }: MachineReportEmailData) {
   const ticket = await getTicketByIdWithAllRelations(ticketId);
   if (!ticket) {
     return badRequest("Ticket not found, unable to send email.");
@@ -74,9 +67,7 @@ export async function sendMachineReportEmail({
       Notes: ${ticket.notes ?? "No notes"}
       <br />
       <br />
-      <a href="${process.env.URL}/close-ticket/${
-        ticket.secretId
-      }">Resolve this ticket</a>
+      <a href="${process.env.URL}/close-ticket/${ticket.secretId}">Resolve this ticket</a>
       `,
     });
     console.log("Message sent: %s", info.messageId);
@@ -86,11 +77,7 @@ export async function sendMachineReportEmail({
   }
 }
 
-export async function sendTicketCloseEmail(
-  ticketId: Ticket["id"],
-  notes: string,
-  email: string
-) {
+export async function sendTicketCloseEmail(ticketId: Ticket["id"], notes: string, email: string) {
   const ticket = await getTicketByIdWithAllRelations(ticketId);
   if (!ticket) {
     return badRequest("Ticket not found, unable to send email.");

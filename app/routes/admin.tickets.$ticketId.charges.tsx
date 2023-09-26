@@ -5,12 +5,7 @@ import dayjs from "dayjs";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableWrapper } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { getChargesByTicketId } from "~/models/charge.server";
 import { requireAdmin } from "~/utils/auth.server";
@@ -44,25 +39,15 @@ export default function TicketCharges() {
 
   return (
     <TableWrapper>
-      <TableHead
-        columns={columns}
-        sortConfig={sortConfig}
-        sortFn={requestSort}
-      />
+      <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} />
       <TableBody>
         {items.map((charge, index) => (
-          <tr
-            key={charge.id}
-            className={index % 2 === 0 ? undefined : "bg-gray-50"}
-          >
+          <tr key={charge.id} className={index % 2 === 0 ? undefined : "bg-gray-50"}>
             <TableCell>{charge.type.name}</TableCell>
-            <TableCell>
-              {dayjs(charge.createdAt).format("M/D/YYYY h:mm A")}
-            </TableCell>
+            <TableCell>{dayjs(charge.createdAt).format("M/D/YYYY h:mm A")}</TableCell>
             <TableCell>{charge.part?.name ?? ""}</TableCell>
             <TableCell>
-              {formatCurrency(charge.actualCost)}{" "}
-              {charge.warrantyCovered && "IW"}
+              {formatCurrency(charge.actualCost)} {charge.warrantyCovered && "IW"}
             </TableCell>
             <TableCell>{charge.invoice.vendor.name}</TableCell>
             <TableCell>{charge.invoice.vendorInvoiceNumber}</TableCell>

@@ -14,11 +14,7 @@ export type BadgeProps = {
     | "bg-pink-100 text-pink-800 border-pink-300";
 };
 
-export function Badge({
-  text,
-  size = "small",
-  color = "bg-gray-100 text-gray-800 border-gray-300",
-}: BadgeProps) {
+export function Badge({ text, size = "small", color = "bg-gray-100 text-gray-800 border-gray-300" }: BadgeProps) {
   return (
     <span
       className={classNames(

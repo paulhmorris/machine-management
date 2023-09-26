@@ -6,12 +6,7 @@ import { Badge } from "~/components/shared/Badge";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableWrapper } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { getTicketEventsByTicketId } from "~/models/ticketEvent.server";
 import { requireAdmin } from "~/utils/auth.server";
@@ -43,20 +38,11 @@ export default function TicketEvents() {
 
   return (
     <TableWrapper>
-      <TableHead
-        columns={columns}
-        sortConfig={sortConfig}
-        sortFn={requestSort}
-      />
+      <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} />
       <TableBody>
         {items.map((event, index) => (
-          <tr
-            key={event.id}
-            className={index % 2 === 0 ? undefined : "bg-gray-50"}
-          >
-            <TableCell>
-              {dayjs(event.timestamp).format("M/D/YYYY h:mm A")}
-            </TableCell>
+          <tr key={event.id} className={index % 2 === 0 ? undefined : "bg-gray-50"}>
+            <TableCell>{dayjs(event.timestamp).format("M/D/YYYY h:mm A")}</TableCell>
             <TableCell>
               {event.createdBy.firstName} {event.createdBy.lastName}{" "}
             </TableCell>
@@ -64,11 +50,7 @@ export default function TicketEvents() {
               {event.assignedTo?.firstName} {event.assignedTo?.lastName}
             </TableCell>
             <TableCell>
-              <Badge
-                text={event.status.name}
-                size="small"
-                color={getTicketStatusBadgeColor(event.status.name)}
-              />
+              <Badge text={event.status.name} size="small" color={getTicketStatusBadgeColor(event.status.name)} />
             </TableCell>
             <TableCell allowWrap>{event.comments}</TableCell>
           </tr>

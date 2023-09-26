@@ -26,7 +26,7 @@ export default function TicketLayout() {
   return (
     <main className="h-full">
       <TicketDetails ticket={ticket} />
-      <div className="pt-4 pb-8">
+      <div className="pb-8 pt-4">
         <TicketNav />
       </div>
       <div className="pb-24">

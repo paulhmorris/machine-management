@@ -6,13 +6,7 @@ import { CaughtError } from "~/components/shared/CaughtError";
 import { CustomLink } from "~/components/shared/CustomLink";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableHeader, TableWrapper } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
@@ -33,10 +27,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function LocationIndex() {
   const { locations } = useLoaderData<typeof loader>();
-  const { items, requestSort, sortConfig } = useSortableData<typeof locations>(
-    locations,
-    { key: "name", direction: "asc" }
-  );
+  const { items, requestSort, sortConfig } = useSortableData<typeof locations>(locations, {
+    key: "name",
+    direction: "asc",
+  });
 
   return (
     <main className="flex flex-col">
@@ -47,28 +41,16 @@ export default function LocationIndex() {
         href="/admin/locations/new"
       />
       <TableWrapper>
-        <TableHead
-          columns={columns}
-          sortConfig={sortConfig}
-          sortFn={requestSort}
-          includeActionCol
-        />
+        <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} includeActionCol />
         <TableBody>
           {items.map((location, index) => {
             return (
-              <tr
-                key={location.id}
-                className={classNames(
-                  index % 2 === 0 ? undefined : "bg-gray-50"
-                )}
-              >
+              <tr key={location.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
                 <TableCell>{location.campus}</TableCell>
                 <TableCell>{location.name}</TableCell>
                 <TableCell>{location.description}</TableCell>
                 <TableCell>
-                  <CustomLink to={`/admin/locations/${location.id}`}>
-                    Edit
-                  </CustomLink>
+                  <CustomLink to={`/admin/locations/${location.id}`}>Edit</CustomLink>
                 </TableCell>
               </tr>
             );

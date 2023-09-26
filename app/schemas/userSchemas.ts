@@ -7,10 +7,7 @@ export const newUserSchema = z
     lastName: z.string().optional(),
     role: z.enum(["ADMIN", "USER"]),
     campusId: z.string().cuid().optional().or(z.literal("")),
-    campusRole: z
-      .enum(["ATTENDANT", "MACHINE_TECH", "CAMPUS_TECH"])
-      .optional()
-      .or(z.literal("")),
+    campusRole: z.enum(["ATTENDANT", "MACHINE_TECH", "CAMPUS_TECH"]).optional().or(z.literal("")),
     sendEmail: z.enum(["on"]).optional(),
   })
   .superRefine(({ campusId, campusRole }, ctx) => {
@@ -38,10 +35,7 @@ export const updateUserSchema = z
     lastName: z.string().optional(),
     role: z.enum(["ADMIN", "USER"]),
     campusId: z.string().cuid().optional().or(z.literal("")),
-    campusRole: z
-      .enum(["ATTENDANT", "MACHINE_TECH", "CAMPUS_TECH"])
-      .optional()
-      .or(z.literal("")),
+    campusRole: z.enum(["ATTENDANT", "MACHINE_TECH", "CAMPUS_TECH"]).optional().or(z.literal("")),
   })
   .superRefine(({ campusId, campusRole }, ctx) => {
     if (campusId && !campusRole) {

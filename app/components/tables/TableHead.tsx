@@ -1,8 +1,4 @@
-import {
-  IconArrowsSort,
-  IconSortAscendingLetters,
-  IconSortDescendingLetters,
-} from "@tabler/icons-react";
+import { IconArrowsSort, IconSortAscendingLetters, IconSortDescendingLetters } from "@tabler/icons-react";
 import type { SortConfig, TableColumn } from "~/components/tables";
 import { classNames } from "~/utils/utils";
 
@@ -13,12 +9,7 @@ type HeadProps = {
   sortFn?: (key: string | number | symbol) => void;
 };
 
-export function TableHead({
-  columns,
-  sortFn,
-  sortConfig,
-  includeActionCol,
-}: HeadProps) {
+export function TableHead({ columns, sortFn, sortConfig, includeActionCol }: HeadProps) {
   return (
     <thead className="whitespace-nowrap border-t border-gray-200 bg-gray-50">
       <tr>
@@ -47,23 +38,14 @@ export function TableHead({
                     )}
                     onClick={() => sortFn(key)}
                   >
-                    {isSortedField ? (
-                      <span>{sortedIcon}</span>
-                    ) : (
-                      <IconArrowsSort size={18} />
-                    )}
+                    {isSortedField ? <span>{sortedIcon}</span> : <IconArrowsSort size={18} />}
                   </button>
                 )}
               </div>
             </th>
           );
         })}
-        {includeActionCol && (
-          <th
-            scope="col"
-            className="border-b border-gray-300 bg-opacity-75 py-3.5 pl-4 pr-1"
-          ></th>
-        )}
+        {includeActionCol && <th scope="col" className="border-b border-gray-300 bg-opacity-75 py-3.5 pl-4 pr-1"></th>}
       </tr>
     </thead>
   );

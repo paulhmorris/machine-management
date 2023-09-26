@@ -29,9 +29,7 @@ export async function commitSession(session: Session) {
   return sessionStorage.commitSession(session);
 }
 
-export async function getUserId(
-  request: Request
-): Promise<User["id"] | undefined> {
+export async function getUserId(request: Request): Promise<User["id"] | undefined> {
   const session = await getSession(request);
   const userId = session.get(USER_SESSION_KEY) as string;
   return userId;

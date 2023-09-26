@@ -41,12 +41,7 @@ export const addShippingSchema = z.object({
   }),
 });
 export const editInvoiceSchmea = z.object({
-  _action: z.enum([
-    "deleteCharge",
-    "finishInvoice",
-    "abandonInvoice",
-    "removeTicket",
-  ]),
+  _action: z.enum(["deleteCharge", "finishInvoice", "abandonInvoice", "removeTicket"]),
 });
 export const deleteChargeSchema = z.object({
   chargeId: z.coerce.number(),

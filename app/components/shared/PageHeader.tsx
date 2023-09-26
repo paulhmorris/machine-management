@@ -10,14 +10,7 @@ type Props = {
   description?: string;
 };
 
-export function PageHeader({
-  title,
-  href,
-  actionText,
-  actionIcon,
-  description,
-  noAction = false,
-}: Props) {
+export function PageHeader({ title, href, actionText, actionIcon, description, noAction = false }: Props) {
   return (
     <div className="mb-4 border-b border-gray-100 pb-4 sm:flex sm:items-center">
       <div className="sm:flex-auto">
@@ -25,7 +18,7 @@ export function PageHeader({
         {description && <p className="text-sm text-gray-500">{description}</p>}
       </div>
       {noAction ? null : (
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <ButtonLink to={href ?? "#"}>
             <span>{actionText}</span>
             {actionIcon}

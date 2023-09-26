@@ -65,9 +65,7 @@ function login({
   cy.exec(
     `npx ts-node --require tsconfig-paths/register ./cypress/support/create-user.ts "${email}" "${password}"`
   ).then(({ stdout }) => {
-    const cookieValue = stdout
-      .replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>")
-      .trim();
+    const cookieValue = stdout.replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>").trim();
     cy.setCookie("__session", cookieValue);
   });
   return cy.get("@user");
@@ -88,9 +86,7 @@ function cleanupUser({ email }: { email?: string } = {}) {
 }
 
 function deleteUserByEmail(email: string) {
-  cy.exec(
-    `npx ts-node --require tsconfig-paths/register ./cypress/support/delete-user.ts "${email}"`
-  );
+  cy.exec(`npx ts-node --require tsconfig-paths/register ./cypress/support/delete-user.ts "${email}"`);
   cy.clearCookie("__session");
 }
 
@@ -108,9 +104,7 @@ function cleanupMachine({ publicId }: { publicId?: string } = {}) {
 }
 
 function deleteMachineByPublicId(publicId: string) {
-  cy.exec(
-    `npx ts-node --require tsconfig-paths/register ./cypress/support/delete-machine.ts ${publicId}`
-  );
+  cy.exec(`npx ts-node --require tsconfig-paths/register ./cypress/support/delete-machine.ts ${publicId}`);
 }
 
 // We're waiting a second because of this issue happen randomly

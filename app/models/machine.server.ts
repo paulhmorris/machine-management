@@ -58,11 +58,7 @@ export function getMachineForRequestEmail(publicId: Machine["id"]) {
   });
 }
 
-export function getMachinesForTable({
-  where = {},
-}: {
-  where?: Prisma.MachineWhereInput;
-}) {
+export function getMachinesForTable({ where = {} }: { where?: Prisma.MachineWhereInput }) {
   return prisma.machine.findMany({
     where,
     include: {

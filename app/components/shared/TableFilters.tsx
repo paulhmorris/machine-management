@@ -22,21 +22,12 @@ type DropdownProps = {
   unmount?: boolean;
 };
 
-export function TableFilters({
-  filters,
-  direction = "right",
-  unmount = true,
-}: DropdownProps) {
+export function TableFilters({ filters, direction = "right", unmount = true }: DropdownProps) {
   const [searchParams] = useSearchParams();
   return (
     <Popover.Group className="hidden sm:flex sm:items-baseline sm:space-x-8">
       {filters.map((section, index) => (
-        <Popover
-          as="div"
-          key={section.name}
-          id={`desktop-menu-${index}`}
-          className="relative inline-block text-left"
-        >
+        <Popover as="div" key={section.name} id={`desktop-menu-${index}`} className="relative inline-block text-left">
           <div>
             <Popover.Button className="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none">
               <span>{section.name}</span>
@@ -61,9 +52,7 @@ export function TableFilters({
             <Popover.Panel
               unmount={unmount}
               className={classNames(
-                direction === "left"
-                  ? "right-0 origin-top-right"
-                  : "left-0 origin-top-left",
+                direction === "left" ? "right-0 origin-top-right" : "left-0 origin-top-left",
                 "space-x- absolute z-20 mt-2 space-y-3 whitespace-nowrap rounded-md bg-white p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
               )}
             >
@@ -75,10 +64,7 @@ export function TableFilters({
                   name={`${section.id}`}
                   defaultValue={option.value}
                   defaultChecked={
-                    option.defaultSelected ||
-                    searchParams
-                      .getAll(`${section.id}`)
-                      .includes(String(option.value))
+                    option.defaultSelected || searchParams.getAll(`${section.id}`).includes(String(option.value))
                   }
                 />
               ))}

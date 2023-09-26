@@ -1,8 +1,5 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
-import {
-  generatePasswordReset,
-  getCurrentPasswordReset,
-} from "~/models/passwordReset.server";
+import { generatePasswordReset, getCurrentPasswordReset } from "~/models/passwordReset.server";
 import { getUserById } from "~/models/user.server";
 import { sendPasswordResetSchema } from "~/schemas/passwordSchemas";
 import { requireAdmin } from "~/utils/auth.server";
@@ -18,12 +15,10 @@ export async function action({ request }: ActionFunctionArgs) {
   const result = sendPasswordResetSchema.safeParse(form);
 
   if (!result.success) {
-    return jsonWithToast(
-      { errors: { ...result.error.flatten().fieldErrors } },
-      { status: 400 },
-      session,
-      { type: "error", message: "Error resetting password" }
-    );
+    return jsonWithToast({ errors: { ...result.error.flatten().fieldErrors } }, { status: 400 }, session, {
+      type: "error",
+      message: "Error resetting password",
+    });
   }
 
   const { userId } = result.data;
@@ -48,10 +43,8 @@ export async function action({ request }: ActionFunctionArgs) {
   const reset = await generatePasswordReset({ email: user.email });
   await sendPasswordResetEmail({ email: user.email, token: reset.token });
 
-  return jsonWithToast(
-    { message: "Password reset email sent" },
-    { status: 200 },
-    session,
-    { type: "success", message: "Password reset email sent" }
-  );
+  return jsonWithToast({ message: "Password reset email sent" }, { status: 200 }, session, {
+    type: "success",
+    message: "Password reset email sent",
+  });
 }

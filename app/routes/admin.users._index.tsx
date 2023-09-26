@@ -22,37 +22,23 @@ export default function UserIndex() {
   const { users } = useLoaderData<typeof loader>();
   return (
     <main className="flex flex-col">
-      <PageHeader
-        title="Users"
-        actionText="New User"
-        href="/admin/users/new"
-        actionIcon={<IconPlus size={18} />}
-      />
+      <PageHeader title="Users" actionText="New User" href="/admin/users/new" actionIcon={<IconPlus size={18} />} />
       <ul className="divide-y divide-gray-200 pb-24">
         {users.map((user) => (
           <li key={user.email}>
-            <Link
-              to={`/admin/users/${user.id}`}
-              className="block hover:bg-gray-50"
-            >
+            <Link to={`/admin/users/${user.id}`} className="block hover:bg-gray-50">
               <div className="flex items-center px-4 py-4 sm:px-6">
                 <div className="flex min-w-0 flex-1 items-center">
                   <div className="min-w-0 flex-1 px-4 text-sm md:grid md:grid-cols-12 md:gap-4 ">
                     <p className="col-span-3 truncate font-medium text-cyan-700">
                       {user.firstName} {user.lastName}
                     </p>
-                    <p className="col-span-4 truncate text-gray-500">
-                      {user.email}
-                    </p>
+                    <p className="col-span-4 truncate text-gray-500">{user.email}</p>
                     <p className="col-span-3 text-gray-500">
-                      {user.campusUserRole
-                        ? getFormattedEnum(user.campusUserRole.role)
-                        : getFormattedEnum(user.role)}
+                      {user.campusUserRole ? getFormattedEnum(user.campusUserRole.role) : getFormattedEnum(user.role)}
                     </p>
                     {user.campusUserRole && (
-                      <p className="col-span-2 text-gray-500">
-                        {user.campusUserRole.campus.name}
-                      </p>
+                      <p className="col-span-2 text-gray-500">{user.campusUserRole.campus.name}</p>
                     )}
                   </div>
                 </div>

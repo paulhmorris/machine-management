@@ -6,12 +6,7 @@ import { Badge } from "~/components/shared/Badge";
 import { CaughtError } from "~/components/shared/CaughtError";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableWrapper } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { getTicketsByMachineId } from "~/models/ticket.server";
 import { requireAdmin } from "~/utils/auth.server";
@@ -32,10 +27,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     },
   });
   if (!ticket) throw notFoundResponse(`Ticket ${ticketId} not found`);
-  const relatedTickets = await getTicketsByMachineId(
-    ticket.machineId,
-    ticket.id
-  );
+  const relatedTickets = await getTicketsByMachineId(ticket.machineId, ticket.id);
   return json({ relatedTickets });
 }
 
@@ -55,29 +47,18 @@ export default function RelatedTickets() {
 
   return (
     <TableWrapper>
-      <TableHead
-        columns={columns}
-        sortConfig={sortConfig}
-        sortFn={requestSort}
-      />
+      <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} />
       <TableBody>
         {items.map((ticket, index) => (
-          <tr
-            key={ticket.id}
-            className={index % 2 === 0 ? undefined : "bg-gray-50"}
-          >
+          <tr key={ticket.id} className={index % 2 === 0 ? undefined : "bg-gray-50"}>
             <TableCell>{ticket.id}</TableCell>
-            <TableCell>
-              {dayjs(ticket.reportedOn).format("M/D/YYYY h:mm A")}
-            </TableCell>
+            <TableCell>{dayjs(ticket.reportedOn).format("M/D/YYYY h:mm A")}</TableCell>
             <TableCell>
               {" "}
               <Badge
                 text={ticket.status.name}
                 size="small"
-                color={getTicketStatusBadgeColor(
-                  ticket.status.name as TTicketStatus
-                )}
+                color={getTicketStatusBadgeColor(ticket.status.name as TTicketStatus)}
               />
             </TableCell>
             <TableCell>

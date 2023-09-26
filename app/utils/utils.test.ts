@@ -24,35 +24,22 @@ test("getFormattedEnum", () => {
 
 test("getSearchParam", () => {
   it("should return a search param from a request", () => {
-    expect(
-      getSearchParam("test", new Request("https://test.com?test=123"))
-    ).toBe("123");
+    expect(getSearchParam("test", new Request("https://test.com?test=123"))).toBe("123");
   });
   it("should return undefined if the param is not found", () => {
-    expect(getSearchParam("test", new Request("https://test.com"))).toBe(
-      undefined
-    );
+    expect(getSearchParam("test", new Request("https://test.com"))).toBe(undefined);
   });
   it("should return the first param if there are multiple", () => {
-    expect(
-      getSearchParam("test", new Request("https://test.com?test=123&test=456"))
-    ).toBe("123");
+    expect(getSearchParam("test", new Request("https://test.com?test=123&test=456"))).toBe("123");
   });
 });
 
 test("getAllSearchParams", () => {
   it("should return all search params from a request", () => {
-    expect(
-      getAllSearchParams(
-        "test",
-        new Request("https://test.com?test=123&test=456")
-      )
-    ).toEqual(["123", "456"]);
+    expect(getAllSearchParams("test", new Request("https://test.com?test=123&test=456"))).toEqual(["123", "456"]);
   });
   it("should return an empty array if the param is not found", () => {
-    expect(getAllSearchParams("test", new Request("https://test.com"))).toEqual(
-      []
-    );
+    expect(getAllSearchParams("test", new Request("https://test.com"))).toEqual([]);
   });
 });
 

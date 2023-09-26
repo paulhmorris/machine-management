@@ -22,10 +22,7 @@ async function deleteMachine(publicId: string) {
     await prisma.campus.deleteMany({ where: { name: "Test Campus" } });
     await prisma.machineType.delete({ where: { name: "Test Type" } });
   } catch (error) {
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
+    if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
       console.log("Machine not found, so no need to delete");
     } else {
       console.log(error);

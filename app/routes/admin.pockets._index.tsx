@@ -7,12 +7,7 @@ import { CustomLink } from "~/components/shared/CustomLink";
 import { PageHeader } from "~/components/shared/PageHeader";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import type { TableColumn } from "~/components/tables";
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableWrapper,
-} from "~/components/tables";
+import { TableBody, TableCell, TableHead, TableWrapper } from "~/components/tables";
 import { useSortableData } from "~/hooks/useSortableData";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
@@ -34,10 +29,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function LocationIndex() {
   const { pockets } = useLoaderData<typeof loader>();
-  const { items, requestSort, sortConfig } = useSortableData<typeof pockets>(
-    pockets,
-    { key: "campus", direction: "asc" }
-  );
+  const { items, requestSort, sortConfig } = useSortableData<typeof pockets>(pockets, {
+    key: "campus",
+    direction: "asc",
+  });
 
   return (
     <main className="flex flex-col">
@@ -48,30 +43,18 @@ export default function LocationIndex() {
         href="/admin/pockets/new"
       />
       <TableWrapper>
-        <TableHead
-          columns={columns}
-          sortConfig={sortConfig}
-          sortFn={requestSort}
-          includeActionCol
-        />
+        <TableHead columns={columns} sortConfig={sortConfig} sortFn={requestSort} includeActionCol />
         <TableBody>
           {items.map((pocket, index) => {
             return (
-              <tr
-                key={pocket.id}
-                className={classNames(
-                  index % 2 === 0 ? undefined : "bg-gray-50"
-                )}
-              >
+              <tr key={pocket.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
                 <TableCell>{pocket.campus}</TableCell>
                 <TableCell>{pocket.location}</TableCell>
                 <TableCell>{pocket.floor}</TableCell>
                 <TableCell>{pocket.position}</TableCell>
                 <TableCell>{pocket.description}</TableCell>
                 <TableCell>
-                  <CustomLink to={`/admin/pockets/${pocket.id}`}>
-                    Edit
-                  </CustomLink>
+                  <CustomLink to={`/admin/pockets/${pocket.id}`}>Edit</CustomLink>
                 </TableCell>
               </tr>
             );

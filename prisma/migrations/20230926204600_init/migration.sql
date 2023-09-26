@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'VENDOR', 'USER');
+CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
 CREATE TYPE "CampusRole" AS ENUM ('ATTENDANT', 'CAMPUS_TECH', 'MACHINE_TECH');
@@ -46,7 +46,6 @@ CREATE TABLE "Vendor" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "campusId" TEXT,
 
     CONSTRAINT "Vendor_pkey" PRIMARY KEY ("id")
 );
@@ -55,6 +54,7 @@ CREATE TABLE "Vendor" (
 CREATE TABLE "Campus" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "monthlyFee" DOUBLE PRECISION NOT NULL DEFAULT 0.00,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -103,6 +103,7 @@ CREATE TABLE "Machine" (
     "id" TEXT NOT NULL,
     "publicId" TEXT NOT NULL,
     "serialNumber" TEXT,
+    "modelNumber" TEXT,
     "description" TEXT,
     "machineTypeId" INTEGER NOT NULL,
     "pocketId" TEXT NOT NULL,

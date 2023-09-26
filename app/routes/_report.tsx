@@ -4,7 +4,7 @@ import { UncaughtError } from "~/components/shared/UncaughtError";
 
 export default function ReportLayout() {
   return (
-    <main className="h-full min-h-screen py-6 px-2 md:mx-auto md:max-w-sm md:px-0">
+    <main className="h-full min-h-screen px-2 py-6 md:mx-auto md:max-w-sm md:px-0">
       <Outlet />
     </main>
   );
