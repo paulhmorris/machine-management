@@ -15,7 +15,6 @@ import { generatePasswordReset } from "~/models/passwordReset.server";
 import { newUserSchema } from "~/schemas/userSchemas";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
-import { sendPasswordSetupEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { getBusyState, useUser } from "~/utils/utils";
@@ -56,7 +55,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (sendEmail) {
     const { token } = await generatePasswordReset({ email });
-    await sendPasswordSetupEmail({ email, token });
+    // await sendPasswordSetupEmail({ email, token });
   }
 
   return redirectWithToast(`/admin/users/`, session, {

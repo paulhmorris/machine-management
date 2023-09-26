@@ -7,7 +7,6 @@ import { Input } from "~/components/shared/Input";
 import { Spinner } from "~/components/shared/Spinner";
 import { Textarea } from "~/components/shared/Textarea";
 import { prisma } from "~/utils/db.server";
-import { sendTicketCloseEmail } from "~/utils/mail.server";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { secretId } = params;
@@ -46,7 +45,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
     where: { id: ticket.id },
     data: { ticketStatusId: 8 },
   });
-  await sendTicketCloseEmail(closedTicket.id, notes, techEmail);
+  // await sendTicketCloseEmail(closedTicket.id, notes, techEmail);
   return redirect(`/close-ticket/${closedTicket.secretId}?thanks=true`);
 }
 

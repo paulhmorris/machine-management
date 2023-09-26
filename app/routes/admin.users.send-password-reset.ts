@@ -3,7 +3,6 @@ import { generatePasswordReset, getCurrentPasswordReset } from "~/models/passwor
 import { getUserById } from "~/models/user.server";
 import { sendPasswordResetSchema } from "~/schemas/passwordSchemas";
 import { requireAdmin } from "~/utils/auth.server";
-import { sendPasswordResetEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast } from "~/utils/toast.server";
 import { notFoundResponse } from "~/utils/utils";
@@ -41,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const reset = await generatePasswordReset({ email: user.email });
-  await sendPasswordResetEmail({ email: user.email, token: reset.token });
+  // await sendPasswordResetEmail({ email: user.email, token: reset.token });
 
   return jsonWithToast({ message: "Password reset email sent" }, { status: 200 }, session, {
     type: "success",

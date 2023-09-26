@@ -9,7 +9,6 @@ import { Spinner } from "~/components/shared/Spinner";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 import { generatePasswordReset, getCurrentPasswordReset } from "~/models/passwordReset.server";
 import { getUserByEmail } from "~/models/user.server";
-import { sendPasswordResetEmail } from "~/utils/mail.server";
 import { getBusyState } from "~/utils/utils";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -34,7 +33,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const reset = await generatePasswordReset({ email: user.email });
-  await sendPasswordResetEmail({ email: user.email, token: reset.token });
+  // await sendPasswordResetEmail({ email: user.email, token: reset.token });
   return json({
     message: "Thanks! Check your email for a password reset link.",
     errors: { email: [] },

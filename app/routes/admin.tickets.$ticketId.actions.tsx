@@ -22,7 +22,6 @@ import { getTicketById, getTicketWithCampusId, reassignTicket, updateTicketStatu
 import { getUserWithCampusRole } from "~/models/user.server";
 import { ticketActionSchema, ticketAssignmentSchema } from "~/schemas/ticketSchemas";
 import { requireAdmin } from "~/utils/auth.server";
-import { sendMachineReportEmail } from "~/utils/mail.server";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { actionIsAvailable, badRequest, getBusyState, notFoundResponse } from "~/utils/utils";
@@ -77,7 +76,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       createdByUserId: user.id,
       ticketStatusId: updatedStatus,
     });
-    await sendMachineReportEmail({ ticketId: ticket.id, notes: comments });
+    // await sendMachineReportEmail({ ticketId: ticket.id, notes: comments });
 
     return redirectWithToast(`/admin/tickets/${ticketId}/events`, session, {
       message: "Ticket assigned successfully",
