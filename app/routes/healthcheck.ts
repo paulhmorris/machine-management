@@ -1,7 +1,7 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { prisma } from "~/utils/db.server";
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   try {
     const url = new URL(`http://localhost:${process.env.PORT ?? 3000}/`);
     // if we can connect to the database and make a simple query

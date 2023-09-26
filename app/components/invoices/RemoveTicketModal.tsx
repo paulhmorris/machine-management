@@ -23,28 +23,14 @@ export function RemoveTicketModal(props: Props) {
         description="This will remove the ticket from the invoice, and delete all charges associated with it. You can add it again later, but all charges will be deleted."
       />
       <div className="mt-5 gap-2 sm:mt-4 sm:flex sm:flex-row-reverse">
-        <fetcher.Form
-          method="post"
-          action={`/admin/invoices/${props.invoiceId}`}
-          replace={true}
-        >
+        <fetcher.Form method="post" action={`/admin/invoices/${props.invoiceId}`}>
           <input type="hidden" name="ticketId" value={props.ticketId} />
-          <Button
-            type="submit"
-            variant="danger"
-            name="_action"
-            value="removeTicket"
-            disabled={busy}
-          >
+          <Button type="submit" variant="danger" name="_action" value="removeTicket" disabled={busy}>
             {busy && <Spinner className="mr-2" />}
             {busy ? "Removing..." : "Remove Ticket"}
           </Button>
         </fetcher.Form>
-        <Button
-          onClick={() => props.setOpen(false)}
-          variant="secondary"
-          disabled={busy}
-        >
+        <Button onClick={() => props.setOpen(false)} variant="secondary" disabled={busy}>
           Cancel
         </Button>
       </div>

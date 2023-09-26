@@ -5,11 +5,7 @@ export function getTicketById(id: Ticket["id"]) {
   return prisma.ticket.findUnique({ where: { id } });
 }
 
-export function getAllTicketsWithCount({
-  where = {},
-}: {
-  where?: Prisma.TicketWhereInput;
-}) {
+export function getAllTicketsWithCount({ where = {} }: { where?: Prisma.TicketWhereInput }) {
   return prisma.ticket.findMany({
     where,
     select: {
@@ -142,10 +138,7 @@ export async function updateTicketStatus({
   });
 }
 
-export function getTicketsByMachineId(
-  machineId: Machine["id"],
-  excludedTicketId: Ticket["id"]
-) {
+export function getTicketsByMachineId(machineId: Machine["id"], excludedTicketId: Ticket["id"]) {
   return prisma.ticket.findMany({
     where: { machineId, id: { not: excludedTicketId } },
     include: {

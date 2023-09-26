@@ -1,11 +1,11 @@
 import type { Campus, Location, MachineType } from "@prisma/client";
-import { Form, useTransition } from "@remix-run/react";
+import { Form, useNavigation } from "@remix-run/react";
 import { IconRefresh } from "@tabler/icons-react";
 import { Button } from "~/components/shared/Button";
 import { Select } from "~/components/shared/Select";
 import type { Filter } from "~/components/shared/TableFilters";
 import { TableFilters } from "~/components/shared/TableFilters";
-import type { MachineQueryParam } from "~/routes/admin/machines";
+import type { MachineQueryParam } from "~/routes/_admin.machines._index";
 import { getBusyState } from "~/utils/utils";
 
 type Props = {
@@ -14,8 +14,8 @@ type Props = {
   machineTypes: Array<Pick<MachineType, "id" | "name">>;
 };
 export function MachinesFilter({ campuses, locations, machineTypes }: Props) {
-  const transition = useTransition();
-  const busy = getBusyState(transition);
+  const navigation = useNavigation();
+  const busy = getBusyState(navigation);
 
   const filters: Array<Filter<MachineQueryParam>> = [
     {

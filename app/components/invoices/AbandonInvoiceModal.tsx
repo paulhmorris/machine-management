@@ -21,15 +21,9 @@ export function AbandonInvoiceModal(props: Props) {
         description="This will delete the invoice and all charges associated with it."
       />
       <div className="mt-5 gap-2 sm:mt-4 sm:flex sm:flex-row-reverse">
-        <fetcher.Form method="post" action={`/admin/invoices/`} replace={true}>
+        <fetcher.Form method="post" action={`/admin/invoices/`}>
           <input type="hidden" name="invoiceId" value={props.invoiceId} />
-          <Button
-            type="submit"
-            variant="danger"
-            disabled={busy}
-            name="_action"
-            value="abandonInvoice"
-          >
+          <Button type="submit" variant="danger" disabled={busy} name="_action" value="abandonInvoice">
             {busy && <Spinner className="mr-2" />}
             {busy ? "Abandoning..." : "Abandon"}
           </Button>

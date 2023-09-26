@@ -2,10 +2,7 @@ import { redirect } from "@remix-run/node";
 import { getUserById } from "~/models/user.server";
 import { getUserId, logout } from "~/utils/session.server";
 
-export async function requireUserId(
-  request: Request,
-  redirectTo: string = new URL(request.url).pathname
-) {
+export async function requireUserId(request: Request, redirectTo: string = new URL(request.url).pathname) {
   const userId = await getUserId(request);
   if (!userId) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
@@ -28,6 +25,18 @@ export async function requireAdmin(request: Request) {
   const user = await getUserById(userId);
   if (user) {
     if (user.role === "ADMIN") {
+      return user;
+    }
+  }
+
+  throw await logout(request);
+}
+
+export async function requireCA(request: Request) {
+  const userId = await requireUserId(request);
+  const user = await getUserById(userId);
+  if (user) {
+    if (user.role === "ADMIN" || user.campusUserRole?.role === "ATTENDANT") {
       return user;
     }
   }

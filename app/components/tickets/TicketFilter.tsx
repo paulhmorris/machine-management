@@ -1,5 +1,5 @@
 import type { TicketStatus } from "@prisma/client";
-import { Form, useSearchParams, useTransition } from "@remix-run/react";
+import { Form, useNavigation, useSearchParams } from "@remix-run/react";
 import { IconRefresh } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { Button } from "~/components/shared/Button";
@@ -12,14 +12,12 @@ type Props = {
   ticketStatuses: TicketStatus[];
 };
 export function TicketFilter({ ticketStatuses }: Props) {
-  const transition = useTransition();
-  const busy = getBusyState(transition);
+  const navigation = useNavigation();
+  const busy = getBusyState(navigation);
   const [searchParams] = useSearchParams();
 
   const urlStatuses = searchParams.getAll("status[]");
-  const defaultStatuses = ticketStatuses
-    .filter((s) => s.name !== "Closed")
-    .map((s) => s.id.toString());
+  const defaultStatuses = ticketStatuses.filter((s) => s.name !== "Closed").map((s) => s.id.toString());
   const statuses = urlStatuses.length ? urlStatuses : defaultStatuses;
   const dateFrom = searchParams.get("dateFrom") ?? undefined;
   const dateTo = searchParams.get("dateTo") ?? undefined;
@@ -37,20 +35,10 @@ export function TicketFilter({ ticketStatuses }: Props) {
   ];
 
   return (
-    <Form
-      method="get"
-      className="flex w-full flex-col gap-4 text-sm"
-      replace={true}
-    >
+    <Form method="get" className="flex w-full flex-col gap-4 text-sm" replace={true}>
       <TableFilters filters={filters} direction="right" unmount={false} />
       <div className="flex gap-2">
-        <Input
-          label="From"
-          name="dateFrom"
-          type="date"
-          defaultValue={dateFrom}
-          hideHelperText
-        />
+        <Input label="From" name="dateFrom" type="date" defaultValue={dateFrom} hideHelperText />
         <Input
           label="To"
           name="dateTo"

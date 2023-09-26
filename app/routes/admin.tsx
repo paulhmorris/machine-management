@@ -5,9 +5,7 @@ import { CaughtError } from "~/components/shared/CaughtError";
 import { UncaughtError } from "~/components/shared/UncaughtError";
 
 export const meta: MetaFunction = () => {
-  return {
-    title: "Admin | Machine Management",
-  };
+  return [{ title: "Admin | Machine Management" }];
 };
 
 export default function AdminLayout() {

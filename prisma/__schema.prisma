@@ -1,0 +1,257 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  role      UserRole
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  password             Password?
+  vendorId             String?         @db.ObjectId
+  vendor               Vendor?         @relation(fields: [vendorId], references: [id])
+  campusUserRole       CampusUser?
+  tickets              Ticket[]
+  createdTicketEvents  TicketEvent[]   @relation("createdByUser")
+  assignedTicketEvents TicketEvent[]   @relation("assignedToUser")
+  submittedInvoices    Invoice[]
+  passwordResets       PasswordReset[]
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model Password {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  hash   String
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model PasswordReset {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  token     String    @unique
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String    @db.ObjectId
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vendor {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  employees  User[]
+  tripCharge Float
+  hourlyRate Float
+  campuses   Campus[] @relation(fields: [campusIds], references: [id])
+  campusIds  String[] @db.ObjectId
+  isActive   Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  invoices  Invoice[]
+}
+
+model Campus {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  monthlyFee Float    @default(0.00)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  locations Location[]
+  vendors   Vendor[]     @relation(fields: [vendorIds], references: [id])
+  vendorIds String[]     @db.ObjectId
+  invoices  Invoice[]
+  users     CampusUser[]
+}
+
+enum CampusRole {
+  ATTENDANT
+  CAMPUS_TECH
+  MACHINE_TECH
+}
+
+model CampusUser {
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  campus   Campus     @relation(fields: [campusId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  role     CampusRole
+  campusId String     @db.ObjectId
+  userId   String     @unique @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campusId, userId])
+}
+
+model Location {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  campusId    String   @db.ObjectId
+  campus      Campus   @relation(fields: [campusId], references: [id])
+  pockets     Pocket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Pocket {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  floor       String?   @default("1")
+  position    Int?      @default(1)
+  description String?
+  machines    Machine[]
+  location    Location  @relation(fields: [locationId], references: [id])
+  locationId  String    @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Machine {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  publicId      String      @unique
+  serialNumber  String?
+  modelNumber   String?
+  description   String?
+  type          MachineType @relation(fields: [machineTypeId], references: [id])
+  machineTypeId String      @db.ObjectId
+  pocket        Pocket      @relation(fields: [pocketId], references: [id])
+  pocketId      String      @db.ObjectId
+  tickets       Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MachineType {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String    @unique
+  machines Machine[]
+}
+
+model MachineErrorType {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String   @unique
+  tickets Ticket[]
+}
+
+model Ticket {
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  secretId      String           @unique @default(cuid())
+  machine       Machine          @relation(fields: [machineId], references: [id])
+  assignedTo    User?            @relation(fields: [assignedToUserId], references: [id])
+  machineId     String           @db.ObjectId
+  notes         String?
+  reporterEmail String?
+  status        TicketStatus     @relation(fields: [ticketStatusId], references: [id])
+  repairCost    Float?
+  errorType     MachineErrorType @relation(fields: [machineErrorTypeId], references: [id])
+
+  reportedOn         DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  ticketStatusId     String        @db.ObjectId
+  assignedToUserId   String?       @db.ObjectId
+  events             TicketEvent[]
+  charges            Charge[]
+  machineErrorTypeId String        @db.ObjectId
+  invoice            Invoice?      @relation(fields: [invoiceId], references: [id])
+  invoiceId          String?       @db.ObjectId
+}
+
+model TicketStatus {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  name        String        @unique
+  tickets     Ticket[]
+  TicketEvent TicketEvent[]
+}
+
+model TicketEvent {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  ticket           Ticket       @relation(fields: [ticketId], references: [id])
+  ticketId         String       @db.ObjectId
+  comments         String?
+  status           TicketStatus @relation(fields: [ticketStatusId], references: [id])
+  assignedTo       User?        @relation("assignedToUser", fields: [assignedToUserId], references: [id])
+  assignedToUserId String?      @db.ObjectId
+  createdBy        User         @relation("createdByUser", fields: [createdByUserId], references: [id])
+  createdByUserId  String       @db.ObjectId
+  timestamp        DateTime     @default(now())
+  ticketStatusId   String       @db.ObjectId
+}
+
+model Invoice {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  campusId String @db.ObjectId
+  vendorId String @db.ObjectId
+
+  submittedOn          DateTime?
+  submittedBy          User?     @relation(fields: [submittedByUserId], references: [id])
+  paidOn               DateTime?
+  total                Float?
+  vendorInvoiceNumber  String?   @unique
+  invoicedOn           DateTime?
+  billedToUniversityOn DateTime?
+  charges              Charge[]
+  tickets              Ticket[]
+
+  vendor            Vendor   @relation(fields: [vendorId], references: [id])
+  campus            Campus   @relation(fields: [campusId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  submittedByUserId String?  @db.ObjectId
+}
+
+model Charge {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  ticket          Ticket     @relation(fields: [ticketId], references: [id])
+  ticketId        String     @db.ObjectId
+  invoice         Invoice    @relation(fields: [invoiceId], references: [id])
+  invoiceId       String     @db.ObjectId
+  type            ChargeType @relation(fields: [typeId], references: [id])
+  typeId          String     @db.ObjectId
+  actualCost      Float
+  warrantyCovered Boolean    @default(false)
+
+  description String?
+  part        Part?   @relation(fields: [partId], references: [id])
+  partId      String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChargeType {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String   @unique
+  charges Charge[]
+}
+
+model Part {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  partNumber   String
+  standardCost Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  charges   Charge[]
+}

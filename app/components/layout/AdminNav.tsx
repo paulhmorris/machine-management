@@ -1,4 +1,4 @@
-import { Link, NavLink, useFetcher, useTransition } from "@remix-run/react";
+import { Link, NavLink, useFetcher, useNavigation } from "@remix-run/react";
 import {
   IconBuildingBank,
   IconDoor,
@@ -15,19 +15,17 @@ import { classNames, useUser } from "~/utils/utils";
 
 export function AdminNav() {
   const user = useUser();
-  const transition = useTransition();
+  const navigation = useNavigation();
   const fetcher = useFetcher();
   const busy = fetcher.state === "loading" || fetcher.state === "submitting";
-  const showSpinner = useSpinDelay(transition.state !== "idle");
+  const showSpinner = useSpinDelay(navigation.state !== "idle");
 
   return (
     <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6 text-[15px]">
       <nav>
         <Link to="/" className="flex items-center px-1">
           <IconWashMachine size={48} className="text-cyan-700" />
-          <span className="text-sm font-bold text-cyan-700">
-            Machine Manager
-          </span>
+          <span className="text-sm font-bold text-cyan-700">Machine Manager</span>
           <IconLoader
             className={classNames(
               showSpinner ? "opacity-100" : "opacity-0",
@@ -45,9 +43,7 @@ export function AdminNav() {
                   to={`/admin${item.href}`}
                   end={item.end}
                   className={({ isActive }) =>
-                    `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${
-                      isActive ? "bg-gray-100" : ""
-                    }`
+                    `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${isActive ? "bg-gray-100" : ""}`
                   }
                 >
                   <li className="flex items-center space-x-4">
@@ -70,9 +66,7 @@ export function AdminNav() {
                   to={`/admin${item.href}`}
                   end={item.end}
                   className={({ isActive }) =>
-                    `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${
-                      isActive ? "bg-gray-100" : ""
-                    }`
+                    `block w-full rounded-md px-3 py-2 hover:bg-gray-100 ${isActive ? "bg-gray-100" : ""}`
                   }
                 >
                   <li className="flex items-center space-x-4">
@@ -94,11 +88,7 @@ export function AdminNav() {
           <span className="block text-gray-400">{user?.email}</span>
         </div>
         <fetcher.Form method="post" action="/logout">
-          <button
-            type="submit"
-            className="text-sm font-medium text-gray-400 hover:text-cyan-700"
-            disabled={busy}
-          >
+          <button type="submit" className="text-sm font-medium text-gray-400 hover:text-cyan-700" disabled={busy}>
             {busy ? "Logging out... 👋🏼" : "Log out"}
           </button>
         </fetcher.Form>

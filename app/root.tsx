@@ -1,4 +1,4 @@
-import type { LinksFunction, LoaderArgs, MetaFunction } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Links,
@@ -7,8 +7,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useCatch,
+  isRouteErrorResponse,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import { Notifications } from "~/components/shared/Notifications";
 import { getGlobalToast } from "~/utils/toast.server";
@@ -34,13 +35,11 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const meta: MetaFunction = () => ({
-  charset: "utf-8",
-  title: "Machine Management",
-  viewport: "width=device-width,initial-scale=1",
-});
+export const meta: MetaFunction = () => {
+  return [{ charset: "utf-8" }, { title: "Machine Management" }, { viewport: "width=device-width,initial-scale=1" }];
+};
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request);
   const toast = getGlobalToast(session);
   const user = await getUser(request);
@@ -85,7 +84,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
       <body>
         <div>
           <h1>Error</h1>
-          <pre>{error.message}</pre>
+          <pre>{error?.message}</pre>
         </div>
         <Scripts />
       </body>
@@ -93,27 +92,30 @@ export function ErrorBoundary({ error }: { error: Error }) {
   );
 }
 export function CatchBoundary() {
-  const caught = useCatch();
-  return (
-    <html>
-      <head>
-        <title>Oh no!</title>
-        <Meta />
-        <Links />
-      </head>
-      <body
-        style={{
-          display: "grid",
-          placeItems: "center",
-          textAlign: "center",
-        }}
-      >
-        <div>
-          <h1>Error {caught.status}</h1>
-          <pre>{caught.data}</pre>
-        </div>
-        <Scripts />
-      </body>
-    </html>
-  );
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <html>
+        <head>
+          <title>Oh no!</title>
+          <Meta />
+          <Links />
+        </head>
+        <body
+          style={{
+            display: "grid",
+            placeItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <div>
+            <h1>Error {error.status}</h1>
+            <pre>{error.data}</pre>
+          </div>
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
 }

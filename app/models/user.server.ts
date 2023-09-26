@@ -6,7 +6,7 @@ import { prisma } from "~/utils/db.server";
 export type { User } from "@prisma/client";
 
 export function getUserById(id: User["id"]) {
-  return prisma.user.findUnique({ where: { id } });
+  return prisma.user.findUnique({ where: { id }, include: { campusUserRole: true } });
 }
 
 export function getUserByEmail(email: User["email"]) {
@@ -22,11 +22,7 @@ export function getUserWithCampusRole(id: User["id"]) {
   });
 }
 
-export async function createUser(
-  email: User["email"],
-  password: string,
-  role: UserRole = "USER"
-) {
+export async function createUser(email: User["email"], password: string, role: UserRole = "USER") {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   return prisma.user.create({
@@ -46,13 +42,7 @@ export async function deleteUserByEmail(email: User["email"]) {
   return prisma.user.delete({ where: { email } });
 }
 
-export async function resetUserPassword({
-  userId,
-  password,
-}: {
-  userId: User["id"];
-  password: string;
-}) {
+export async function resetUserPassword({ userId, password }: { userId: User["id"]; password: string }) {
   const hash = await bcrypt.hash(password, 10);
   return prisma.user.update({
     where: { id: userId },
@@ -62,13 +52,7 @@ export async function resetUserPassword({
   });
 }
 
-export async function setupUserPassword({
-  userId,
-  password,
-}: {
-  userId: User["id"];
-  password: string;
-}) {
+export async function setupUserPassword({ userId, password }: { userId: User["id"]; password: string }) {
   const hash = await bcrypt.hash(password, 10);
   return prisma.user.update({
     where: { id: userId },
@@ -80,10 +64,7 @@ export async function setupUserPassword({
   });
 }
 
-export async function verifyLogin(
-  email: User["email"],
-  password: Password["hash"]
-) {
+export async function verifyLogin(email: User["email"], password: Password["hash"]) {
   const userWithPassword = await prisma.user.findUnique({
     where: { email },
     include: {
@@ -95,10 +76,7 @@ export async function verifyLogin(
     return null;
   }
 
-  const isValid = await bcrypt.compare(
-    password,
-    userWithPassword.password.hash
-  );
+  const isValid = await bcrypt.compare(password, userWithPassword.password.hash);
 
   if (!isValid) {
     return null;

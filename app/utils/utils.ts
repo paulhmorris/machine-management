@@ -1,7 +1,6 @@
 import type { Charge } from "@prisma/client";
-import { json, Response } from "@remix-run/node";
-import { useMatches } from "@remix-run/react";
-import type { Transition } from "@remix-run/react/dist/transition";
+import { json } from "@remix-run/node";
+import { Navigation, useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
@@ -39,8 +38,7 @@ export function safeRedirect(
 export function useMatchesData(id: string): Record<string, unknown> | undefined {
   const matchingRoutes = useMatches();
   const route = useMemo(() => matchingRoutes.find((route) => route.id === id), [matchingRoutes, id]);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return route?.data;
+  return route?.data as Record<string, unknown>;
 }
 
 export function isUser(user: unknown): user is User {
@@ -99,11 +97,27 @@ export function calculateTotalByType(charges: Array<Pick<Charge, "actualCost" | 
   }, 0);
 }
 
-export function getBusyState(transition: Transition) {
-  return (
-    transition.state === "submitting" ||
-    ((transition.type === "actionRedirect" || transition.type === "actionReload") && transition.state === "loading")
-  );
+export function getBusyState(navigation: Navigation) {
+  // navigation.type === "actionSubmission"
+  const isActionSubmission = navigation.state === "submitting";
+
+  // navigation.type === "actionReload"
+  const isActionReload =
+    navigation.state === "loading" &&
+    navigation.formMethod != null &&
+    navigation.formMethod != "GET" &&
+    // We had a submission navigation and are loading the submitted location
+    navigation.formAction === navigation.location.pathname;
+
+  // navigation.type === "actionRedirect"
+  const isActionRedirect =
+    navigation.state === "loading" &&
+    navigation.formMethod != null &&
+    navigation.formMethod != "GET" &&
+    // We had a submission navigation and are now navigating to different location
+    navigation.formAction !== navigation.location.pathname;
+
+  return isActionSubmission || isActionReload || isActionRedirect;
 }
 
 export function actionIsAvailable(actionName: string, statusId: number) {
