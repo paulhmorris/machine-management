@@ -17,6 +17,7 @@ import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
 import { badRequest, getBusyState, useMatchesData } from "~/utils/utils";
 
 export async function action({ params, request }: ActionFunctionArgs) {
+  console.log("---------- hello");
   await requireAdmin(request);
   const session = await getSession(request);
   const { invoiceId } = params;
@@ -49,11 +50,14 @@ export async function action({ params, request }: ActionFunctionArgs) {
 export default function AddTrip() {
   const navigation = useNavigation();
   const actionData = useActionData<typeof action>();
-  const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
+  const data = useMatchesData("routes/admin.invoices.$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
+  console.log("------data", data);
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
   const busy = getBusyState(navigation);
+
+  console.log(data);
 
   return (
     <Form className="flex max-w-xs flex-col gap-3 sm:w-40" method="post" replace>

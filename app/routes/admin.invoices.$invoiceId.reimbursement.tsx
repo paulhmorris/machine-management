@@ -43,7 +43,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
 }
 
 export default function AddLabor() {
-  const data = useMatchesData("routes/admin/invoices/$invoiceId") as {
+  const data = useMatchesData("routes/admin.invoices.$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
   const navigation = useNavigation();
