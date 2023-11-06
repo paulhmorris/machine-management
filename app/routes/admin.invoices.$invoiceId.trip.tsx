@@ -53,11 +53,8 @@ export default function AddTrip() {
   const data = useMatchesData("routes/admin.invoices.$invoiceId") as {
     invoice: Awaited<ReturnType<typeof getInvoiceWithAllRelations>>;
   };
-  console.log("------data", data);
   const tripCharge = data.invoice?.vendor.tripCharge ?? 0;
   const busy = getBusyState(navigation);
-
-  console.log(data);
 
   return (
     <Form className="flex max-w-xs flex-col gap-3 sm:w-40" method="post" replace>
