@@ -40,7 +40,7 @@ import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
 import { getSession } from "~/utils/session.server";
 import { jsonWithToast, redirectWithToast } from "~/utils/toast.server";
-import { badRequest, classNames, notFoundResponse } from "~/utils/utils";
+import { badRequest, cn, notFoundResponse } from "~/utils/utils";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   await requireAdmin(request);
@@ -205,7 +205,7 @@ export default function Invoice() {
                         <div className="flex items-center">
                           <Disclosure.Button
                             disabled={chargeCount === 0}
-                            className={classNames(
+                            className={cn(
                               "flex h-full w-full items-center justify-between border-b border-gray-200 p-4 sm:px-6 lg:px-8",
                               !open && "rounded-md hover:enabled:bg-gray-50"
                             )}

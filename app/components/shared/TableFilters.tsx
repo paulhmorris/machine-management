@@ -3,7 +3,7 @@ import { useSearchParams } from "@remix-run/react";
 import { IconChevronDown } from "@tabler/icons-react";
 import { Fragment } from "react";
 import { Checkbox } from "~/components/shared/Checkbox";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 export type Filter<T = string | number> = {
   id: T;
@@ -51,7 +51,7 @@ export function TableFilters({ filters, direction = "right", unmount = true }: D
           >
             <Popover.Panel
               unmount={unmount}
-              className={classNames(
+              className={cn(
                 direction === "left" ? "right-0 origin-top-right" : "left-0 origin-top-left",
                 "space-x- absolute z-20 mt-2 space-y-3 whitespace-nowrap rounded-md bg-white p-4 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
               )}

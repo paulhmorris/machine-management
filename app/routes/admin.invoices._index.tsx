@@ -12,7 +12,7 @@ import { useSortableData } from "~/hooks/useSortableData";
 import { getInvoicesForIndex } from "~/models/invoice.server";
 import { requireAdmin } from "~/utils/auth.server";
 import { formatCurrency } from "~/utils/formatters";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireAdmin(request);
@@ -56,7 +56,7 @@ export default function InvoiceIndex() {
             .filter((i) => i.submittedOn)
             .map((invoice, index) => {
               return (
-                <tr key={invoice.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
+                <tr key={invoice.id} className={cn(index % 2 === 0 ? undefined : "bg-gray-50")}>
                   <TableCell>
                     <CustomLink to={`/admin/vendors/${invoice.vendorId}`}>{invoice.vendor.name}</CustomLink>
                   </TableCell>

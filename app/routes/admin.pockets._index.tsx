@@ -11,7 +11,7 @@ import { TableBody, TableCell, TableHead, TableWrapper } from "~/components/tabl
 import { useSortableData } from "~/hooks/useSortableData";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireAdmin(request);
@@ -47,7 +47,7 @@ export default function LocationIndex() {
         <TableBody>
           {items.map((pocket, index) => {
             return (
-              <tr key={pocket.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
+              <tr key={pocket.id} className={cn(index % 2 === 0 ? undefined : "bg-gray-50")}>
                 <TableCell>{pocket.campus}</TableCell>
                 <TableCell>{pocket.location}</TableCell>
                 <TableCell>{pocket.floor}</TableCell>

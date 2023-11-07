@@ -2,7 +2,7 @@ import type { RemixNavLinkProps } from "@remix-run/react/dist/components";
 import { NavLink } from "@remix-run/react/dist/components";
 import type { ReactNode } from "react";
 import { forwardRef } from "react";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 interface Props extends RemixNavLinkProps {
   children: ReactNode;
@@ -16,7 +16,7 @@ export const ButtonNavLink = forwardRef<HTMLAnchorElement, Props>(({ children, d
       to={disabled ? "#" : props.to}
       ref={ref}
       className={({ isActive }) =>
-        classNames(
+        cn(
           isActive && !disabled
             ? "border-cyan-700 bg-cyan-700 text-white hover:border-cyan-800 hover:bg-cyan-800"
             : "border-gray-300 bg-white hover:bg-gray-50",

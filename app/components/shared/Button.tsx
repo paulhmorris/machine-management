@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef, ReactNode } from "react";
 import { forwardRef } from "react";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 interface ButtonProps extends ComponentPropsWithRef<"button"> {
   children: ReactNode;
@@ -12,7 +12,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ children, va
     <button
       {...props}
       ref={ref}
-      className={classNames(
+      className={cn(
         variant === "primary" &&
           "border-cyan-700 bg-cyan-700 text-white shadow-sm focus:ring-cyan-600/50 hover:enabled:border-cyan-800 hover:enabled:bg-cyan-800",
         variant === "secondary" && "border-gray-300 bg-white shadow-sm focus:ring-cyan-600/50 hover:enabled:bg-gray-50",

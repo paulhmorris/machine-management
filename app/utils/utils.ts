@@ -2,6 +2,7 @@ import type { Charge } from "@prisma/client";
 import { json } from "@remix-run/node";
 import { Navigation, useMatches } from "@remix-run/react";
 import { useMemo } from "react";
+import { ClassNameValue, twMerge } from "tailwind-merge";
 
 import type { User } from "~/models/user.server";
 
@@ -83,8 +84,8 @@ export function getAllSearchParams(param: string, request: Request) {
   return url.searchParams.getAll(param);
 }
 
-export function classNames(...classes: unknown[]): string {
-  return classes.filter(Boolean).join(" ");
+export function cn(...inputs: ClassNameValue[]) {
+  return twMerge(...inputs);
 }
 
 export function wait(ms: number): Promise<void> {

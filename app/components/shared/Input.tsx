@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef } from "react";
 import { forwardRef } from "react";
 import { FieldError } from "~/components/shared/FieldError";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 interface InputProps extends ComponentPropsWithRef<"input"> {
   name: string;
@@ -20,10 +20,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <div>
           <label
             htmlFor={name}
-            className={classNames(
-              hideLabel && "sr-only",
-              "inline-block whitespace-nowrap text-sm font-medium text-gray-700"
-            )}
+            className={cn(hideLabel && "sr-only", "inline-block whitespace-nowrap text-sm font-medium text-gray-700")}
           >
             {label}
           </label>
@@ -52,7 +49,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             step={isCurrency ? "0.01" : props.step}
             aria-invalid={errors ? true : props["aria-invalid"]}
             aria-describedby={`${name}-error ${name}-description additional-label`}
-            className={classNames(
+            className={cn(
               isCurrency && "pl-7",
               "mt-1 block w-full rounded-md border-gray-300 shadow-sm transition duration-100 placeholder:text-gray-300 hover:border-cyan-700 focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
               props.className

@@ -10,7 +10,7 @@ import { useSortableData } from "~/hooks/useSortableData";
 import { getMachinesForTable } from "~/models/machine.server";
 import { requireAdmin } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
-import { classNames, getAllSearchParams } from "~/utils/utils";
+import { cn, getAllSearchParams } from "~/utils/utils";
 
 export type MachineQueryParam = "campus" | "loc" | "type";
 
@@ -62,7 +62,7 @@ export default function TicketIndex() {
         <TableBody>
           {items.map((machine, index) => {
             return (
-              <tr key={machine.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
+              <tr key={machine.id} className={cn(index % 2 === 0 ? undefined : "bg-gray-50")}>
                 <TableCell>{machine.campus}</TableCell>
                 <TableCell>{machine.publicId}</TableCell>
                 <TableCell>{machine.type}</TableCell>

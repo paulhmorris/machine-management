@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef } from "react";
 import { forwardRef } from "react";
 import { FieldError } from "~/components/shared/FieldError";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 interface TextareaProps extends ComponentPropsWithRef<"textarea"> {
   name: string;
@@ -19,10 +19,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div>
           <label
             htmlFor={name}
-            className={classNames(
-              hideLabel && "sr-only",
-              "inline-block whitespace-nowrap text-sm font-medium text-gray-700"
-            )}
+            className={cn(hideLabel && "sr-only", "inline-block whitespace-nowrap text-sm font-medium text-gray-700")}
           >
             {label}
           </label>
@@ -45,7 +42,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             id={name}
             aria-describedby={`${name}-error ${name}-description`}
             aria-invalid={errors ? true : props["aria-invalid"]}
-            className={classNames(
+            className={cn(
               "block w-full rounded-md border-gray-300 shadow-sm placeholder:text-gray-300 focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
               resizeable ? "resize-y" : "resize-none"
             )}

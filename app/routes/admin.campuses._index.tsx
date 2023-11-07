@@ -10,7 +10,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableWrapper } from "~/co
 import { useSortableData } from "~/hooks/useSortableData";
 import { getAllCampuses } from "~/models/campus.server";
 import { requireAdmin } from "~/utils/auth.server";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireAdmin(request);
@@ -37,7 +37,7 @@ export default function CampusIndex() {
         <TableBody>
           {items.map((campus, index) => {
             return (
-              <tr key={campus.id} className={classNames(index % 2 === 0 ? undefined : "bg-gray-50")}>
+              <tr key={campus.id} className={cn(index % 2 === 0 ? undefined : "bg-gray-50")}>
                 <TableCell>{campus.name}</TableCell>
                 <TableCell>
                   <CustomLink to={`/admin/campuses/${campus.id}`}>Edit</CustomLink>

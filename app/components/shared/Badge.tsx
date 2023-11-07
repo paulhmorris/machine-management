@@ -1,4 +1,4 @@
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 export type BadgeProps = {
   text: string;
@@ -17,7 +17,7 @@ export type BadgeProps = {
 export function Badge({ text, size = "small", color = "bg-gray-100 text-gray-800 border-gray-300" }: BadgeProps) {
   return (
     <span
-      className={classNames(
+      className={cn(
         "inline-flex items-center rounded-full border font-medium",
         color,
         size === "small" ? "px-2.5 py-0.5 text-xs" : "px-3 py-0.5 text-sm"

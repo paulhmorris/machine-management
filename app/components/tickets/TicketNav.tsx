@@ -1,5 +1,5 @@
 import { NavLink } from "@remix-run/react";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 const tabs = [
   { name: "Events", href: "events" },
@@ -20,7 +20,7 @@ export function TicketNav() {
                 to={tab.href}
                 replace={true}
                 className={({ isActive }) =>
-                  classNames(
+                  cn(
                     "whitespace-nowrap border-b-2 px-1 pb-4 font-medium",
                     isActive ? "border-cyan-700 text-cyan-700" : "border-transparent hover:border-gray-300"
                   )

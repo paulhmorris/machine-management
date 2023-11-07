@@ -11,7 +11,7 @@ import {
   IconWashMachine,
 } from "@tabler/icons-react";
 import { useSpinDelay } from "spin-delay";
-import { classNames, useUser } from "~/utils/utils";
+import { cn, useUser } from "~/utils/utils";
 
 export function AdminNav() {
   const user = useUser();
@@ -21,13 +21,13 @@ export function AdminNav() {
   const showSpinner = useSpinDelay(navigation.state !== "idle");
 
   return (
-    <div className="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-gray-200 px-3 py-6 text-[15px]">
+    <div className="fixed inset-y-0 left-0 z-10 flex w-64 flex-col border-r border-gray-200 bg-white px-3 py-6 text-[15px]">
       <nav>
         <Link to="/" className="flex items-center px-1">
           <IconWashMachine size={48} className="text-cyan-700" />
           <span className="text-sm font-bold text-cyan-700">Machine Manager</span>
           <IconLoader
-            className={classNames(
+            className={cn(
               showSpinner ? "opacity-100" : "opacity-0",
               "ml-2 animate-spin text-gray-400 transition-opacity"
             )}

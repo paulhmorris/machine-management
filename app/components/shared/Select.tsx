@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef, ReactNode } from "react";
 import { forwardRef } from "react";
 import { FieldError } from "~/components/shared/FieldError";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 interface Props extends ComponentPropsWithRef<"select"> {
   label: string;
@@ -19,10 +19,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(
         <div>
           <label
             htmlFor={name}
-            className={classNames(
-              hideLabel && "sr-only",
-              "inline-block whitespace-nowrap text-sm font-medium text-gray-700"
-            )}
+            className={cn(hideLabel && "sr-only", "inline-block whitespace-nowrap text-sm font-medium text-gray-700")}
           >
             {label}
           </label>
@@ -43,7 +40,7 @@ export const Select = forwardRef<HTMLSelectElement, Props>(
           name={name}
           aria-describedby={`${name}-error ${name}-description additional-label`}
           aria-invalid={errors ? true : props["aria-invalid"]}
-          className={classNames(
+          className={cn(
             "mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base shadow-sm focus:border-cyan-700 focus:ring focus:ring-cyan-600 focus:ring-opacity-25 disabled:pointer-events-none disabled:opacity-50 sm:text-sm",
             props.className
           )}

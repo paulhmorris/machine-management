@@ -12,7 +12,7 @@ import { UncaughtError } from "~/components/shared/UncaughtError";
 import { getErrorTypesForReport, getMachineForReport } from "~/models/machine.server";
 import { reportSchema } from "~/schemas/reportSchemas";
 import { prisma } from "~/utils/db.server";
-import { badRequest, classNames, getBusyState, notFoundResponse } from "~/utils/utils";
+import { badRequest, cn, getBusyState, notFoundResponse } from "~/utils/utils";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Report a Machine Issue" }];
@@ -87,7 +87,7 @@ export default function MachineReport() {
                     value={type.id}
                     onSelect={() => commentsRef.current?.focus()}
                     className={({ checked }) =>
-                      classNames(
+                      cn(
                         "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-4 text-base font-bold shadow-sm transition duration-75 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:py-2 sm:text-sm",
                         checked
                           ? "border-cyan-700 bg-cyan-700 text-white hover:border-cyan-800 hover:bg-cyan-800"

@@ -1,6 +1,6 @@
 import { IconArrowsSort, IconSortAscendingLetters, IconSortDescendingLetters } from "@tabler/icons-react";
 import type { SortConfig, TableColumn } from "~/components/tables";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 type HeadProps = {
   columns: TableColumn[];
@@ -32,7 +32,7 @@ export function TableHead({ columns, sortFn, sortConfig, includeActionCol }: Hea
                 {sortFn && sortable && (
                   <button
                     type="button"
-                    className={classNames(
+                    className={cn(
                       "rounded-md bg-gray-200 p-0.5 transition duration-75 group-hover:opacity-100",
                       isSortedField ? "opacity-100" : "opacity-0"
                     )}

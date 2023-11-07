@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
-import { classNames } from "~/utils/utils";
+import { cn } from "~/utils/utils";
 
 interface CheckboxProps extends ComponentPropsWithoutRef<"input"> {
   id: string;
@@ -16,7 +16,7 @@ export function Checkbox({ id, name, label, ...props }: CheckboxProps) {
           id={id}
           name={name}
           type="checkbox"
-          className={classNames(
+          className={cn(
             "h-4 w-4 cursor-pointer rounded border-gray-300 text-cyan-600 transition duration-75 focus:ring-cyan-600/50",
             props.className
           )}
