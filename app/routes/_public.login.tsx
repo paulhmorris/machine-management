@@ -72,6 +72,7 @@ export default function LoginPage() {
           label="Username"
           name="email"
           type="email"
+          defaultValue="tmfd@remix.run"
           autoComplete="username"
           errors={actionData?.errors.email}
           required
@@ -80,6 +81,7 @@ export default function LoginPage() {
           label="Password"
           name="password"
           type="password"
+          defaultValue="password"
           autoComplete="current-password"
           errors={actionData?.errors.password}
           required

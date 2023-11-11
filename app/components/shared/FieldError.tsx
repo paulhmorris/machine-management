@@ -1,4 +1,4 @@
-export function FieldError({ errors, name }: { errors: string[] | undefined; name: string }) {
+export function FieldError({ errors, name }: { errors: string[] | null[] | undefined; name: string }) {
   if (!errors?.length) return null;
 
   return (

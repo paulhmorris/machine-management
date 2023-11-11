@@ -109,27 +109,19 @@ async function seed() {
 
   // Create types
   await prisma.machineErrorType.createMany({
-    data: errorTypes.map((type) => {
-      return { name: type };
-    }),
+    data: errorTypes,
   });
 
   await prisma.ticketStatus.createMany({
-    data: ticketStatuses.map((status) => {
-      return { name: status };
-    }),
+    data: ticketStatuses,
   });
 
   await prisma.chargeType.createMany({
-    data: chargeTypes.map((status) => {
-      return { name: status };
-    }),
+    data: chargeTypes,
   });
 
   await prisma.machineType.createMany({
-    data: machineTypes.map((type) => {
-      return { name: type };
-    }),
+    data: machineTypes,
   });
   // Machines
   const pockets = await prisma.pocket.findMany();

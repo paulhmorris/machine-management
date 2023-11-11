@@ -5,7 +5,7 @@ import { Button } from "~/components/shared/Button";
 import { Select } from "~/components/shared/Select";
 import type { Filter } from "~/components/shared/TableFilters";
 import { TableFilters } from "~/components/shared/TableFilters";
-import type { MachineQueryParam } from "~/routes/_admin.machines._index";
+import { MachineQueryParam } from "~/routes/admin.machines._index";
 import { getBusyState } from "~/utils/utils";
 
 type Props = {

@@ -9,7 +9,7 @@ interface InputProps extends ComponentPropsWithRef<"input"> {
   description?: string;
   hideLabel?: boolean;
   hideHelperText?: boolean;
-  errors?: string[] | undefined;
+  errors?: string[] | null[] | undefined;
   isCurrency?: boolean;
 }
 
