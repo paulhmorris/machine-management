@@ -43,7 +43,7 @@ async function seed() {
         total: faker.datatype.float({ min: 0, max: 1000 }),
         vendorId: vendor.id,
         campusId: campus!.id,
-        vendorInvoiceNumber: `INV-${faker.random.numeric(6)}`,
+        vendorInvoiceNumber: `INV-${faker.number.int(6)}`,
         invoicedOn: faker.date.past(),
         paidOn: faker.date.past(),
         submittedOn: faker.date.past(),
@@ -55,53 +55,53 @@ async function seed() {
   await prisma.pocket.createMany({
     data: [
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
       {
-        floor: faker.random.numeric(),
-        description: faker.random.words(10),
+        floor: faker.number.int(9).toString(),
+        description: faker.lorem.word(10),
         locationId: faker.helpers.arrayElement(locations).id,
       },
     ],
@@ -128,10 +128,10 @@ async function seed() {
   for (let i = 0; i < 1000; i++) {
     await prisma.machine.create({
       data: {
-        publicId: faker.random.alphaNumeric(6).toUpperCase(),
+        publicId: faker.string.alphanumeric(6).toUpperCase(),
         pocketId: faker.helpers.arrayElement(pockets).id,
-        description: faker.random.words(4),
-        serialNumber: faker.random.alphaNumeric(16),
+        description: faker.lorem.word(4),
+        serialNumber: faker.string.alphanumeric(16),
         machineTypeId: 1,
       },
     });
@@ -161,8 +161,8 @@ async function seed() {
     });
     await prisma.part.create({
       data: {
-        name: faker.random.words(2),
-        partNumber: faker.random.alphaNumeric(6),
+        name: faker.lorem.word(2),
+        partNumber: faker.string.alphanumeric(6),
         standardCost: faker.datatype.float({ min: 0, max: 1000 }),
       },
     });
@@ -192,7 +192,7 @@ async function seed() {
   for (let i = 0; i < 100; i++) {
     await prisma.ticket.create({
       data: {
-        notes: faker.random.words(10),
+        notes: faker.lorem.word(10),
         machineId: faker.helpers.arrayElement(machines).id,
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
         machineErrorTypeId: faker.helpers.arrayElement(machineErrorTypes).id,
@@ -209,7 +209,7 @@ async function seed() {
     const randomTicket = faker.helpers.arrayElement(tickets);
     await prisma.ticketEvent.create({
       data: {
-        comments: faker.random.words(faker.datatype.number({ min: 10, max: 40 })),
+        comments: faker.lorem.word(faker.number.int({ min: 10, max: 40 })),
         ticketId: randomTicket.id,
         ticketStatusId: faker.helpers.arrayElement(statuses).id,
         assignedToUserId: admin.id,
@@ -220,8 +220,8 @@ async function seed() {
     const randomInvoice = faker.helpers.arrayElement(invoices);
     await prisma.charge.create({
       data: {
-        actualCost: faker.datatype.number({ min: 10, max: 100 }),
-        typeId: faker.datatype.number({ min: 1, max: 3 }),
+        actualCost: faker.number.int({ min: 10, max: 100 }),
+        typeId: faker.number.int({ min: 1, max: 3 }),
         ticketId: randomTicket.id,
         createdAt: faker.date.past(),
         invoiceId: randomInvoice.id,
